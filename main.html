@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Conversational Football Trivia</title>
+  <style>
+    /* General Styles */
+    body {
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #csv-upload-container {
+      margin: 20px;
+      text-align: center;
+      z-index: 1;
+    }
+    #game-container {
+      background: white;
+      width: 350px;
+      height: 600px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+    }
+    #score {
+      background: #007aff;
+      color: white;
+      padding: 8px 12px;
+      font-weight: bold;
+      text-align: center;
+    }
+    #chat-container {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: white;
+    }
+    /* Message Bubbles */
+    .message {
+      max-width: 80%;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 18px;
+      clear: both;
+      word-wrap: break-word;
+      border: 1px solid #ccc;
+    }
+    .ai {
+      float: left;
+      background: #e5e5e5;
+      color: black;
+    }
+    .user {
+      float: right;
+      background: #007aff;
+      color: white;
+    }
+    /* Typing Indicator */
+    .typing-indicator {
+      max-width: 80%;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 18px;
+      background: #e5e5e5;
+      color: #555;
+      font-style: italic;
+      border: 1px solid #ccc;
+    }
+    /* Binary Choices Container */
+    #binary-choices {
+      display: none;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #binary-choices button {
+      padding: 8px 12px;
+      margin: 0 5px;
+      border: none;
+      background: #007aff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    /* Input Form */
+    #input-form {
+      display: flex;
+      border-top: 1px solid #ddd;
+      padding: 5px;
+    }
+    #user-input {
+      flex: 1;
+      border: none;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #user-input:focus {
+      outline: none;
+    }
+    #input-form button {
+      border: none;
+      background: #007aff;
+      color: white;
+      padding: 0 15px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    /* Game Over Overlay */
+    #game-over {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.95);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      z-index: 10;
+    }
+    #game-over p {
+      font-size: 24px;
+      margin: 0 0 20px;
+    }
+    #game-over button {
+      border: none;
+      background: #007aff;
+      color: white;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    /* Start Overlay – Now a child of #game-container */
+    #start-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(240,240,240,0.95);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+    }
+    #start-overlay h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    #start-overlay button {
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      background: #007aff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- CSV Upload Section (outside game container) -->
+  <div id="csv-upload-container">
+    <p>Upload a CSV file to expand the player pool.<br>
+       (CSV headers: "round, pick, NFL team, name, position, college, value")</p>
+    <input type="file" id="csvUpload" accept=".csv" />
+  </div>
+  
+  <div id="game-container">
+    <div id="score">Score: 0</div>
+    <div id="chat-container"></div>
+    <!-- Binary Choices Container -->
+    <div id="binary-choices">
+      <button id="choice-tough">Hit me with a tough one</button>
+      <button id="choice-defense">Go defense</button>
+    </div>
+    <form id="input-form">
+      <input type="text" id="user-input" placeholder="Type your answer here..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+    <div id="game-over">
+      <p id="game-over-msg">Game Over!</p>
+      <button id="restart">Restart Game</button>
+    </div>
+    <!-- Start Overlay (child of game-container) -->
+    <div id="start-overlay">
+      <h2>Press Start to Play</h2>
+      <button id="start-button">Start</button>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Global variables
+      let nflToCollege = {}; // Will be updated from CSV.
+      let phase = "trivia";
+      let currentNFLPlayer = "";
+      let score = 0;
+      let gameActive = true;
+      let correctStreak = 0;
+      
+      const chatContainer = document.getElementById('chat-container');
+      const inputForm = document.getElementById('input-form');
+      const userInput = document.getElementById('user-input');
+      const scoreDisplay = document.getElementById('score');
+      const gameOverOverlay = document.getElementById('game-over');
+      const gameOverMsg = document.getElementById('game-over-msg');
+      const restartButton = document.getElementById('restart');
+      const csvUpload = document.getElementById('csvUpload');
+      const startOverlay = document.getElementById('start-overlay');
+      const startButton = document.getElementById('start-button');
+      const binaryChoices = document.getElementById('binary-choices');
+      const choiceTough = document.getElementById('choice-tough');
+      const choiceDefense = document.getElementById('choice-defense');
+    
+      // Start Button Event Listener
+      startButton.addEventListener('click', function() {
+        console.log("Start button clicked. CSV length:", Object.keys(nflToCollege).length);
+        if (Object.keys(nflToCollege).length === 0) {
+          alert("Please upload a CSV file to play.");
+          return;
+        }
+        // Hide overlay within game-container.
+        startOverlay.style.display = "none";
+        startIntro();
+      });
+    
+      // CSV Upload: Parse CSV and update nflToCollege.
+      csvUpload.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const contents = event.target.result;
+          const lines = contents.split(/\r?\n/);
+          if (lines.length < 2) {
+            addMessage("CSV file does not contain enough data.", "ai");
+            return;
+          }
+          let updatedDict = {};
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line === "") continue;
+            const parts = line.split(',');
+            if (parts.length < 7) continue;
+            const roundNum = parseInt(parts[0].trim());
+            const name = parts[3].trim();
+            const position = parts[4].trim();
+            const college = parts[5].trim();
+            const value = parts[6].trim() === "" ? 0 : parseFloat(parts[6].trim());
+            if (!isNaN(roundNum) && name && college && position) {
+              updatedDict[name] = { college: college, round: roundNum, position: position, value: value };
+            }
+          }
+          if (Object.keys(updatedDict).length > 0) {
+            nflToCollege = updatedDict;
+            addMessage("Player pool updated from CSV.", "ai");
+          }
+        };
+        reader.readAsText(file);
+      });
+    
+      // Append a message to chat.
+      function addMessage(text, sender) {
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('message', sender);
+        msgDiv.textContent = text;
+        chatContainer.appendChild(msgDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    
+      // Update score.
+      function updateScore() {
+        scoreDisplay.textContent = `Score: ${score}`;
+      }
+    
+      // Random brief response.
+      function getBriefResponse() {
+        return briefResponses[Math.floor(Math.random() * briefResponses.length)];
+      }
+    
+      // AI question templates.
+      const questionTemplates = [
+        "How about XXXXX",
+        "Let's go with XXXXX",
+        "XXXXX",
+        "What about XXXXX",
+        "ummm XXXXX",
+        "XXXXX?"
+      ];
+    
+      // Normalize college string.
+      function normalizeCollege(str) {
+        let s = str.replace(/[^\w\s]/gi, "").toLowerCase().trim();
+        if (s.startsWith("university of ")) {
+          s = s.slice("university of ".length).trim();
+        } else if (s.startsWith("college of ")) {
+          s = s.slice("college of ".length).trim();
+        }
+        let tokens = s.split(/\s+/);
+        if (tokens.length > 1) {
+          let last = tokens[tokens.length - 1];
+          if (last === "st" || last === "st.") {
+            tokens[tokens.length - 1] = "state";
+            s = tokens.join(" ");
+          }
+        }
+        if (s.endsWith(" university")) {
+          let tmp = s.slice(0, s.lastIndexOf(" university")).trim();
+          if (tmp.split(/\s+/).length >= 2) {
+            s = tmp;
+          }
+        }
+        return s;
+      }
+    
+      // Normalize NFL player name.
+      function normalizePlayerName(str) {
+        return str.replace(/[^\w\s]/gi, "").toLowerCase().trim();
+      }
+    
+      // Check if college answer is correct.
+      function isCollegeAnswerCorrect(answer, correctCollege) {
+        const ans = normalizeCollege(answer);
+        const normalizedCorrect = normalizeCollege(correctCollege);
+        const accepted = new Set();
+        accepted.add(normalizedCorrect);
+        if (collegeNicknames.hasOwnProperty(normalizedCorrect)) {
+          collegeNicknames[normalizedCorrect].forEach(alias => {
+            accepted.add(normalizeCollege(alias));
+          });
+        }
+        const tokens = normalizedCorrect.split(" ");
+        if (tokens.length > 1) {
+          accepted.add(tokens[tokens.length - 1]);
+        }
+        return accepted.has(ans);
+      }
+    
+      // Get NFL player key.
+      function getNFLPlayerKey(input) {
+        const normalizedInput = normalizePlayerName(input);
+        for (const key in nflToCollege) {
+          if (normalizePlayerName(key) === normalizedInput) {
+            return key;
+          }
+        }
+        return null;
+      }
+    
+      // Typing indicator.
+      function showTypingIndicator(callback) {
+        const indicator = document.createElement('div');
+        indicator.classList.add('message', 'ai', 'typing-indicator');
+        indicator.textContent = "...";
+        chatContainer.appendChild(indicator);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        setTimeout(() => {
+          chatContainer.removeChild(indicator);
+          callback();
+        }, 1500);
+      }
+    
+      // Wrap AI message.
+      function addAIMessage(text) {
+        showTypingIndicator(() => {
+          addMessage(text, "ai");
+        });
+      }
+    
+      // Game over.
+      function gameOver(message) {
+        gameActive = false;
+        addMessage(message, "ai");
+        gameOverMsg.textContent = message;
+        gameOverOverlay.style.display = "flex";
+        inputForm.style.display = "none";
+      }
+    
+      // Restart game.
+      function restartGame() {
+        phase = "trivia";
+        currentNFLPlayer = "";
+        score = 0;
+        gameActive = true;
+        correctStreak = 0;
+        updateScore();
+        chatContainer.innerHTML = "";
+        userInput.value = "";
+        inputForm.style.display = "block";
+        gameOverOverlay.style.display = "none";
+        startTriviaRound();
+      }
+    
+      // startIntro: Conversational intro.
+      function startIntro() {
+        addAIMessage("Hey, let's kick it off. You know the drill 🤝");
+        setTimeout(() => { 
+          addAIMessage("No googling, just pure football wisdom.");
+        }, 1500);
+        setTimeout(startTriviaRound, 3000);
+      }
+    
+      // askNextQuestion: After a correct answer.
+      function askNextQuestion() {
+        addAIMessage("What's next?");
+        setTimeout(() => {
+          if (correctStreak >= 4 && Math.random() < 0.5) {
+            correctStreak = 0;
+            showBinaryChoices();
+          } else {
+            startTriviaRound();
+          }
+        }, 1500);
+      }
+    
+      // Show binary choices.
+      function showBinaryChoices() {
+        inputForm.style.display = "none";
+        binaryChoices.style.display = "block";
+      }
+    
+      // Hide binary choices.
+      function hideBinaryChoices() {
+        binaryChoices.style.display = "none";
+        inputForm.style.display = "block";
+      }
+    
+      // Start a normal trivia round.
+      function startTriviaRound() {
+        if (Object.keys(nflToCollege).length === 0) {
+          gameOver("No CSV data loaded. Please upload a CSV to play.");
+          return;
+        }
+        const eligiblePlayers = Object.keys(nflToCollege).filter(player => {
+          const info = nflToCollege[player];
+          return info.round <= 3 &&
+                 ["QB", "RB", "WR"].includes(info.position.toUpperCase()) &&
+                 info.value >= 20;
+        });
+        if (eligiblePlayers.length === 0) {
+          gameOver("No eligible players available for this round. Game Over!");
+          return;
+        }
+        currentNFLPlayer = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
+        const template = questionTemplates[Math.floor(Math.random() * questionTemplates.length)];
+        const question = template.replace("XXXXX", currentNFLPlayer);
+        addAIMessage(question);
+        userInput.value = "";
+        inputForm.style.display = "block";
+      }
+    
+      // Start a trivia round filtered by binary choice.
+      function startTriviaRoundFiltered(choice) {
+        let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
+          const info = nflToCollege[player];
+          return info.round <= 3;
+        });
+        if (choice === "tough") {
+          eligiblePlayers = eligiblePlayers.filter(player => {
+            const info = nflToCollege[player];
+            return ["QB", "RB", "WR"].includes(info.position.toUpperCase()) &&
+                   info.value >= 11 && info.value < 25;
+          });
+        } else if (choice === "defense") {
+          eligiblePlayers = eligiblePlayers.filter(player => {
+            const info = nflToCollege[player];
+            return !["QB", "RB", "WR"].includes(info.position.toUpperCase()) &&
+                   info.value >= 30;
+          });
+        }
+        if (eligiblePlayers.length === 0) {
+          addAIMessage("Can't think of anyone, let's just keep going.");
+          setTimeout(startTriviaRound, 1500);
+          return;
+        }
+        currentNFLPlayer = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
+        const template = questionTemplates[Math.floor(Math.random() * questionTemplates.length)];
+        const question = template.replace("XXXXX", currentNFLPlayer);
+        addAIMessage(question);
+        hideBinaryChoices();
+      }
+    
+      // Handle the college guess.
+      function handleCollegeGuess(answer) {
+        const correctCollege = nflToCollege[currentNFLPlayer].college;
+        if (isCollegeAnswerCorrect(answer, correctCollege)) {
+          addAIMessage(getBriefResponse());
+          score++;
+          updateScore();
+          correctStreak++;
+          if (correctStreak >= 4 && Math.random() < 0.5) {
+            correctStreak = 0;
+            setTimeout(askNextQuestion, 1500);
+          } else {
+            setTimeout(startTriviaRound, 1500);
+          }
+        } else {
+          gameOver(`Nah, ${currentNFLPlayer} played at ${correctCollege}. Better luck next time!`);
+        }
+      }
+    
+      // Listen for form submissions.
+      inputForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!gameActive) return;
+        const answer = userInput.value.trim();
+        if (answer === "") return;
+        addMessage(answer, "user");
+        userInput.value = "";
+        handleCollegeGuess(answer);
+      });
+    
+      // Binary choice event listeners.
+      choiceTough.addEventListener('click', function() {
+        addMessage("Hit me with a tough one", "user");
+        hideBinaryChoices();
+        correctStreak = 0;
+        startTriviaRoundFiltered("tough");
+      });
+    
+      choiceDefense.addEventListener('click', function() {
+        addMessage("Go defense", "user");
+        hideBinaryChoices();
+        correctStreak = 0;
+        startTriviaRoundFiltered("defense");
+      });
+    
+      // Restart button.
+      restartButton.addEventListener('click', function() {
+        restartGame();
+      });
+    });
+  </script>
+</body>
+</html>
