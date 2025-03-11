@@ -16,6 +16,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const gameOverOverlay = document.getElementById('game-over');
   const gameOverMsg = document.getElementById('game-over-msg');
   const restartButton = document.getElementById('restart');
+  const startOverlay = document.getElementById('start-overlay');
+  const startButton = document.getElementById('start-button');
+  const binaryChoices = document.getElementById('binary-choices');
+  const choiceTough = document.getElementById('choice-tough');
+  const choiceDefense = document.getElementById('choice-defense');
+  
+  // Debug logging for binary buttons.
+  console.log("choiceTough element:", choiceTough);
+  console.log("choiceDefense element:", choiceDefense);
   
   // Load external files
   fetch('dialogue.json')
@@ -23,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
       dialogueBuckets = data;
       console.log("Dialogue loaded:", dialogueBuckets);
-      // Start the intro once dialogue is loaded
       startIntro();
     })
     .catch(error => console.error("Error loading dialogue:", error));
@@ -41,15 +49,13 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(text => {
       nflToCollege = parsePlayersCSV(text);
       console.log("Players loaded:", nflToCollege);
-      // Do not show a "Player pool loaded" message to the player.
     })
     .catch(error => console.error("Error loading players CSV:", error));
   
-  // CSV parser for college aliases
+  // CSV parser for college aliases (handles multiple alias columns)
   function parseCSVtoObject(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
-    // Assume first row is header.
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
       if (parts.length < 1) continue;
@@ -87,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return result;
   }
   
-  // Append a message.
+  // Append a message to the chat container.
   function addMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', sender);
@@ -96,14 +102,13 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
   
-  // Update score.
+  // Update score display.
   function updateScore() {
     scoreDisplay.textContent = `Score: ${score}`;
   }
   
-  // Get a brief response.
+  // Returns a random brief response (20% chance from big compliments).
   function getBriefResponse() {
-    // 20% chance to choose from big compliments if available.
     if (dialogueBuckets.big_compliments && dialogueBuckets.big_compliments.length > 0 && Math.random() < 0.2) {
       return dialogueBuckets.big_compliments[Math.floor(Math.random() * dialogueBuckets.big_compliments.length)];
     } else if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
@@ -112,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return "nice";
   }
   
-  // Get a question template.
+  // Returns a random question template.
   function getQuestionTemplate() {
     if (dialogueBuckets.questions && dialogueBuckets.questions.length > 0) {
       return dialogueBuckets.questions[Math.floor(Math.random() * dialogueBuckets.questions.length)];
@@ -120,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return "How about XXXXX";
   }
   
-  // Normalize college string.
+  // Normalize a college string.
   function normalizeCollegeString(str) {
     let s = str.replace(/[^\w\s]/gi, "").toLowerCase().trim();
     if (s.startsWith("university of ")) {
@@ -145,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return s;
   }
   
-  // Check if the answer is correct using aliases.
+  // Check if the college answer is correct using aliases.
   function isCollegeAnswerCorrect(answer, correctCollege) {
     const normAnswer = normalizeCollegeString(answer);
     const normCorrect = normalizeCollegeString(correctCollege);
@@ -167,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1500);
   }
   
-  // Wrap AI message.
+  // Wrap AI message with typing indicator.
   function addAIMessage(text) {
     showTypingIndicator(() => {
       addMessage(text, "ai");
@@ -185,6 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Restart game.
   function restartGame() {
+    console.log("Restarting game.");
     phase = "trivia";
     currentNFLPlayer = "";
     score = 0;
@@ -195,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
     userInput.value = "";
     inputForm.style.display = "block";
     gameOverOverlay.style.display = "none";
-    // Use restart_intro dialogue bucket if available.
     if (dialogueBuckets.restart && dialogueBuckets.restart.length > 0) {
       addAIMessage(dialogueBuckets.restart[0]);
       setTimeout(startTriviaRound, 2500);
@@ -340,8 +345,9 @@ document.addEventListener('DOMContentLoaded', function() {
     startTriviaRoundFiltered("defense");
   });
   
-  // Restart button.
+  // Restart button event listener.
   restartButton.addEventListener('click', function() {
+    console.log("Restart button clicked.");
     restartGame();
   });
 });
