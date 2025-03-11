@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let score = 0;
   let gameActive = true;
   let correctStreak = 0;
-  
+  let recentSchools = [];      // Array to store normalized college names from the last 7 rounds.
+
   const chatContainer = document.getElementById('chat-container');
   const inputForm = document.getElementById('input-form');
   const userInput = document.getElementById('user-input');
@@ -16,9 +17,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const gameOverOverlay = document.getElementById('game-over');
   const gameOverMsg = document.getElementById('game-over-msg');
   const restartButton = document.getElementById('restart');
+  
   const binaryChoices = document.getElementById('binary-choices');
+  
+  // Get binary choice elements and check if they exist.
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
+  if (!choiceTough || !choiceDefense) {
+    console.error("Binary choice elements not found. Check your HTML for 'choice-tough' and 'choice-defense'.");
+  }
   
   // Load external dialogue JSON.
   fetch('dialogue.json')
@@ -49,9 +56,9 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error("Error loading players CSV:", error));
   
+  // When both dialogue and players are loaded, start the game.
   function checkAndStartGame() {
     if (Object.keys(dialogueBuckets).length > 0 && Object.keys(nflToCollege).length > 0) {
-      // Start the intro immediately.
       startIntro();
     }
   }
@@ -98,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return result;
   }
   
-  // Append a message.
+  // Append a message to the chat container.
   function addMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', sender);
@@ -107,12 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
   
-  // Update score.
+  // Update score display.
   function updateScore() {
     scoreDisplay.textContent = `Score: ${score}`;
   }
   
-  // Get a brief response (20% chance from big compliments).
+  // Returns a random brief response (20% chance from big compliments).
   function getBriefResponse() {
     if (dialogueBuckets.big_compliments && dialogueBuckets.big_compliments.length > 0 && Math.random() < 0.2) {
       return dialogueBuckets.big_compliments[Math.floor(Math.random() * dialogueBuckets.big_compliments.length)];
@@ -122,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return "nice";
   }
   
-  // Get a question template.
+  // Returns a random question template.
   function getQuestionTemplate() {
     if (dialogueBuckets.questions && dialogueBuckets.questions.length > 0) {
       return dialogueBuckets.questions[Math.floor(Math.random() * dialogueBuckets.questions.length)];
@@ -177,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1500);
   }
   
-  // Wrap AI message.
+  // Wrap AI message with typing indicator.
   function addAIMessage(text) {
     showTypingIndicator(() => {
       addMessage(text, "ai");
@@ -201,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
     score = 0;
     gameActive = true;
     correctStreak = 0;
+    recentSchools = [];
     updateScore();
     chatContainer.innerHTML = "";
     userInput.value = "";
@@ -254,17 +262,32 @@ document.addEventListener('DOMContentLoaded', function() {
       gameOver("No players data loaded.");
       return;
     }
-    const eligiblePlayers = Object.keys(nflToCollege).filter(player => {
+    let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
       return info.round <= 3 &&
              ["QB", "RB", "WR"].includes(info.position.toUpperCase()) &&
              info.value >= 20;
     });
+    // Filter out players from recentSchools.
+    const filteredPlayers = eligiblePlayers.filter(player => {
+      const collegeNorm = normalizeCollegeString(nflToCollege[player].college);
+      return !recentSchools.includes(collegeNorm);
+    });
+    // If none remain after filtering, fall back to all eligible players.
+    if (filteredPlayers.length > 0) {
+      eligiblePlayers = filteredPlayers;
+    }
     if (eligiblePlayers.length === 0) {
       gameOver("No eligible players available for this round. Game Over!");
       return;
     }
     currentNFLPlayer = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
+    // Add the chosen player's college to recentSchools.
+    const chosenCollege = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
+    recentSchools.push(chosenCollege);
+    if (recentSchools.length > 7) {
+      recentSchools.shift();
+    }
     const template = getQuestionTemplate();
     const question = template.replace("XXXXX", currentNFLPlayer);
     addAIMessage(question);
@@ -297,6 +320,12 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     currentNFLPlayer = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
+    // Update recentSchools with the chosen player's college.
+    const chosenCollege = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
+    recentSchools.push(chosenCollege);
+    if (recentSchools.length > 7) {
+      recentSchools.shift();
+    }
     const template = getQuestionTemplate();
     const question = template.replace("XXXXX", currentNFLPlayer);
     addAIMessage(question);
@@ -323,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Form submission listener.
+  // Listen for form submissions.
   inputForm.addEventListener('submit', function(e) {
     e.preventDefault();
     if (!gameActive) return;
@@ -336,19 +365,22 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Binary choice event listeners.
-  choiceTough.addEventListener('click', function() {
-    addMessage("Hit me with a tough one", "user");
-    hideBinaryChoices();
-    correctStreak = 0;
-    startTriviaRoundFiltered("tough");
-  });
-  
-  choiceDefense.addEventListener('click', function() {
-    addMessage("Go defense", "user");
-    hideBinaryChoices();
-    correctStreak = 0;
-    startTriviaRoundFiltered("defense");
-  });
+  if (choiceTough) {
+    choiceTough.addEventListener('click', function() {
+      addMessage("Hit me with a tough one", "user");
+      hideBinaryChoices();
+      correctStreak = 0;
+      startTriviaRoundFiltered("tough");
+    });
+  }
+  if (choiceDefense) {
+    choiceDefense.addEventListener('click', function() {
+      addMessage("Go defense", "user");
+      hideBinaryChoices();
+      correctStreak = 0;
+      startTriviaRoundFiltered("defense");
+    });
+  }
   
   // Restart button listener.
   restartButton.addEventListener('click', function() {
