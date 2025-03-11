@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Global variables
-  let nflToCollege = {}; // Will be loaded from players.csv.
-  let collegeAliases = {}; // Will be loaded from college_aliases.csv.
-  let dialogueBuckets = {}; // Will be loaded from dialogue.json.
+  let nflToCollege = {}; // Loaded from players.csv.
+  let collegeAliases = {}; // Loaded from college_aliases.csv.
+  let dialogueBuckets = {}; // Loaded from dialogue.json.
   let phase = "trivia";
   let currentNFLPlayer = "";
   let score = 0;
   let gameActive = true;
   let correctStreak = 0;
-  
+
   const chatContainer = document.getElementById('chat-container');
   const inputForm = document.getElementById('input-form');
   const userInput = document.getElementById('user-input');
@@ -16,12 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const gameOverOverlay = document.getElementById('game-over');
   const gameOverMsg = document.getElementById('game-over-msg');
   const restartButton = document.getElementById('restart');
-  const startOverlay = document.getElementById('start-overlay');
-  const startButton = document.getElementById('start-button');
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  
+
   // Load external dialogue JSON.
   fetch('dialogue.json')
     .then(response => response.json())
@@ -30,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log("Dialogue loaded:", dialogueBuckets);
     })
     .catch(error => console.error("Error loading dialogue:", error));
-  
+
   // Load college aliases CSV.
   fetch('college_aliases.csv')
     .then(response => response.text())
@@ -39,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log("College aliases loaded:", collegeAliases);
     })
     .catch(error => console.error("Error loading college aliases:", error));
-  
+
   // Load players CSV.
   fetch('players.csv')
     .then(response => response.text())
@@ -47,14 +45,15 @@ document.addEventListener('DOMContentLoaded', function() {
       nflToCollege = parsePlayersCSV(text);
       console.log("Players loaded:", nflToCollege);
       addMessage("Player pool loaded.", "ai");
+      // Start the intro automatically once players are loaded.
+      startIntro();
     })
     .catch(error => console.error("Error loading players CSV:", error));
-  
-  // CSV parser for college aliases (expects header: college, alias1, alias2, ...)
+
+  // CSV parser for college aliases (handles multiple alias columns)
   function parseCSVtoObject(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
-    // First line is headers.
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
       if (parts.length < 1) continue;
@@ -70,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return result;
   }
-  
+
   // CSV parser for players.
   function parsePlayersCSV(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
@@ -91,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return result;
   }
-  
+
   // Append a message to the chat container.
   function addMessage(text, sender) {
     const msgDiv = document.createElement('div');
@@ -100,12 +99,12 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.appendChild(msgDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
-  
+
   // Update score display.
   function updateScore() {
     scoreDisplay.textContent = `Score: ${score}`;
   }
-  
+
   // Returns a random brief response.
   function getBriefResponse() {
     if (dialogueBuckets && dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
@@ -113,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return "nice";
   }
-  
+
   // Returns a random question template.
   function getQuestionTemplate() {
     if (dialogueBuckets && dialogueBuckets.questions && dialogueBuckets.questions.length > 0) {
@@ -121,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return "How about XXXXX";
   }
-  
+
   // Normalize a college string.
   function normalizeCollegeString(str) {
     let s = str.replace(/[^\w\s]/gi, "").toLowerCase().trim();
@@ -146,8 +145,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return s;
   }
-  
-  // Check if the college answer is correct using the aliases CSV.
+
+  // Check if the college answer is correct.
   function isCollegeAnswerCorrect(answer, correctCollege) {
     const normAnswer = normalizeCollegeString(answer);
     const normCorrect = normalizeCollegeString(correctCollege);
@@ -157,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return false;
   }
-  
+
   // Typing indicator.
   function showTypingIndicator(callback) {
     const indicator = document.createElement('div');
@@ -170,14 +169,14 @@ document.addEventListener('DOMContentLoaded', function() {
       callback();
     }, 1500);
   }
-  
-  // Wrap AI message.
+
+  // Wrap AI message with typing indicator.
   function addAIMessage(text) {
     showTypingIndicator(() => {
       addMessage(text, "ai");
     });
   }
-  
+
   // Game over.
   function gameOver(message) {
     gameActive = false;
@@ -186,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gameOverOverlay.style.display = "flex";
     inputForm.style.display = "none";
   }
-  
+
   // Restart game.
   function restartGame() {
     phase = "trivia";
@@ -201,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gameOverOverlay.style.display = "none";
     startTriviaRound();
   }
-  
+
   // startIntro: Conversational intro dialogue.
   function startIntro() {
     addAIMessage(dialogueBuckets.greetings ? dialogueBuckets.greetings[0] : "Hey, let's kick it off. You know the drill 🤝");
@@ -210,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1500);
     setTimeout(startTriviaRound, 3000);
   }
-  
+
   // askNextQuestion: After a correct answer.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
@@ -223,19 +222,19 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 1500);
   }
-  
+
   // Show binary choices.
   function showBinaryChoices() {
     inputForm.style.display = "none";
     binaryChoices.style.display = "block";
   }
-  
+
   // Hide binary choices.
   function hideBinaryChoices() {
     binaryChoices.style.display = "none";
     inputForm.style.display = "block";
   }
-  
+
   // Start a normal trivia round.
   function startTriviaRound() {
     if (Object.keys(nflToCollege).length === 0) {
@@ -259,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
     userInput.value = "";
     inputForm.style.display = "block";
   }
-  
+
   // Start a trivia round filtered by binary choice.
   function startTriviaRoundFiltered(choice) {
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
@@ -290,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(question);
     hideBinaryChoices();
   }
-  
+
   // Handle the college guess.
   function handleCollegeGuess(answer) {
     console.log("Handling answer:", answer);
@@ -310,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
       gameOver(`Nah, ${currentNFLPlayer} played at ${correctCollege}. Better luck next time!`);
     }
   }
-  
+
   // Listen for form submissions.
   inputForm.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -322,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
     userInput.value = "";
     handleCollegeGuess(answer);
   });
-  
+
   // Binary choice event listeners.
   choiceTough.addEventListener('click', function() {
     addMessage("Hit me with a tough one", "user");
