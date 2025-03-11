@@ -1,7 +1,12 @@
 {
   "greetings": [
-    "Hey, let's kick it off. You know the drill 🤝",
-    "No googling, just pure football wisdom."
+    "Hey, let's run it back",
+    "No googling, just ball knowledge."
+  ],
+  "restart": [
+    "Ok let's do another round"
+    "Let's play again"
+    "A new streak begins"
   ],
   "questions": [
     "How about XXXXX",
@@ -13,9 +18,16 @@
   ],
   "confirmations": [
     "nice",
+    "boom",
+    "got em"
+    "yup"
+    "bang"
+  ],
+  "big_compliments": [
     "dude is a dawg",
-    "guy was so good in college",
-    "boom"
+    "guy was so good in college"
+    "might have his jersey lol"
+
   ],
   "transitions": [
     "What's next?"

@@ -8,6 +8,7 @@ body {
   align-items: center;
   min-height: 100vh;
 }
+
 #game-container {
   background: white;
   width: 350px;
@@ -20,6 +21,7 @@ body {
   position: relative;
   z-index: 2;
 }
+
 #score {
   background: #007aff;
   color: white;
@@ -27,6 +29,7 @@ body {
   font-weight: bold;
   text-align: center;
 }
+
 #chat-container {
   flex: 1;
   padding: 10px;
@@ -125,7 +128,7 @@ body {
   z-index: 10;
 }
 #game-over p {
-  font-size: 20px;
+  font-size: 16px; /* Reduced font size */
   text-align: center;
   margin: 0 0 20px;
 }
@@ -138,3 +141,5 @@ body {
   font-size: 16px;
   border-radius: 5px;
 }
+
+/* (No Start Overlay here since we auto-start the intro) */
