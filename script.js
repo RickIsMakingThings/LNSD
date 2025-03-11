@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Global variables
-  let nflToCollege = {}; // Loaded from players.csv.
-  let collegeAliases = {}; // Loaded from college_aliases.csv.
-  let dialogueBuckets = {}; // Loaded from dialogue.json.
+  let nflToCollege = {};       // Loaded from players.csv.
+  let collegeAliases = {};     // Loaded from college_aliases.csv.
+  let dialogueBuckets = {};    // Loaded from dialogue.json.
   let phase = "trivia";
   let currentNFLPlayer = "";
   let score = 0;
@@ -16,26 +16,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const gameOverOverlay = document.getElementById('game-over');
   const gameOverMsg = document.getElementById('game-over-msg');
   const restartButton = document.getElementById('restart');
-  const startOverlay = document.getElementById('start-overlay');
-  const startButton = document.getElementById('start-button');
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
   
-  // Debug logging for binary buttons.
-  console.log("choiceTough element:", choiceTough);
-  console.log("choiceDefense element:", choiceDefense);
-  
-  // Load external files
+  // Load external dialogue JSON.
   fetch('dialogue.json')
     .then(response => response.json())
     .then(data => {
       dialogueBuckets = data;
       console.log("Dialogue loaded:", dialogueBuckets);
-      startIntro();
+      checkAndStartGame();
     })
     .catch(error => console.error("Error loading dialogue:", error));
   
+  // Load college aliases CSV.
   fetch('college_aliases.csv')
     .then(response => response.text())
     .then(text => {
@@ -44,18 +39,28 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error("Error loading college aliases:", error));
   
+  // Load players CSV.
   fetch('players.csv')
     .then(response => response.text())
     .then(text => {
       nflToCollege = parsePlayersCSV(text);
       console.log("Players loaded:", nflToCollege);
+      checkAndStartGame();
     })
     .catch(error => console.error("Error loading players CSV:", error));
+  
+  function checkAndStartGame() {
+    if (Object.keys(dialogueBuckets).length > 0 && Object.keys(nflToCollege).length > 0) {
+      // Start the intro immediately.
+      startIntro();
+    }
+  }
   
   // CSV parser for college aliases (handles multiple alias columns)
   function parseCSVtoObject(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
+    // Assume first row is headers.
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
       if (parts.length < 1) continue;
@@ -93,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return result;
   }
   
-  // Append a message to the chat container.
+  // Append a message.
   function addMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', sender);
@@ -102,12 +107,12 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
   
-  // Update score display.
+  // Update score.
   function updateScore() {
     scoreDisplay.textContent = `Score: ${score}`;
   }
   
-  // Returns a random brief response (20% chance from big compliments).
+  // Get a brief response (20% chance from big compliments).
   function getBriefResponse() {
     if (dialogueBuckets.big_compliments && dialogueBuckets.big_compliments.length > 0 && Math.random() < 0.2) {
       return dialogueBuckets.big_compliments[Math.floor(Math.random() * dialogueBuckets.big_compliments.length)];
@@ -117,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return "nice";
   }
   
-  // Returns a random question template.
+  // Get a question template.
   function getQuestionTemplate() {
     if (dialogueBuckets.questions && dialogueBuckets.questions.length > 0) {
       return dialogueBuckets.questions[Math.floor(Math.random() * dialogueBuckets.questions.length)];
@@ -150,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return s;
   }
   
-  // Check if the college answer is correct using aliases.
+  // Check if the college answer is correct.
   function isCollegeAnswerCorrect(answer, correctCollege) {
     const normAnswer = normalizeCollegeString(answer);
     const normCorrect = normalizeCollegeString(correctCollege);
@@ -172,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1500);
   }
   
-  // Wrap AI message with typing indicator.
+  // Wrap AI message.
   function addAIMessage(text) {
     showTypingIndicator(() => {
       addMessage(text, "ai");
@@ -209,16 +214,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // startIntro: Regular intro dialogue.
+  // Intro dialogue.
   function startIntro() {
     addAIMessage(dialogueBuckets.greetings ? dialogueBuckets.greetings[0] : "Hey, let's kick it off. You know the drill 🤝");
-    setTimeout(() => { 
+    setTimeout(() => {
       addAIMessage(dialogueBuckets.greetings && dialogueBuckets.greetings[1] ? dialogueBuckets.greetings[1] : "No googling, just pure football wisdom.");
     }, 1500);
     setTimeout(startTriviaRound, 3000);
   }
   
-  // askNextQuestion: After a correct answer.
+  // Ask next question.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
@@ -318,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // Listen for form submissions.
+  // Form submission listener.
   inputForm.addEventListener('submit', function(e) {
     e.preventDefault();
     if (!gameActive) return;
@@ -345,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     startTriviaRoundFiltered("defense");
   });
   
-  // Restart button event listener.
+  // Restart button listener.
   restartButton.addEventListener('click', function() {
     console.log("Restart button clicked.");
     restartGame();

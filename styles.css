@@ -128,9 +128,9 @@ body {
   z-index: 10;
 }
 #game-over p {
-  font-size: 16px; /* Reduced font size */
+  font-size: 16px;
   text-align: center;
-  margin: 0 0 20px;
+  margin: 0 auto 20px;
 }
 #game-over button {
   border: none;
@@ -141,5 +141,3 @@ body {
   font-size: 16px;
   border-radius: 5px;
 }
-
-/* (No Start Overlay here since we auto-start the intro) */
