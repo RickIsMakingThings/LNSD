@@ -1,0 +1,26 @@
+{
+  "greetings": [
+    "Hey, let's kick it off. You know the drill 🤝",
+    "No googling, just pure football wisdom."
+  ],
+  "questions": [
+    "How about XXXXX",
+    "Let's go with XXXXX",
+    "XXXXX",
+    "What about XXXXX",
+    "ummm XXXXX",
+    "XXXXX?"
+  ],
+  "confirmations": [
+    "nice",
+    "dude is a dawg",
+    "guy was so good in college",
+    "boom"
+  ],
+  "transitions": [
+    "What's next?"
+  ],
+  "errors": [
+    "Nah, that's not it. Better luck next time!"
+  ]
+}
