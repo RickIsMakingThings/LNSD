@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let score = 0;
   let gameActive = true;
   let correctStreak = 0;
-  let recentSchools = [];      // Array to store normalized college names from the last 7 rounds.
-
+  let recentSchools = [];
+  
   const chatContainer = document.getElementById('chat-container');
   const inputForm = document.getElementById('input-form');
   const userInput = document.getElementById('user-input');
@@ -17,15 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const gameOverOverlay = document.getElementById('game-over');
   const gameOverMsg = document.getElementById('game-over-msg');
   const restartButton = document.getElementById('restart');
-  
   const binaryChoices = document.getElementById('binary-choices');
-  
-  // Get binary choice elements and check if they exist.
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  if (!choiceTough || !choiceDefense) {
-    console.error("Binary choice elements not found. Check your HTML for 'choice-tough' and 'choice-defense'.");
-  }
   
   // Load external dialogue JSON.
   fetch('dialogue.json')
@@ -63,11 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  // CSV parser for college aliases (handles multiple alias columns)
+  // CSV parser for college aliases.
   function parseCSVtoObject(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
-    // Assume first row is headers.
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
       if (parts.length < 1) continue;
@@ -105,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return result;
   }
   
-  // Append a message to the chat container.
+  // Append a message.
   function addMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', sender);
@@ -114,12 +107,12 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
   
-  // Update score display.
+  // Update score.
   function updateScore() {
     scoreDisplay.textContent = `Score: ${score}`;
   }
   
-  // Returns a random brief response (20% chance from big compliments).
+  // Get a brief response.
   function getBriefResponse() {
     if (dialogueBuckets.big_compliments && dialogueBuckets.big_compliments.length > 0 && Math.random() < 0.2) {
       return dialogueBuckets.big_compliments[Math.floor(Math.random() * dialogueBuckets.big_compliments.length)];
@@ -129,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return "nice";
   }
   
-  // Returns a random question template.
+  // Get a question template.
   function getQuestionTemplate() {
     if (dialogueBuckets.questions && dialogueBuckets.questions.length > 0) {
       return dialogueBuckets.questions[Math.floor(Math.random() * dialogueBuckets.questions.length)];
@@ -184,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1500);
   }
   
-  // Wrap AI message with typing indicator.
+  // Wrap AI message.
   function addAIMessage(text) {
     showTypingIndicator(() => {
       addMessage(text, "ai");
@@ -235,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
-      if (correctStreak >= 4 && Math.random() < 0.5) {
+      if (correctStreak >= 4) {  // Force binary choices after 4 correct answers.
         correctStreak = 0;
         showBinaryChoices();
       } else {
@@ -268,12 +261,11 @@ document.addEventListener('DOMContentLoaded', function() {
              ["QB", "RB", "WR"].includes(info.position.toUpperCase()) &&
              info.value >= 20;
     });
-    // Filter out players from recentSchools.
+    // Filter out players whose college is in recentSchools.
     const filteredPlayers = eligiblePlayers.filter(player => {
       const collegeNorm = normalizeCollegeString(nflToCollege[player].college);
       return !recentSchools.includes(collegeNorm);
     });
-    // If none remain after filtering, fall back to all eligible players.
     if (filteredPlayers.length > 0) {
       eligiblePlayers = filteredPlayers;
     }
@@ -282,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     currentNFLPlayer = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
-    // Add the chosen player's college to recentSchools.
+    // Track recent colleges.
     const chosenCollege = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
     recentSchools.push(chosenCollege);
     if (recentSchools.length > 7) {
@@ -320,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     currentNFLPlayer = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
-    // Update recentSchools with the chosen player's college.
+    // Update recentSchools.
     const chosenCollege = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
     recentSchools.push(chosenCollege);
     if (recentSchools.length > 7) {
@@ -341,7 +333,7 @@ document.addEventListener('DOMContentLoaded', function() {
       score++;
       updateScore();
       correctStreak++;
-      if (correctStreak >= 4 && Math.random() < 0.5) {
+      if (correctStreak >= 4) {
         correctStreak = 0;
         setTimeout(askNextQuestion, 1500);
       } else {

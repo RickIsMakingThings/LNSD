@@ -131,6 +131,8 @@ body {
   font-size: 16px;
   text-align: center;
   margin: 0 auto 20px;
+  word-wrap: break-word;
+  max-width: 90%;
 }
 #game-over button {
   border: none;
