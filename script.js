@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error("Error loading players CSV:", error));
   
-  // When both dialogue and players are loaded, start the game.
+  // Start game when both dialogue and players are loaded.
   function checkAndStartGame() {
     if (Object.keys(dialogueBuckets).length > 0 && Object.keys(nflToCollege).length > 0) {
       startIntro();
@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return s;
   }
   
-  // Check if the college answer is correct.
+  // Check if the answer is correct.
   function isCollegeAnswerCorrect(answer, correctCollege) {
     const normAnswer = normalizeCollegeString(answer);
     const normCorrect = normalizeCollegeString(correctCollege);
@@ -228,9 +228,10 @@ document.addEventListener('DOMContentLoaded', function() {
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
-      if (correctStreak >= 4) {  // Force binary choices after 4 correct answers.
-        correctStreak = 0;
+      // Force binary choices when correctStreak is 4 or more.
+      if (correctStreak >= 4) {
         showBinaryChoices();
+        correctStreak = 0;
       } else {
         startTriviaRound();
       }
@@ -334,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
       updateScore();
       correctStreak++;
       if (correctStreak >= 4) {
-        correctStreak = 0;
         setTimeout(askNextQuestion, 1500);
       } else {
         setTimeout(startTriviaRound, 1500);

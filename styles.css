@@ -115,8 +115,9 @@ body {
 #game-over {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
   height: 100%;
   background: rgba(255,255,255,0.95);
   display: none;
@@ -132,7 +133,6 @@ body {
   text-align: center;
   margin: 0 auto 20px;
   word-wrap: break-word;
-  max-width: 90%;
 }
 #game-over button {
   border: none;
