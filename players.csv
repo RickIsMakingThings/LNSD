@@ -96,7 +96,7 @@
 3,96,JAX,Jarrian Jones,DB,Florida State,2
 3,97,CIN,McKinnley Jackson,DL,Texas A&M,1
 3,98,PIT,Payton Wilson,LB,North Carolina State,4
-3,99,LAR,Kamren Kinchens,SAF,Miami (FL),3
+3,99,LAR,Kamren Kinchens,SAF,Miami Florida,3
 3,100,WAS,Luke McCaffrey,WR,Rice,2
 4,101,CAR,Ja'Tavion Sanders,TE,Texas,3
 4,102,DEN,Troy Franklin,WR,Oregon,2
@@ -223,7 +223,7 @@
 7,223,LVR,Trey Taylor,FS,Air Force,1
 7,224,CIN,Daijahn Anthony,SAF,Mississippi,1
 7,225,LAC,Brenden Rice,WR,USC,0
-7,226,ARI,Jaden Davis,DB,Miami (FL),
+7,226,ARI,Jaden Davis,DB,Miami Florida,
 7,227,CLE,Myles Harden,DB,South Dakota,0
 7,228,BAL,Nick Samac,C,Michigan State,
 7,229,LVR,M.J. Devonshire,DB,Pittsburgh,
@@ -234,12 +234,12 @@
 7,234,IND,Jonah Laulu,DL,Oklahoma,4
 7,235,DEN,Devaughn Vele,WR,Utah,4
 7,236,JAX,Myles Cole,OLB,Texas Tech,0
-7,237,CIN,Matt Lee,C,Miami (FL),2
+7,237,CIN,Matt Lee,C,Miami Florida,2
 7,238,HOU,Solomon Byrd,DE,USC,0
 7,239,NOR,Josiah Ezirim,OT,Eastern Kentucky,
 7,240,CAR,Michael Barrett,LB,Michigan,
 7,241,MIA,Tahj Washington,WR,USC,
-7,242,TEN,James Williams,SAF,Miami (FL),2
+7,242,TEN,James Williams,SAF,Miami Florida,2
 7,243,CLE,Jowon Briggs,DE,Cincinnati,1
 7,244,DAL,Justin Rogers,DL,Auburn,
 7,245,GNB,Michael Pratt,QB,Tulane,
@@ -310,7 +310,7 @@
 2,53,CHI,Gervon Dexter,DL,Florida,10
 2,54,LAC,Tuli Tuipulotu,DL,USC,11
 2,55,KAN,Rashee Rice,WR,SMU,11
-2,56,CHI,Tyrique Stevenson,CB,Miami (FL),12
+2,56,CHI,Tyrique Stevenson,CB,Miami Florida,12
 2,57,NYG,John Michael Schmitz,OL,Minnesota,9
 2,58,DAL,Luke Schoonmaker,TE,Michigan,3
 2,59,BUF,O'Cyrus Torrence,OL,Florida,16
@@ -416,7 +416,7 @@
 5,159,GNB,Dontayvion Wicks,WR,Virginia,10
 5,160,JAX,Antonio Johnson,DB,Texas A&M,5
 5,161,LAR,Nick Hampton,OLB,Appalachian State,2
-5,162,IND,Will Mallory,TE,Miami (FL),2
+5,162,IND,Will Mallory,TE,Miami Florida,2
 5,163,CIN,Chase Brown,RB,Illinois,13
 5,164,MIN,Jaren Hall,QB,BYU,1
 5,165,CHI,Terell Smith,DB,Minnesota,4
@@ -500,7 +500,7 @@
 7,243,NYG,Jordon Riley,DL,Oregon,4
 7,244,DAL,Jalen Brooks,WR,South Carolina,2
 7,245,NWE,Isaiah Bolden,CB,Jackson State,1
-7,246,CIN,DJ Ivey,CB,Miami (FL),2
+7,246,CIN,DJ Ivey,CB,Miami Florida,2
 7,247,SFO,Brayden Willis,TE,Oklahoma,0
 7,248,HOU,Brandon Hill,DB,Pittsburgh,0
 7,249,PHI,Moro Ojomo,DE,Texas,2
@@ -687,7 +687,7 @@
 5,171,DEN,Luke Wattenberg,OL,Washington,7
 5,172,SFO,Samuel Womack,CB,Toledo,6
 5,173,NYG,Marcus McKethan,OL,North Carolina,2
-5,174,CHI,Dominique Robinson,DE,Miami (OH),5
+5,174,CHI,Dominique Robinson,DE,Miami Ohio,5
 5,175,LVR,Matthew Butler,DT,Tennessee,1
 5,176,DAL,Damone Clark,LB,LSU,13
 5,177,DET,James Mitchell,TE,Virginia Tech,1
@@ -747,7 +747,7 @@
 7,231,BUF,Baylon Spector,LB,Clemson,5
 7,232,DEN,Faion Hicks,CB,Wisconsin,0
 7,233,SEA,Dareke Young,WR,Lenoir-Rhyne,0
-7,234,GNB,Jonathan Ford,DT,Miami (FL),0
+7,234,GNB,Jonathan Ford,DT,Miami Florida,0
 7,235,LAR,Daniel Hardy,LB,Montana State,1
 7,236,LAC,Deane Leonard,DB,Mississippi,3
 7,237,DET,Chase Lucas,DB,Arizona State,1
@@ -793,7 +793,7 @@
 1,15,NWE,Mac Jones,QB,Alabama,27
 1,16,ARI,Zaven Collins,LB,Tulsa,21
 1,17,LVR,Alex Leatherwood,OL,Alabama,8
-1,18,MIA,Jaelan Phillips,DL,Miami (FL),16
+1,18,MIA,Jaelan Phillips,DL,Miami Florida,16
 1,19,WAS,Jamin Davis,LB,Kentucky,16
 1,20,NYG,Kadarius Toney,WR,Florida,7
 1,21,IND,Kwity Paye,DL,Michigan,26
@@ -805,7 +805,7 @@
 1,27,BAL,Rashod Bateman,WR,Minnesota,18
 1,28,NOR,Payton Turner,DE,Houston,3
 1,29,GNB,Eric Stokes,DB,Georgia,10
-1,30,BUF,Gregory Rousseau,DL,Miami (FL),32
+1,30,BUF,Gregory Rousseau,DL,Miami Florida,32
 1,31,BAL,Odafe Oweh,DE,Penn State,14
 1,32,TAM,Joe Tryon-Shoyinka,OLB,Washington,22
 2,33,JAX,Tyson Campbell,DB,Georgia,19
@@ -922,7 +922,7 @@
 4,144,KAN,Joshua Kaindoh,DE,Florida State,0
 5,145,JAX,Luke Farrell,TE,Ohio State,2
 5,146,NYJ,Jamien Sherwood,DB,Auburn,11
-5,147,HOU,Brevin Jordan,TE,Miami (FL),4
+5,147,HOU,Brevin Jordan,TE,Miami Florida,4
 5,148,ATL,Ta'Quon Graham,DL,Texas,9
 5,149,CIN,Evan McPherson,K,Florida,11
 5,150,PHI,Kenneth Gainwell,RB,Memphis,16
@@ -936,7 +936,7 @@
 5,158,CAR,Daviyon Nixon,DT,Iowa,1
 5,159,LAC,Brenden Jaimes,OL,Nebraska,5
 5,160,BAL,Shaun Wade,CB,Ohio State,3
-5,161,BUF,Tommy Doyle,OL,Miami (OH),1
+5,161,BUF,Tommy Doyle,OL,Miami Ohio,1
 5,162,KAN,Noah Gray,TE,Duke,10
 5,163,WAS,Darrick Forrest,S,Cincinnati,7
 5,164,DEN,Jamar Johnson,DB,Indiana,0
@@ -991,7 +991,7 @@
 6,213,BUF,Rachad Wildgoose,CB,Wisconsin,2
 6,214,GNB,Cole Van Lanen,OL,Wisconsin,3
 6,215,TEN,Brady Breeze,S,Oregon,0
-6,216,PIT,Quincy Roche,DL,Miami (FL),2
+6,216,PIT,Quincy Roche,DL,Miami Florida,2
 6,217,CHI,Khalil Herbert,RB,Virginia Tech,13
 6,218,IND,Sam Ehlinger,QB,Texas,2
 6,219,DEN,Seth Williams,WR,Auburn,0
@@ -1174,11 +1174,11 @@
 4,137,JAX,Josiah Scott,CB,Michigan State,3
 4,138,KAN,L'Jarius Sneed,S,Louisiana Tech,20
 4,139,LVR,Amik Robertson,CB,Louisiana Tech,11
-4,140,JAX,Shaquille Quarterman,LB,Miami (FL),5
+4,140,JAX,Shaquille Quarterman,LB,Miami Florida,5
 4,141,HOU,John Reid,CB,Penn State,2
 4,142,WAS,Antonio Gandy-Golden,WR,Liberty,0
 4,143,BAL,Ben Bredeson,G,Michigan,17
-4,144,SEA,DeeJay Dallas,RB,Miami (FL),7
+4,144,SEA,DeeJay Dallas,RB,Miami Florida,7
 4,145,PHI,Jack Driscoll,G,Auburn,12
 4,146,DAL,Tyler Biadasz,C,Wisconsin,31
 5,147,CIN,Khalid Kareem,DE,Notre Dame,2
@@ -1210,7 +1210,7 @@
 5,173,CHI,Darnell Mooney,WR,Tulane,30
 5,174,TEN,Larrell Murchison,DT,North Carolina State,6
 5,175,GNB,Kamal Martin,LB,Minnesota,4
-5,176,MIN,K.J. Osborn,WR,Miami (FL),13
+5,176,MIN,K.J. Osborn,WR,Miami Florida,13
 5,177,KAN,Michael Danna,DE,Michigan,17
 5,178,DEN,Justin Strnad,LB,Wake Forest,10
 5,179,DAL,Bradlee Anae,DE,Utah,1
@@ -1276,13 +1276,13 @@
 7,239,BUF,Dane Jackson,CB,Pittsburgh,12
 7,240,NOR,Tommy Stevens,QB,Mississippi State,0
 7,241,TAM,Chapelle Russell,LB,Temple,2
-7,242,GNB,Jonathan Garvin,DE,Miami (FL),3
+7,242,GNB,Jonathan Garvin,DE,Miami Florida,3
 7,243,TEN,Chris Jackson,S,Marshall,2
 7,244,MIN,Nate Stanley,QB,Iowa,
 7,245,TAM,Raymond Calais,RB,Louisiana,0
 7,246,MIA,Malcolm Perry,RB,Navy,1
 7,247,NYG,Chris Williamson,CB,Minnesota,0
-7,248,LAR,Sam Sloman,K,Miami (OH),0
+7,248,LAR,Sam Sloman,K,Miami Ohio,0
 7,249,MIN,Brian Cole II,S,Mississippi State,
 7,250,LAR,Tremayne Anchrum,G,Clemson,2
 7,251,SEA,Stephen Sullivan,TE,LSU,1
@@ -1408,7 +1408,7 @@
 4,116,TEN,Amani Hooker,S,Iowa,20
 4,117,DET,Austin Bryant,DE,Clemson,5
 4,118,NWE,Hjalte Froholdt,G,Arkansas,18
-4,119,CLE,Sheldrick Redwine,S,Miami (FL),4
+4,119,CLE,Sheldrick Redwine,S,Miami Florida,4
 4,120,SEA,Gary Jennings Jr,WR,West Virginia,0
 4,121,NYJ,Trevon Wesco,TE,West Virginia,0
 4,122,PIT,Benny Snell Jr.,RB,Kentucky,8
@@ -1447,14 +1447,14 @@
 5,155,CLE,Mack Wilson,LB,Alabama,23
 5,156,DEN,Justin Hollins,LB,Oregon,8
 5,157,NYJ,Blake Cashman,LB,Minnesota,19
-5,158,DAL,Michael Jackson,CB,Miami (FL),13
+5,158,DAL,Michael Jackson,CB,Miami Florida,13
 5,159,NWE,Byron Cowart,DT,Maryland,14
 5,160,BAL,Daylon Mack,DT,Texas A&M,0
 5,161,HOU,Charles Omenihu,DE,Texas,11
 5,162,MIN,Cameron Smith,LB,USC,0
 5,163,NWE,Jake Bailey,P,Stanford,9
 5,164,IND,E.J. Speed,LB,Tarleton State,16
-5,165,DAL,Joe Jackson,DE,Miami (FL),1
+5,165,DAL,Joe Jackson,DE,Miami Florida,1
 5,166,LAC,Easton Stick,QB,North Dakota State,4
 5,167,PHI,Clayton Thorson,QB,Northwestern,
 5,168,TEN,D'Andre Walker,LB,Georgia,0
@@ -1470,7 +1470,7 @@
 6,178,JAX,Gardner Minshew II,QB,Washington State,32
 6,179,ARI,Lamont Gaillard,C,Georgia,2
 6,180,NYG,Corey Ballentine,CB,Washburn,5
-6,181,BUF,Jaquan Johnson,CB,Miami (FL),5
+6,181,BUF,Jaquan Johnson,CB,Miami Florida,5
 6,182,CIN,Trayveon Williams,RB,Texas A&M,3
 6,183,SFO,Justin Skule,T,Vanderbilt,11
 6,184,DET,Travis Fulgham,WR,Old Dominion,4
@@ -1493,7 +1493,7 @@
 6,201,KAN,Rashad Fenton,CB,South Carolina,7
 6,202,MIA,Isaiah Prince,T,Ohio State,4
 6,203,ATL,Marcus Green,WR,La-Monroe,
-6,204,SEA,Travis Homer,RB,Miami (FL),8
+6,204,SEA,Travis Homer,RB,Miami Florida,8
 6,205,CHI,Duke Shelley,CB,Kansas State,6
 6,206,WAS,Kelvin Harmon,WR,North Carolina State,3
 6,207,PIT,Ulysees Gilbert,LB,Akron,2
@@ -1610,7 +1610,7 @@
 2,64,IND,Tyquan Lewis,DE,Ohio State,12
 3,65,OAK,Brandon Parker,T,North Carolina A&T,15
 3,66,NYG,Lorenzo Carter,DE,Georgia,30
-3,67,CLE,Chad Thomas,DE,Miami (FL),5
+3,67,CLE,Chad Thomas,DE,Miami Florida,5
 3,68,HOU,Justin Reid,S,Stanford,29
 3,69,NYG,B.J. Hill,DT,North Carolina State,32
 3,70,SFO,Fred Warner,OLB,BYU,80
@@ -1650,12 +1650,12 @@
 4,104,IND,Nyheim Hines,RB,North Carolina State,25
 4,105,CLE,Antonio Callaway,WR,Florida,5
 4,106,DEN,Josey Jewell,ILB,Iowa,32
-4,107,NYJ,Chris Herndon,TE,Miami (FL),6
+4,107,NYJ,Chris Herndon,TE,Miami Florida,6
 4,108,NYG,Kyle Lauletta,QB,Richmond,0
 4,109,WAS,Troy Apke,S,Penn State,6
 4,110,OAK,Nick Nelson,CB,Wisconsin,1
 4,111,LAR,Brian Allen,C,Michigan State,16
-4,112,CIN,Mark Walton,RB,Miami (FL),3
+4,112,CIN,Mark Walton,RB,Miami Florida,3
 4,113,DEN,DaeSean Hamilton,WR,Penn State,6
 4,114,DET,Da'Shawn Hand,DE,Alabama,10
 4,115,CHI,Joel Iyiegbuniwe,LB,Western Kentucky,5
@@ -1682,7 +1682,7 @@
 4,136,CAR,Marquis Haynes,OLB,Mississippi,7
 4,137,DAL,Dalton Schultz,TE,Stanford,25
 5,138,GNB,Cole Madison,G,Washington State,
-5,139,NYG,R.J. McIntosh,DT,Miami (FL),1
+5,139,NYG,R.J. McIntosh,DT,Miami Florida,1
 5,140,OAK,Maurice Hurst Jr.,DT,Michigan,11
 5,141,SEA,Shaquem Griffin,OLB,Central Florida,4
 5,142,SFO,D.J. Reed,CB,Kansas State,24
@@ -1753,7 +1753,7 @@
 6,207,GNB,Equanimeous St. Brown,WR,Notre Dame,8
 6,208,DAL,Cedrick Wilson Jr.,WR,Boise State,11
 6,209,MIA,Cornell Armstrong,CB,Southern Miss,3
-6,210,NWE,Braxton Berrios,WR,Miami (FL),11
+6,210,NWE,Braxton Berrios,WR,Miami Florida,11
 6,211,HOU,Jordan Thomas,TE,Mississippi State,2
 6,212,BAL,Greg Senat,T,Wagner,1
 6,213,MIN,Colby Gossett,G,Appalachian State,4
@@ -1785,7 +1785,7 @@
 7,239,GNB,Hunter Bradley,LS,Mississippi State,3
 7,240,SFO,Richie James,WR,Middle Tenn. State,13
 7,241,WAS,Greg Stroman,CB,Virginia Tech,4
-7,242,CAR,Kendrick Norton,DT,Miami (FL),
+7,242,CAR,Kendrick Norton,DT,Miami Florida,
 7,243,NWE,Keion Crossen,CB,Western Carolina,6
 7,244,LAR,Justin Lawler,DE,SMU,1
 7,245,NOR,Will Clapp,C,LSU,12
@@ -1828,7 +1828,7 @@
 1,26,ATL,Takkarist McKinley,DE,UCLA,16
 1,27,BUF,Tre'Davious White,CB,LSU,48
 1,28,DAL,Taco Charlton,DE,Michigan,9
-1,29,CLE,David Njoku,TE,Miami (FL),26
+1,29,CLE,David Njoku,TE,Miami Florida,26
 1,30,PIT,T.J. Watt,OLB,Wisconsin,90
 1,31,SFO,Reuben Foster,LB,Alabama,8
 1,32,NOR,Ryan Ramczyk,T,Wisconsin,64
@@ -1912,7 +1912,7 @@
 4,110,JAX,Dede Westbrook,WR,Oklahoma,14
 4,111,SEA,Tedric Thompson,S,Colorado,9
 4,112,CHI,Eddie Jackson,S,Alabama,45
-4,113,LAC,Rayshawn Jenkins,S,Miami (FL),31
+4,113,LAC,Rayshawn Jenkins,S,Miami Florida,31
 4,114,WAS,Samaje Perine,RB,Oklahoma,24
 4,115,ARI,Dorian Johnson,G,Pittsburgh,
 4,116,CIN,Carl Lawson,OLB,Auburn,20
@@ -1951,7 +1951,7 @@
 5,149,ATL,Damontae Kazee,CB,San Diego State,22
 5,150,NYJ,Jordan Leggett,TE,Clemson,1
 5,151,LAC,Desmond King,S,Iowa,27
-5,152,CAR,Corn Elder,CB,Miami (FL),2
+5,152,CAR,Corn Elder,CB,Miami Florida,2
 5,153,CIN,Jake Elliott,K,Memphis,22
 5,154,WAS,Jeremy Sprinkle,TE,Arkansas,2
 5,155,TEN,Jayon Brown,LB,UCLA,26
@@ -1979,7 +1979,7 @@
 5,177,SFO,Trent Taylor,WR,Louisiana Tech,7
 5,178,MIA,Davon Godchaux,DT,LSU,45
 5,179,ARI,T.J. Logan,RB,North Carolina,0
-5,180,MIN,Danny Isidora,G,Miami (FL),4
+5,180,MIN,Danny Isidora,G,Miami Florida,4
 5,181,NYJ,Dylan Donahue,DL,West Georgia,0
 5,182,GNB,Aaron Jones,RB,Texas-El Paso,64
 5,183,KAN,Ukeme Eligwe,LB,Georgia Southern,2
@@ -1995,7 +1995,7 @@
 6,193,CIN,Jordan Evans,LB,Oklahoma,9
 6,194,MIA,Vincent Taylor,DT,Oklahoma State,5
 6,195,BUF,Tanner Vallejo,LB,Boise State,7
-6,196,NOR,Al-Quadin Muhammad,DE,Miami (FL),18
+6,196,NOR,Al-Quadin Muhammad,DE,Miami Florida,18
 6,197,NYJ,Jeremy Clark,CB,Michigan,0
 6,198,SFO,D.J. Jones,DT,Mississippi,40
 6,199,WAS,Chase Roullier,C,Wyoming,24
@@ -2014,11 +2014,11 @@
 6,212,GNB,Kofi Amichia,C,South Florida,
 6,213,PIT,Colin Holba,LS,Louisville,0
 6,214,PHI,Elijah Qualls,DT,Washington,1
-6,215,DET,Brad Kaaya,QB,Miami (FL),
+6,215,DET,Brad Kaaya,QB,Miami Florida,
 6,216,DAL,Marquez White,CB,Florida State,
 6,217,TEN,Corey Levin,OL,Chattanooga,6
 6,218,KAN,Leon McQuay,S,USC,0
-7,219,MIN,Stacy Coley,WR,Miami (FL),0
+7,219,MIN,Stacy Coley,WR,Miami Florida,0
 7,220,MIN,Ifeadi Odenigbo,DL,Northwestern,11
 7,221,OAK,Shalom Luani,S,Washington State,2
 7,222,JAX,Jalen Myrick,CB,Minnesota,0
@@ -2028,7 +2028,7 @@
 7,226,SEA,David Moore,WR,East Central (OK),15
 7,227,TEN,Josh Carraway,OLB,TCU,0
 7,228,DAL,Joey Ivie,DT,Florida,0
-7,229,SFO,Adrian Colbert,DB,Miami (FL),8
+7,229,SFO,Adrian Colbert,DB,Miami Florida,8
 7,230,WAS,Josh Harvey-Clemons,S,Louisville,4
 7,231,OAK,Jylan Ware,T,Alabama State,0
 7,232,MIN,Elijah Lee,LB,Kansas State,8
@@ -2039,7 +2039,7 @@
 7,237,MIA,Isaiah Ford,WR,Virginia Tech,5
 7,238,GNB,Devante Mays,RB,Utah State,0
 7,239,DAL,Noah Brown,WR,Ohio State,18
-7,240,JAX,Marquez Williams,FB,Miami (FL),0
+7,240,JAX,Marquez Williams,FB,Miami Florida,0
 7,241,TEN,Khalfani Muhammad,RB,California,
 7,242,OAK,Elijah Hood,RB,North Carolina,0
 7,243,HOU,Kyle Fuller,C,Baylor,7
@@ -2077,7 +2077,7 @@
 1,22,WAS,Josh Doctson,WR,TCU,9
 1,23,MIN,Laquon Treadwell,WR,Mississippi,8
 1,24,CIN,William Jackson III,CB,Houston,19
-1,25,PIT,Artie Burns,CB,Miami (FL),17
+1,25,PIT,Artie Burns,CB,Miami Florida,17
 1,26,DEN,Paxton Lynch,QB,Memphis,2
 1,27,GNB,Kenny Clark,DT,UCLA,60
 1,28,SFO,Joshua Garnett,G,Stanford,5
@@ -2176,7 +2176,7 @@
 4,121,MIN,Willie Beavers,T,Western Michigan,0
 4,122,CIN,Andrew Billings,NT,Baylor,29
 4,123,PIT,Jerald Hawkins,T,LSU,2
-4,124,CHI,Deon Bush,S,Miami (FL),8
+4,124,CHI,Deon Bush,S,Miami Florida,8
 4,125,IND,Antonio Morrison,ILB,Florida,13
 4,126,KAN,Demarcus Robinson,WR,Florida,25
 4,127,CHI,Deiondre' Hall,CB,Northern Iowa,2
@@ -2314,7 +2314,7 @@
 1,6,NYJ,Leonard Williams,DE,USC,66
 1,7,CHI,Kevin White,WR,West Virginia,3
 1,8,ATL,Vic Beasley,OLB,Clemson,32
-1,9,NYG,Ereck Flowers,T,Miami (FL),35
+1,9,NYG,Ereck Flowers,T,Miami Florida,35
 1,10,STL,Todd Gurley,RB,Georgia,54
 1,11,MIN,Trae Waynes,CB,Michigan State,18
 1,12,CLE,Danny Shelton,NT,Washington,33
@@ -2334,7 +2334,7 @@
 1,26,BAL,Breshad Perriman,WR,Central Florida,15
 1,27,DAL,Byron Jones,CB,Connecticut,38
 1,28,DET,Laken Tomlinson,G,Duke,54
-1,29,IND,Phillip Dorsett,WR,Miami (FL),16
+1,29,IND,Phillip Dorsett,WR,Miami Florida,16
 1,30,GNB,Damarious Randall,S,Arizona State,21
 1,31,NOR,Stephone Anthony,ILB,Clemson,10
 1,32,NWE,Malcom Brown,DT,Texas,43
@@ -2353,7 +2353,7 @@
 2,45,MIN,Eric Kendricks,ILB,UCLA,64
 2,46,SFO,Jaquiski Tartt,S,Samford,21
 2,47,PHI,Eric Rowe,CB,Utah,21
-2,48,SDG,Denzel Perryman,ILB,Miami (FL),43
+2,48,SDG,Denzel Perryman,ILB,Miami Florida,43
 2,49,KAN,Mitch Morse,G,Missouri,55
 2,50,BUF,Ronald Darby,CB,Florida State,34
 2,51,CLE,Nate Orchard,DE,Utah,8
@@ -2367,13 +2367,13 @@
 2,59,DEN,Ty Sambrailo,T,Colorado State,14
 2,60,DAL,Randy Gregory,OLB,Nebraska,15
 2,61,TAM,Ali Marpet,C,Hobart,43
-2,62,GNB,Quinten Rollins,CB,Miami (OH),7
+2,62,GNB,Quinten Rollins,CB,Miami Ohio,7
 2,63,SEA,Frank Clark,DE,Michigan,49
 2,64,NWE,Jordan Richards,S,Stanford,10
 3,65,IND,D'Joun Smith,CB,Florida Atlantic,0
 3,66,TEN,Jeremiah Poutasi,G,Utah,3
 3,67,JAX,A.J. Cann,G,South Carolina,39
-3,68,OAK,Clive Walford,TE,Miami (FL),7
+3,68,OAK,Clive Walford,TE,Miami Florida,7
 3,69,SEA,Tyler Lockett,WR,Kansas State,67
 3,70,HOU,Jaelen Strong,WR,Arizona State,2
 3,71,CHI,Hroniss Grasu,C,Oregon,8
@@ -2382,7 +2382,7 @@
 3,74,NYG,Owamagbe Odighizuwa,DE,UCLA,1
 3,75,NOR,Garrett Grayson,QB,Colorado State,
 3,76,KAN,Chris Conley,WR,Georgia,23
-3,77,CLE,Duke Johnson,RB,Miami (FL),28
+3,77,CLE,Duke Johnson,RB,Miami Florida,28
 3,78,NOR,P.J. Williams,CB,Florida State,19
 3,79,SFO,Eli Harold,OLB,Virginia,11
 3,80,DET,Alex Carter,CB,Stanford,0
@@ -2433,7 +2433,7 @@
 4,125,BAL,Javorius Allen,RB,USC,14
 4,126,SFO,Mike Davis,RB,South Carolina,20
 4,127,DAL,Damien Wilson,ILB,Minnesota,31
-4,128,OAK,Jon Feliciano,G,Miami (FL),26
+4,128,OAK,Jon Feliciano,G,Miami Florida,26
 4,129,GNB,Jake Ryan,OLB,Michigan,14
 4,130,SEA,Terry Poole,G,San Diego State,
 4,131,NWE,Shaq Mason,C,Georgia Tech,54
@@ -2517,7 +2517,7 @@
 6,209,SEA,Obum Gwacham,DE,Oregon State,1
 6,210,GNB,Christian Ringo,DE,Louisiana,5
 6,211,HOU,Reshard Cliett,OLB,South Florida,
-6,212,PIT,Anthony Chickillo,DE,Miami (FL),10
+6,212,PIT,Anthony Chickillo,DE,Miami Florida,10
 6,213,GNB,Kennard Backman,TE,Ala-Birmingham,0
 6,214,SEA,Kristjan Sokoli,DT,Buffalo,0
 6,215,STL,Cody Wichmann,G,Fresno State,6
@@ -2654,7 +2654,7 @@
 3,90,IND,Donte Moncrief,WR,Mississippi,18
 3,91,ARI,John Brown,WR,Pittsburg State,36
 3,92,CAR,Trai Turner,OL,LSU,51
-3,93,JAX,Brandon Linder,OL,Miami (FL),31
+3,93,JAX,Brandon Linder,OL,Miami Florida,31
 3,94,CLE,Terrance West,RB,Towson,11
 3,95,DEN,Michael Schofield,OL,Michigan,38
 3,96,MIN,Jerick McKinnon,RB,Georgia Southern,32
@@ -2752,7 +2752,7 @@
 6,188,STL,E.J. Gaines,DB,Missouri,13
 6,189,DET,T.J. Jones,WR,Notre Dame,7
 6,190,MIA,Matt Hazel,WR,Coastal Carolina,0
-6,191,CHI,Pat O'Donnell,P,Miami (FL),18
+6,191,CHI,Pat O'Donnell,P,Miami Florida,18
 6,192,PIT,Jordan Zumwalt,LB,UCLA,
 6,193,KAN,Zach Fulton,G,Tennessee,39
 6,194,BAL,Keith Wenning,QB,Ball State,
@@ -2798,7 +2798,7 @@
 7,234,MIA,Terrence Fede,DE,Marist,5
 7,235,OAK,Shelby Harris,DE,Illinois State,39
 7,236,GNB,Jeff Janis,WR,Saginaw Valley State,2
-7,237,BUF,Seantrel Henderson,OL,Miami (FL),14
+7,237,BUF,Seantrel Henderson,OL,Miami Florida,14
 7,238,DAL,Will Smith,LB,Texas Tech,
 7,239,CIN,James Wright,WR,LSU,2
 7,240,SDG,Tevin Reese,WR,Baylor,
