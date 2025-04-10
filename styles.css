@@ -70,6 +70,21 @@ body {
   border: 1px solid #ccc;
 }
 
+/* Timer Container */
+#timer-container {
+  height: 4px;             /* Thin horizontal bar */
+  background-color: #ccc;    /* Light grey background */
+  width: 100%;
+  margin: 5px 0;
+}
+#timer-bar {
+  height: 100%;
+  background-color: #007aff;  /* Blue fill color */
+  width: 100%;
+  transition: width 0.1s linear; /* Smooth decrement animation */
+}
+
+
 /* Binary Choices Container */
 #binary-choices {
   display: none;

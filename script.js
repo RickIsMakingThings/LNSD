@@ -278,9 +278,8 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
-      const info = nflToCollege[player];
-      return ["QB", "RB", "WR"].includes(info.position.toUpperCase()) &&
-             info.value >= 50;
+  const info = nflToCollege[player];
+  return info.position.toUpperCase() === "QB" && info.value >= 50;
     });
     // Exclude players whose college is in recentSchools.
     const filteredPlayers = eligiblePlayers.filter(player => {
