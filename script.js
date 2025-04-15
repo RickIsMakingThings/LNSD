@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let gameActive = true;
   let correctStreak = 0;
   let easyRounds = 0;          // Target: 3 easy rounds
+  let normalRoundsCount = 0;   // Count the normal rounds after easy rounds end
   let recentSchools = [];      // Tracks normalized college names from the last 7 rounds
 
   // Binary mode controls
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  const timerBar = document.getElementById('timer-bar'); // Must exist in your HTML
+  const timerBar = document.getElementById('timer-bar'); // Must exist in HTML
 
   // --- Data Loading ---
   fetch('dialogue.json')
@@ -155,8 +156,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Dialogue Utility Functions ---
-  // getBriefResponse: In easy rounds, always use confirmations.
-  // In other rounds, use big compliments with a 10% chance.
+  // getBriefResponse: 
+  // - In easy rounds: always use a random entry from "confirmations".
+  // - In other rounds: use a big compliment 10% of the time, otherwise use a confirmation.
   function getBriefResponse() {
     if (phase === "easy") {
       if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
@@ -249,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
     clearTimer();
     phase = "easy";
     easyRounds = 0;
+    normalRoundsCount = 0;
     currentNFLPlayer = "";
     score = 0;
     gameActive = true;
@@ -288,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       addAIMessage(transitionMsg);
       phase = "trivia";
+      normalRoundsCount = 0;  // Reset normal rounds counter
       setTimeout(startTriviaRound, 1500);
       return;
     }
@@ -323,8 +327,11 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Normal Rounds: Criteria: round ≤ 4, [QB, RB, WR], value ≥ 20.
+  // We'll count these rounds in normalRoundsCount.
+  let normalRoundsCount = 0;
   function startTriviaRound() {
     phase = "trivia";
+    normalRoundsCount++;  // Increment count for normal rounds
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
       return info.round <= 4 &&
@@ -353,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Binary Mode Rounds: Using binary filters based on choice.
+  // Binary Mode Rounds: Using filters based on binary choice.
   function startTriviaRoundFiltered(choice) {
     phase = "binary";
     let eligiblePlayers = [];
@@ -394,11 +401,19 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // When 4 correct answers occur in normal rounds, trigger binary mode for 3 rounds.
+  // When 4 correct answers in normal rounds occur OR when normalRoundsCount reaches 3,
+  // trigger binary mode for exactly 3 rounds.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
-      if (correctStreak >= 4) {
+      if (normalRoundsCount >= 3) {
+        binaryModeActive = true;
+        binaryRoundCount = 3;
+        normalRoundsCount = 0; // Reset normal rounds counter for the next cycle.
+        correctStreak = 0;
+        showBinaryChoices();
+      } else if (correctStreak >= 4) {
+        // Also allow correct-streak trigger in later rounds if desired.
         binaryModeActive = true;
         binaryRoundCount = 3;
         correctStreak = 0;
@@ -440,11 +455,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             addAIMessage(transitionMsg);
             phase = "trivia";
+            normalRoundsCount = 0;
             setTimeout(startTriviaRound, 1500);
           }
         }, 1500);
       } else if (phase === "trivia") {
-        if (correctStreak >= 4) {
+        if (normalRoundsCount >= 3) {
           setTimeout(askNextQuestion, 1500);
         } else {
           setTimeout(startTriviaRound, 1500);
@@ -483,7 +499,6 @@ document.addEventListener('DOMContentLoaded', function() {
       startTriviaRoundFiltered("tough");
     });
   }
-
   if (choiceDefense) {
     choiceDefense.addEventListener('click', function() {
       addMessage("Go defense", "user");
