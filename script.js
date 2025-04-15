@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let timerInterval;
 
   // --- NEW: Player Exclusion List ---
-  const playerExclusionList = ["russell wilson"];
+  // Names (normalized to lower-case) that should never appear.
+  const playerExclusionList = ["russell wilson", "jayden daniels"];
 
   // DOM elements
   const chatContainer = document.getElementById('chat-container');
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  const timerBar = document.getElementById('timer-bar'); // Ensure this element exists in your HTML
+  const timerBar = document.getElementById('timer-bar'); // Must exist in HTML
 
   // --- Data Loading ---
   fetch('dialogue.json')
@@ -66,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error("Error loading players CSV:", error));
 
-  // Start game once players are loaded
   function checkAndStartGame() {
     if (!gameStarted && Object.keys(nflToCollege).length > 0) {
       gameStarted = true;
@@ -160,7 +160,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Dialogue Utility Functions ---
-  // getBriefResponse: During easy rounds, always return from "confirmations" bucket.
+  // getBriefResponse: In easy rounds, always choose from confirmations.
+  // In other rounds, use big compliments 10% of the time.
   function getBriefResponse() {
     if (phase === "easy") {
       if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
@@ -168,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return "nice";
     } else {
-      // In non-easy rounds, big compliments have a 10% chance.
       if (dialogueBuckets.big_compliments && dialogueBuckets.big_compliments.length > 0 && Math.random() < 0.1) {
         return dialogueBuckets.big_compliments[Math.floor(Math.random() * dialogueBuckets.big_compliments.length)];
       } else if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
@@ -271,6 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Game Phase Functions ---
+  // Intro: Show greetings, then announce easy rounds.
   function startIntro() {
     addAIMessage(dialogueBuckets.greetings ? dialogueBuckets.greetings[0] : "Hey, let's kick it off. You know the drill 🤝");
     setTimeout(() => {
@@ -287,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function startEasyRound() {
     if (!gameActive) return;
     if (easyRounds >= 3) {
-      // Transition phase to normal rounds
+      // Transition to normal rounds using easyTransition bucket if available.
       const transitionMsg = (dialogueBuckets.easyTransition && dialogueBuckets.easyTransition.length > 0)
                               ? dialogueBuckets.easyTransition[Math.floor(Math.random() * dialogueBuckets.easyTransition.length)]
                               : "Ok, now let's have some fun.";
@@ -358,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Binary Mode Rounds: Using binary filters.
+  // Binary Mode Rounds: Uses filters based on binary choice.
   function startTriviaRoundFiltered(choice) {
     phase = "binary";
     let eligiblePlayers = [];
@@ -399,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // When 4 correct answers occur in normal rounds, trigger binary mode for 3 rounds.
+  // When correct streak in normal rounds reaches 4, trigger binary mode for 3 rounds.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
