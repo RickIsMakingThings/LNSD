@@ -155,12 +155,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Dialogue Utility Functions ---
-  // In all rounds, use the "confirmations" bucket exclusively.
+  // getBriefResponse: In easy rounds, always use confirmations.
+  // In other rounds, use big compliments with a 10% chance.
   function getBriefResponse() {
-    if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
-      return dialogueBuckets.confirmations[Math.floor(Math.random() * dialogueBuckets.confirmations.length)];
+    if (phase === "easy") {
+      if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
+        return dialogueBuckets.confirmations[Math.floor(Math.random() * dialogueBuckets.confirmations.length)];
+      }
+      return "nice";
+    } else {
+      if (dialogueBuckets.big_compliments && dialogueBuckets.big_compliments.length > 0 && Math.random() < 0.1) {
+        return dialogueBuckets.big_compliments[Math.floor(Math.random() * dialogueBuckets.big_compliments.length)];
+      } else if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
+        return dialogueBuckets.confirmations[Math.floor(Math.random() * dialogueBuckets.confirmations.length)];
+      }
+      return "nice";
     }
-    return "nice";
   }
 
   function getQuestionTemplate() {
@@ -268,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 3000);
   }
 
-  // Easy Rounds: Only QBs with value >= 50.
+  // Easy Rounds: Only QBs with value >= 40.
   function startEasyRound() {
     if (!gameActive) return;
     if (easyRounds >= 3) {
@@ -284,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
     phase = "easy";
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
-      return info.position.toUpperCase() === "QB" && info.value >= 50;
+      return info.position.toUpperCase() === "QB" && info.value >= 40;
     });
     eligiblePlayers = eligiblePlayers.filter(player => {
       return !playerExclusionList.includes(player.toLowerCase());
@@ -312,14 +322,14 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Normal Rounds: Criteria: round ≤ 3, [QB, RB, WR], value ≥ 10.
+  // Normal Rounds: Criteria: round ≤ 4, [QB, RB, WR], value ≥ 20.
   function startTriviaRound() {
     phase = "trivia";
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
-      return info.round <= 3 &&
+      return info.round <= 4 &&
              ["QB", "RB", "WR"].includes(info.position.toUpperCase()) &&
-             info.value >= 10;
+             info.value >= 20;
     });
     eligiblePlayers = eligiblePlayers.filter(player => {
       const collegeNorm = normalizeCollegeString(nflToCollege[player].college);
@@ -343,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Binary Mode Rounds: Using filters based on the binary choice.
+  // Binary Mode Rounds: Using binary filters based on choice.
   function startTriviaRoundFiltered(choice) {
     phase = "binary";
     let eligiblePlayers = [];
@@ -384,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // When the correct streak in normal rounds reaches 4, trigger binary mode for 3 rounds.
+  // When 4 correct answers occur in normal rounds, trigger binary mode for 3 rounds.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
@@ -473,6 +483,7 @@ document.addEventListener('DOMContentLoaded', function() {
       startTriviaRoundFiltered("tough");
     });
   }
+
   if (choiceDefense) {
     choiceDefense.addEventListener('click', function() {
       addMessage("Go defense", "user");
