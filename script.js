@@ -13,12 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
   let gameActive = true;
   let correctStreak = 0;
   let easyRounds = 0;          // Target: 3 easy rounds
-  let normalRoundsCount = 0;   // Count the normal rounds (after easy rounds)
+  let normalRoundsCount = 0;   // Count of normal rounds (after easy rounds)
   let recentSchools = [];      // Tracks normalized college names from the last 7 rounds
 
   // Binary mode controls
   let binaryModeActive = false;
-  let binaryRoundCount = 0;    // Will be set to 3 once binary mode is triggered
+  let binaryRoundCount = 0;    // Will be set to 3 when binary mode is triggered
   let choicePending = "";      // "tough" or "defense"
 
   // Timer variables
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  const timerBar = document.getElementById('timer-bar'); // Must exist in the HTML
+  const timerBar = document.getElementById('timer-bar'); // Must exist in your HTML
 
   // --- Data Loading ---
   fetch('dialogue.json')
@@ -156,9 +156,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Dialogue Utility Functions ---
-  // getBriefResponse: 
-  // - In easy rounds: always use a random entry from "confirmations".
-  // - In other rounds: use a big compliment 10% of the time, otherwise use a confirmation.
+  // getBriefResponse:
+  // - In easy rounds: always use a random entry from "confirmations" bucket.
+  // - In non-easy rounds: use big compliments 10% of the time; otherwise, use confirmations.
   function getBriefResponse() {
     if (phase === "easy") {
       if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       addAIMessage(transitionMsg);
       phase = "trivia";
-      normalRoundsCount = 0; // Reset normal rounds counter for the new phase.
+      normalRoundsCount = 0;  // Reset normal rounds counter
       setTimeout(startTriviaRound, 1500);
       return;
     }
@@ -399,20 +399,14 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // When 4 correct answers occur in normal rounds OR when normalRoundsCount reaches 3,
-  // trigger binary mode for exactly 3 rounds.
+  // When normal rounds have been played for three rounds, trigger binary mode for exactly 3 rounds.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
       if (normalRoundsCount >= 3) {
         binaryModeActive = true;
         binaryRoundCount = 3;
-        normalRoundsCount = 0; // Reset for next cycle.
-        correctStreak = 0;
-        showBinaryChoices();
-      } else if (correctStreak >= 4) {
-        binaryModeActive = true;
-        binaryRoundCount = 3;
+        normalRoundsCount = 0; // Reset normal rounds counter for next cycle.
         correctStreak = 0;
         showBinaryChoices();
       } else {
@@ -457,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }, 1500);
       } else if (phase === "trivia") {
-        if (normalRoundsCount >= 3 || correctStreak >= 4) {
+        if (normalRoundsCount >= 3) {
           setTimeout(askNextQuestion, 1500);
         } else {
           setTimeout(startTriviaRound, 1500);
@@ -550,17 +544,5 @@ document.addEventListener('DOMContentLoaded', function() {
     return false;
   }
 
-  // --- Typing Indicator ---
-  function showTypingIndicator(callback) {
-    const indicator = document.createElement('div');
-    indicator.classList.add('message', 'ai', 'typing-indicator');
-    indicator.textContent = "...";
-    chatContainer.appendChild(indicator);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    setTimeout(() => {
-      chatContainer.removeChild(indicator);
-      callback();
-    }, 1500);
-  }
-
+  // --- Typing Indicator (duplicate removed) ---
 });
