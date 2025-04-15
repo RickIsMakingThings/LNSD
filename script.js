@@ -1,22 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Global variables
+  // Global variables and state
   let nflToCollege = {};       // Loaded from players.csv.
   let collegeAliases = {};     // Loaded from college_aliases.csv.
   let dialogueBuckets = {};    // Loaded from dialogue.json.
   
+  let gameStarted = false;     // Ensures game starts once players are loaded.
+  
   // Phase can be "easy", "trivia" (normal), or "binary"
-  let phase = "easy";          
+  let phase = "easy";
   let currentNFLPlayer = "";
   let score = 0;
   let gameActive = true;
   let correctStreak = 0;
-  let easyRounds = 0;          // Count of easy rounds played (target: 3)
-  let recentSchools = [];      // Tracks normalized college names of the last 7 rounds
+  let easyRounds = 0;          // Easy rounds count (target: 3)
+  let recentSchools = [];      // Tracks normalized college names from the last 7 rounds
 
-  // Binary mode control variables:
+  // Binary mode controls
   let binaryModeActive = false;
-  let binaryRoundCount = 0;    // Should be forced to 3 when binary mode starts
-  let choicePending = "";      // Holds the current binary choice ("tough" or "defense")
+  let binaryRoundCount = 0;    // 3 consecutive binary rounds
+  let choicePending = "";      // "tough" or "defense"
 
   // Timer variables
   let timerInterval;
@@ -32,9 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  const timerBar = document.getElementById('timer-bar'); // Ensure this exists in your HTML
+  const timerBar = document.getElementById('timer-bar');
 
   // --- Data Loading ---
+
   // Load external dialogue JSON.
   fetch('dialogue.json')
     .then(response => response.json())
@@ -64,18 +67,20 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error("Error loading players CSV:", error));
 
-  // Wait until both dialogue and players data are loaded, then start the game.
+  // If players are loaded, start the game even if dialogue is missing.
   function checkAndStartGame() {
-    if (Object.keys(dialogueBuckets).length > 0 && Object.keys(nflToCollege).length > 0) {
+    if (!gameStarted && Object.keys(nflToCollege).length > 0) {
+      gameStarted = true;
       startIntro();
     }
   }
 
   // --- CSV Parsing Functions ---
+
+  // Parses college_aliases.csv. Expects header row; subsequent rows: college, alias1, alias2,...
   function parseCSVtoObject(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
-    // Assume first row is header.
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
       if (parts.length < 1) continue;
@@ -92,10 +97,10 @@ document.addEventListener('DOMContentLoaded', function() {
     return result;
   }
 
+  // Parses players.csv. Expects header row and fields: round, pick, NFL team, name, position, college, value
   function parsePlayersCSV(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
-    // Expect header then rows: round, pick, NFL team, name, position, college, value
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
@@ -114,6 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Timer Functions ---
+
   function startTimer() {
     clearTimer();
     let timeLeft = 7; // seconds
@@ -132,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 100);
   }
-  
+
   function clearTimer() {
     if (timerInterval) {
       clearInterval(timerInterval);
@@ -144,6 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- UI Utility Functions ---
+
   function addMessage(text, sender) {
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', sender);
@@ -157,7 +164,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Dialogue Utility Functions ---
-  // 20% chance for "big compliments"
   function getBriefResponse() {
     if (dialogueBuckets.big_compliments && dialogueBuckets.big_compliments.length > 0 && Math.random() < 0.2) {
       return dialogueBuckets.big_compliments[Math.floor(Math.random() * dialogueBuckets.big_compliments.length)];
@@ -175,6 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- String Normalization ---
+
   function normalizeCollegeString(str) {
     let s = str.replace(/[^\w\s]/gi, "").toLowerCase().trim();
     if (s.startsWith("university of ")) {
@@ -198,8 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return s;
   }
-  
-  // --- Answer Checking ---
+
   function isCollegeAnswerCorrect(answer, correctCollege) {
     const normAnswer = normalizeCollegeString(answer);
     const normCorrect = normalizeCollegeString(correctCollege);
@@ -209,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Typing Indicator ---
+
   function showTypingIndicator(callback) {
     const indicator = document.createElement('div');
     indicator.classList.add('message', 'ai', 'typing-indicator');
@@ -230,6 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Game Over and Restart ---
+
   function gameOver(message) {
     gameActive = false;
     clearTimer();
@@ -238,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gameOverOverlay.style.display = "flex";
     inputForm.style.display = "none";
   }
-  
+
   function restartGame() {
     console.log("Restarting game.");
     phase = "easy";
@@ -260,7 +268,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Game Phase Functions ---
 
-  // Intro dialogue: starts with greetings then announces easy rounds.
   function startIntro() {
     addAIMessage(dialogueBuckets.greetings ? dialogueBuckets.greetings[0] : "Hey, let's kick it off. You know the drill 🤝");
     setTimeout(() => {
@@ -271,19 +278,19 @@ document.addEventListener('DOMContentLoaded', function() {
       startEasyRound();
     }, 3000);
   }
-  
-  // Easy rounds: only QBs with value >= 50.
+
+  // Easy rounds: Only QBs with value >= 50.
   function startEasyRound() {
     phase = "easy";
     if (Object.keys(nflToCollege).length === 0) {
       gameOver("No players data loaded.");
       return;
     }
+    // Filter: only QBs with value at least 50.
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
       return info.position.toUpperCase() === "QB" && info.value >= 50;
     });
-    // Exclude players whose college is in recentSchools.
     const filteredPlayers = eligiblePlayers.filter(player => {
       const collegeNorm = normalizeCollegeString(nflToCollege[player].college);
       return !recentSchools.includes(collegeNorm);
@@ -305,16 +312,15 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(question);
     userInput.value = "";
     inputForm.style.display = "block";
-    // After 3 easy rounds, transition to normal rounds.
-    if (easyRounds >= 3) {
-      setTimeout(() => {
-        phase = "trivia";
-        startTriviaRound();
-      }, 1500);
+    if (easyRounds < 3) {
+      setTimeout(startEasyRound, 1500);
+    } else {
+      phase = "trivia";
+      setTimeout(startTriviaRound, 1500);
     }
   }
 
-  // Normal rounds: rounds with criteria: round ≤ 3, position in [QB, RB, WR], value ≥ 10.
+  // Normal rounds: round <= 3, position in [QB, RB, WR], value >= 10.
   function startTriviaRound() {
     phase = "trivia";
     if (Object.keys(nflToCollege).length === 0) {
@@ -349,8 +355,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Binary mode: triggered in normal rounds when correct streak reaches 4.
-  // Binary mode continues for 3 consecutive rounds.
+  // Binary rounds: Filter based on binary choice.
   function startTriviaRoundFiltered(choice) {
     phase = "binary";
     let eligiblePlayers = [];
@@ -384,7 +389,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const chosenCollege = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
     recentSchools.push(chosenCollege);
     if (recentSchools.length > 7) { recentSchools.shift(); }
-    // Decrement binary counter.
     binaryRoundCount--;
     const template = getQuestionTemplate();
     const question = template.replace("XXXXX", currentNFLPlayer);
@@ -392,12 +396,11 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // Ask next question in normal mode. If correct streak reaches 4, trigger binary mode.
+  // Ask next question; if correct streak >= 4, force binary mode.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
       if (correctStreak >= 4) {
-        // Trigger binary mode for 3 rounds.
         binaryModeActive = true;
         binaryRoundCount = 3;
         correctStreak = 0;
@@ -408,19 +411,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1500);
   }
 
-  // Show binary choices.
   function showBinaryChoices() {
     inputForm.style.display = "none";
     binaryChoices.style.display = "block";
   }
 
-  // Hide binary choices.
   function hideBinaryChoices() {
     binaryChoices.style.display = "none";
     inputForm.style.display = "block";
   }
 
-  // Handle the college guess.
+  // Handle user's answer.
   function handleCollegeGuess(answer) {
     console.log("Handling answer:", answer);
     const correctCollege = nflToCollege[currentNFLPlayer].college;
@@ -430,7 +431,6 @@ document.addEventListener('DOMContentLoaded', function() {
       score++;
       updateScore();
       correctStreak++;
-      // Check phase: easy or normal or binary.
       if (phase === "easy") {
         if (easyRounds < 3) {
           setTimeout(startEasyRound, 1500);
@@ -449,7 +449,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } else if (phase === "binary") {
         if (binaryModeActive && binaryRoundCount > 0) {
-          // Continue binary rounds.
           setTimeout(() => { showBinaryChoices(); }, 1500);
         } else {
           binaryModeActive = false;
@@ -457,11 +456,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     } else {
+      clearTimer();
       gameOver(`Nah, ${currentNFLPlayer} played at ${correctCollege}. Better luck next time!`);
     }
   }
 
-  // Form submission listener.
+  // Listen for form submissions.
   inputForm.addEventListener('submit', function(e) {
     e.preventDefault();
     if (!gameActive) return;
@@ -499,4 +499,34 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Restart button clicked.");
     restartGame();
   });
+
+  // Typing indicator and AI messaging.
+  function showTypingIndicator(callback) {
+    const indicator = document.createElement('div');
+    indicator.classList.add('message', 'ai', 'typing-indicator');
+    indicator.textContent = "...";
+    chatContainer.appendChild(indicator);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    setTimeout(() => {
+      chatContainer.removeChild(indicator);
+      callback();
+    }, 1500);
+  }
+
+  function addAIMessage(text) {
+    clearTimer();
+    showTypingIndicator(() => {
+      addMessage(text, "ai");
+      startTimer();
+    });
+  }
+
+  function gameOver(message) {
+    gameActive = false;
+    clearTimer();
+    addMessage(message, "ai");
+    gameOverMsg.textContent = message;
+    gameOverOverlay.style.display = "flex";
+    inputForm.style.display = "none";
+  }
 });
