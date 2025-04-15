@@ -13,12 +13,12 @@ document.addEventListener('DOMContentLoaded', function() {
   let gameActive = true;
   let correctStreak = 0;
   let easyRounds = 0;          // Target: 3 easy rounds
-  let normalRoundsCount = 0;   // Count the normal rounds after easy rounds end
+  let normalRoundsCount = 0;   // Count the normal rounds (after easy rounds)
   let recentSchools = [];      // Tracks normalized college names from the last 7 rounds
 
   // Binary mode controls
   let binaryModeActive = false;
-  let binaryRoundCount = 0;    // Force 3 rounds in binary mode when triggered
+  let binaryRoundCount = 0;    // Will be set to 3 once binary mode is triggered
   let choicePending = "";      // "tough" or "defense"
 
   // Timer variables
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  const timerBar = document.getElementById('timer-bar'); // Must exist in HTML
+  const timerBar = document.getElementById('timer-bar'); // Must exist in the HTML
 
   // --- Data Loading ---
   fetch('dialogue.json')
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       addAIMessage(transitionMsg);
       phase = "trivia";
-      normalRoundsCount = 0;  // Reset normal rounds counter
+      normalRoundsCount = 0; // Reset normal rounds counter for the new phase.
       setTimeout(startTriviaRound, 1500);
       return;
     }
@@ -327,11 +327,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Normal Rounds: Criteria: round ≤ 4, [QB, RB, WR], value ≥ 20.
-  // We'll count these rounds in normalRoundsCount.
-  let normalRoundsCount = 0;
   function startTriviaRound() {
     phase = "trivia";
-    normalRoundsCount++;  // Increment count for normal rounds
+    normalRoundsCount++;  // Increment normal rounds counter
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
       return info.round <= 4 &&
@@ -360,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Binary Mode Rounds: Using filters based on binary choice.
+  // Binary Mode Rounds: Using binary filters based on the binary choice.
   function startTriviaRoundFiltered(choice) {
     phase = "binary";
     let eligiblePlayers = [];
@@ -401,7 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // When 4 correct answers in normal rounds occur OR when normalRoundsCount reaches 3,
+  // When 4 correct answers occur in normal rounds OR when normalRoundsCount reaches 3,
   // trigger binary mode for exactly 3 rounds.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
@@ -409,11 +407,10 @@ document.addEventListener('DOMContentLoaded', function() {
       if (normalRoundsCount >= 3) {
         binaryModeActive = true;
         binaryRoundCount = 3;
-        normalRoundsCount = 0; // Reset normal rounds counter for the next cycle.
+        normalRoundsCount = 0; // Reset for next cycle.
         correctStreak = 0;
         showBinaryChoices();
       } else if (correctStreak >= 4) {
-        // Also allow correct-streak trigger in later rounds if desired.
         binaryModeActive = true;
         binaryRoundCount = 3;
         correctStreak = 0;
@@ -460,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }, 1500);
       } else if (phase === "trivia") {
-        if (normalRoundsCount >= 3) {
+        if (normalRoundsCount >= 3 || correctStreak >= 4) {
           setTimeout(askNextQuestion, 1500);
         } else {
           setTimeout(startTriviaRound, 1500);
@@ -544,4 +541,26 @@ document.addEventListener('DOMContentLoaded', function() {
     gameOverOverlay.style.display = "flex";
     inputForm.style.display = "none";
   }
+
+  function isCollegeAnswerCorrect(answer, correctCollege) {
+    const normAnswer = normalizeCollegeString(answer);
+    const normCorrect = normalizeCollegeString(correctCollege);
+    if (normAnswer === normCorrect) return true;
+    if (collegeAliases[normCorrect] && collegeAliases[normCorrect].includes(normAnswer)) return true;
+    return false;
+  }
+
+  // --- Typing Indicator ---
+  function showTypingIndicator(callback) {
+    const indicator = document.createElement('div');
+    indicator.classList.add('message', 'ai', 'typing-indicator');
+    indicator.textContent = "...";
+    chatContainer.appendChild(indicator);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    setTimeout(() => {
+      chatContainer.removeChild(indicator);
+      callback();
+    }, 1500);
+  }
+
 });
