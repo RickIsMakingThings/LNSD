@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conversational Football Trivia</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Load Firebase Compat Libraries First -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Firebase Initialization (Using compat) -->
+  <script>
+    // Your Firebase configuration (replace with your actual config)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwBmdgqQ3XeG2vtNtpHcM67Xk5rviNh6Q",
+      authDomain: "lnsd-13da9.firebaseapp.com",
+      projectId: "lnsd-13da9",
+      storageBucket: "lnsd-13da9.firebasestorage.app",
+      messagingSenderId: "1000350992218",
+      appId: "1:1000350992218:web:31e80c8e595afc00cc1563",
+      measurementId: "G-JWM9SK7VRM"
+    };
+
+    // Initialize Firebase using the compat libraries
+    firebase.initializeApp(firebaseConfig);
+    // Optionally, if you plan to use Analytics, you can initialize it here:
+    // firebase.analytics();
+  </script>
+</head>
+<body>
+  <div id="game-container">
+    <div id="score">Score: 0</div>
+    <div id="chat-container"></div>
+    <!-- Timer Container: This thin grey bar will display above the input -->
+    <div id="timer-container">
+      <div id="timer-bar"></div>
+    </div>
+    <!-- Binary Choices Container -->
+    <div id="binary-choices">
+      <button id="choice-tough">Hit me with a tough one</button>
+      <button id="choice-defense">Go defense</button>
+    </div>
+    <form id="input-form">
+      <input type="text" id="user-input" placeholder="Type your answer here..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+    <div id="game-over">
+      <p id="game-over-msg">Game Over!</p>
+      <button id="restart">Restart Game</button>
+    </div>
+  </div>
+  
+  <!-- Load the main game script AFTER Firebase is initialized -->
+  <script src="script.js"></script>
+</body>
+</html>

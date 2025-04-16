@@ -1,5 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Global state variables
+  // --- Firebase Initialization ---
+  // Make sure to replace these placeholders with your actual Firebase configuration.
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  // Initialize Firebase (this requires the Firebase scripts in your HTML)
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // --- Global state variables ---
   let nflToCollege = {};       // Loaded from players.csv.
   let collegeAliases = {};     // Loaded from college_aliases.csv.
   let dialogueBuckets = {};    // Loaded from dialogue.json.
@@ -13,18 +27,18 @@ document.addEventListener('DOMContentLoaded', function() {
   let gameActive = true;
   let correctStreak = 0;
   let easyRounds = 0;          // Target: 3 easy rounds
-  let normalRoundsCount = 0;   // Count of normal rounds (after easy rounds)
+  let normalRoundsCount = 0;   // Count of normal rounds after easy rounds
   let recentSchools = [];      // Tracks normalized college names from the last 7 rounds
 
   // Binary mode controls
   let binaryModeActive = false;
-  let binaryRoundCount = 0;    // Will be set to 3 when binary mode is triggered
+  let binaryRoundCount = 0;    // Set to 3 when binary mode is triggered
   let choicePending = "";      // "tough" or "defense"
 
   // Timer variables
   let timerInterval;
 
-  // --- NEW: Player Exclusion List ---
+  // --- Player Exclusion List ---
   const playerExclusionList = ["russell wilson", "jayden daniels"];
 
   // DOM elements
@@ -78,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function parseCSVtoObject(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
-    // Assume first row is header.
     for (let i = 1; i < lines.length; i++) {
       const parts = lines[i].split(',');
       if (parts.length < 1) continue;
@@ -98,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function parsePlayersCSV(csvText) {
     const lines = csvText.trim().split(/\r?\n/);
     const result = {};
-    // Expect header row then fields: round, pick, NFL team, name, position, college, value
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (!line) continue;
@@ -120,7 +132,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function startTimer() {
     clearTimer();
     let timeLeft = 7; // seconds
-    if (timerBar) { timerBar.style.width = "100%"; }
+    if (timerBar) {
+      timerBar.style.width = "100%";
+    }
     timerInterval = setInterval(() => {
       timeLeft -= 0.1;
       if (timerBar) {
@@ -139,7 +153,9 @@ document.addEventListener('DOMContentLoaded', function() {
       clearInterval(timerInterval);
       timerInterval = null;
     }
-    if (timerBar) { timerBar.style.width = "0%"; }
+    if (timerBar) {
+      timerBar.style.width = "0%";
+    }
   }
 
   // --- UI Utility Functions ---
@@ -156,9 +172,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Dialogue Utility Functions ---
-  // getBriefResponse:
-  // - In easy rounds: always use a random entry from "confirmations" bucket.
-  // - In non-easy rounds: use big compliments 10% of the time; otherwise, use confirmations.
   function getBriefResponse() {
     if (phase === "easy") {
       if (dialogueBuckets.confirmations && dialogueBuckets.confirmations.length > 0) {
@@ -236,14 +249,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // --- High Score Functions ---
+  function submitHighScore(score) {
+    db.collection("highScores").add({
+      score: score,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      console.log("High score submitted!");
+    })
+    .catch((error) => {
+      console.error("Error submitting high score: ", error);
+    });
+  }
+
+  function getLeaderboard() {
+    db.collection("highScores")
+      .orderBy("score", "desc")
+      .limit(10)
+      .get()
+      .then((querySnapshot) => {
+        const scores = [];
+        querySnapshot.forEach((doc) => {
+          scores.push(doc.data());
+        });
+        console.log("Leaderboard:", scores);
+        // Update your UI with the leaderboard info if desired.
+      })
+      .catch((error) => {
+        console.error("Error getting leaderboard: ", error);
+      });
+  }
+
   // --- Game Over and Restart ---
   function gameOver(message) {
     gameActive = false;
     clearTimer();
-    addMessage(message, "ai");
+    addAIMessage(message);
     gameOverMsg.textContent = message;
     gameOverOverlay.style.display = "flex";
     inputForm.style.display = "none";
+    // Submit the score to Firebase and then retrieve leaderboard for display.
+    submitHighScore(score);
+    getLeaderboard();
   }
 
   function restartGame() {
@@ -291,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       addAIMessage(transitionMsg);
       phase = "trivia";
-      normalRoundsCount = 0;  // Reset normal rounds counter
+      normalRoundsCount = 0; // Reset normal rounds counter for the new phase.
       setTimeout(startTriviaRound, 1500);
       return;
     }
@@ -329,7 +377,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Normal Rounds: Criteria: round ≤ 4, [QB, RB, WR], value ≥ 20.
   function startTriviaRound() {
     phase = "trivia";
-    normalRoundsCount++;  // Increment normal rounds counter
+    normalRoundsCount++;  // Increment the normal rounds counter
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
       return info.round <= 4 &&
@@ -358,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Binary Mode Rounds: Using binary filters based on the binary choice.
+  // Binary Mode Rounds: Using filters based on the binary choice.
   function startTriviaRoundFiltered(choice) {
     phase = "binary";
     let eligiblePlayers = [];
@@ -399,14 +447,19 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // When normal rounds have been played for three rounds, trigger binary mode for exactly 3 rounds.
+  // When normal rounds have been played for 3 rounds (normalRoundsCount), trigger binary mode for exactly 3 rounds.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
       if (normalRoundsCount >= 3) {
         binaryModeActive = true;
         binaryRoundCount = 3;
-        normalRoundsCount = 0; // Reset normal rounds counter for next cycle.
+        normalRoundsCount = 0; // Reset for the next cycle.
+        correctStreak = 0;
+        showBinaryChoices();
+      } else if (correctStreak >= 4) {
+        binaryModeActive = true;
+        binaryRoundCount = 3;
         correctStreak = 0;
         showBinaryChoices();
       } else {
@@ -451,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }, 1500);
       } else if (phase === "trivia") {
-        if (normalRoundsCount >= 3) {
+        if (normalRoundsCount >= 3 || correctStreak >= 4) {
           setTimeout(askNextQuestion, 1500);
         } else {
           setTimeout(startTriviaRound, 1500);
@@ -530,19 +583,51 @@ document.addEventListener('DOMContentLoaded', function() {
   function gameOver(message) {
     gameActive = false;
     clearTimer();
-    addMessage(message, "ai");
+    addAIMessage(message);
     gameOverMsg.textContent = message;
     gameOverOverlay.style.display = "flex";
     inputForm.style.display = "none";
+    // --- High Score Submission ---
+    submitHighScore(score);
+    // --- Retrieve Leaderboard ---
+    getLeaderboard();
   }
 
-  function isCollegeAnswerCorrect(answer, correctCollege) {
-    const normAnswer = normalizeCollegeString(answer);
-    const normCorrect = normalizeCollegeString(correctCollege);
-    if (normAnswer === normCorrect) return true;
-    if (collegeAliases[normCorrect] && collegeAliases[normCorrect].includes(normAnswer)) return true;
-    return false;
+  // --- High Score Functions using Firebase Firestore ---
+  function submitHighScore(score) {
+    db.collection("highScores").add({
+      score: score,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      console.log("High score submitted!");
+    })
+    .catch((error) => {
+      console.error("Error submitting high score: ", error);
+    });
   }
 
-  // --- Typing Indicator (duplicate removed) ---
+  function getLeaderboard() {
+    db.collection("highScores")
+      .orderBy("score", "desc")
+      .limit(10)
+      .get()
+      .then((querySnapshot) => {
+        const scores = [];
+        querySnapshot.forEach((doc) => {
+          scores.push(doc.data());
+        });
+        console.log("Leaderboard:", scores);
+        // For now, simply log the leaderboard; you can later update the UI to display it.
+      })
+      .catch((error) => {
+        console.error("Error getting leaderboard: ", error);
+      });
+  }
+
+  // --- Duplicate Typing Indicator Removal ---
+  // (The duplicate definition of showTypingIndicator was removed.)
+  
+  // --- Duplicate Functions Removal ---
+  // (Ensure there are no duplicate function declarations.)
 });
