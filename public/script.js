@@ -116,7 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 100);
   }
-
   function clearTimer(){
     clearInterval(timerInterval);
     timerBar.style.width = "0%";
@@ -130,7 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.appendChild(d);
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
-
   function updateScore(){
     scoreDisplay.textContent = `Score: ${score}`;
   }
@@ -169,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return str;
   }
-
   function isCollegeAnswerCorrect(ans, correct){
     const a = normalizeCollegeString(ans);
     const c = normalizeCollegeString(correct);
@@ -192,16 +189,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   /**
    * addAIMessage(text, onDone?)
-   * - shows typing indicator
-   * - renders text
-   * - starts timer ONLY if text includes current player's name
-   * - then calls onDone() if provided
+   *  - typing indicator
+   *  - render text
+   *  - only start timer if game is active & text includes currentNFLPlayer
+   *  - then call onDone()
    */
   function addAIMessage(txt, onDone) {
     clearTimer();
     showTypingIndicator(() => {
       addMessage(txt, "ai");
-      if (currentNFLPlayer && txt.includes(currentNFLPlayer)) {
+      // ←► Only fire timer during active gameplay questions
+      if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
         startTimer();
       }
       if (typeof onDone === "function") {
@@ -297,10 +295,10 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
 
     // Hide all overlays/forms
-    gameOverOverlay.style.display      = "none";
-    gameOverButtons.style.display      = "none";
-    usernameForm.style.display         = "none";
-    leaderboardContainer.style.display = "none";
+    gameOverOverlay.style.display       = "none";
+    gameOverButtons.style.display       = "none";
+    usernameForm.style.display          = "none";
+    leaderboardContainer.style.display  = "none";
 
     startIntro();
   }
@@ -311,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
       dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
       () => {
         addAIMessage(
-          dialogueBuckets.greetings?.[1] || "no googling",
+          dialogueBuckets.greetings?.[1] || "no Googling",
           () => {
             addAIMessage(
               "We can start with some easy ones.",
@@ -326,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
   }
 
-  // --- Rounds Logic ---
+  // --- Gameplay Rounds ---
   function startEasyRound(){
     if (!gameActive) return;
     if (easyRounds >= 3){
@@ -344,7 +342,8 @@ document.addEventListener('DOMContentLoaded', function() {
     phase = "easy";
     let candidates = Object.keys(nflToCollege).filter(p => {
       const i = nflToCollege[p];
-      return i.position.toUpperCase()==="QB" && i.value>=40
+      return i.position.toUpperCase()==="QB"
+             && i.value>=40
              && !playerExclusionList.includes(p.toLowerCase());
     });
     const filtered = candidates.filter(p =>
@@ -427,7 +426,7 @@ document.addEventListener('DOMContentLoaded', function() {
           binaryModeActive = true;
           binaryRoundCount = 3;
           normalRoundsCount = 0;
-          correctStreak = 0;
+          correctStreak     = 0;
           showBinaryChoices();
         } else {
           startTriviaRound();
@@ -437,12 +436,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showBinaryChoices(){
-    inputForm.style.display = "none";
-    binaryChoices.style.display = "block";
+    inputForm.style.display   = "none";
+    binaryChoices.style.display= "block";
   }
   function hideBinaryChoices(){
-    binaryChoices.style.display = "none";
-    inputForm.style.display = "block";
+    binaryChoices.style.display= "none";
+    inputForm.style.display    = "block";
   }
 
   function handleCollegeGuess(ans){
@@ -454,20 +453,14 @@ document.addEventListener('DOMContentLoaded', function() {
         score++;
         updateScore();
         correctStreak++;
-        if (phase === "easy"){
-          setTimeout(() => {
-            easyRounds < 3 ? startEasyRound() : startTriviaRound();
-          }, 500);
-        } else if (phase === "trivia"){
-          if (normalRoundsCount >= 3) setTimeout(askNextQuestion, 500);
-          else setTimeout(startTriviaRound, 500);
+        if (phase==="easy"){
+          setTimeout(()=> easyRounds<3 ? startEasyRound() : startTriviaRound(),500);
+        } else if (phase==="trivia"){
+          if (normalRoundsCount>=3) setTimeout(askNextQuestion,500);
+          else setTimeout(startTriviaRound,500);
         } else {
-          if (binaryModeActive && binaryRoundCount > 0) {
-            setTimeout(showBinaryChoices, 500);
-          } else {
-            binaryModeActive = false;
-            setTimeout(startTriviaRound, 500);
-          }
+          if (binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,500);
+          else { binaryModeActive=false; setTimeout(startTriviaRound,500); }
         }
       });
     } else {
@@ -484,13 +477,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   choiceTough.onclick = () => {
-    addMessage("Hit me with a tough one", "user");
+    addMessage("Hit me with a tough one","user");
     hideBinaryChoices();
     correctStreak = 0;
     startTriviaRoundFiltered("tough");
   };
   choiceDefense.onclick = () => {
-    addMessage("Go defense", "user");
+    addMessage("Go defense","user");
     hideBinaryChoices();
     correctStreak = 0;
     startTriviaRoundFiltered("defense");
