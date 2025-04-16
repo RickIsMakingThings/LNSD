@@ -1,19 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // --- Firebase Initialization ---
-  // Make sure to replace these placeholders with your actual Firebase configuration.
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-  // Initialize Firebase (this requires the Firebase scripts in your HTML)
-  firebase.initializeApp(firebaseConfig);
+  // --- Firebase Firestore Reference ---
+  // Assumes Firebase has been initialized in index.html using the compat libraries.
   const db = firebase.firestore();
 
-  // --- Global state variables ---
+  // Global state variables
   let nflToCollege = {};       // Loaded from players.csv.
   let collegeAliases = {};     // Loaded from college_aliases.csv.
   let dialogueBuckets = {};    // Loaded from dialogue.json.
@@ -32,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Binary mode controls
   let binaryModeActive = false;
-  let binaryRoundCount = 0;    // Set to 3 when binary mode is triggered
+  let binaryRoundCount = 0;    // Will be set to 3 when binary mode is triggered
   let choicePending = "";      // "tough" or "defense"
 
   // Timer variables
@@ -41,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Player Exclusion List ---
   const playerExclusionList = ["russell wilson", "jayden daniels"];
 
-  // DOM elements
+  // --- DOM Elements ---
   const chatContainer = document.getElementById('chat-container');
   const inputForm = document.getElementById('input-form');
   const userInput = document.getElementById('user-input');
@@ -52,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const binaryChoices = document.getElementById('binary-choices');
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
-  const timerBar = document.getElementById('timer-bar'); // Must exist in your HTML
+  const timerBar = document.getElementById('timer-bar');
 
   // --- Data Loading ---
   fetch('dialogue.json')
@@ -132,9 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function startTimer() {
     clearTimer();
     let timeLeft = 7; // seconds
-    if (timerBar) {
-      timerBar.style.width = "100%";
-    }
+    if (timerBar) { timerBar.style.width = "100%"; }
     timerInterval = setInterval(() => {
       timeLeft -= 0.1;
       if (timerBar) {
@@ -153,9 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
       clearInterval(timerInterval);
       timerInterval = null;
     }
-    if (timerBar) {
-      timerBar.style.width = "0%";
-    }
+    if (timerBar) { timerBar.style.width = "0%"; }
   }
 
   // --- UI Utility Functions ---
@@ -249,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // --- High Score Functions ---
+  // --- High Score Functions using Firebase Firestore ---
   function submitHighScore(score) {
     db.collection("highScores").add({
       score: score,
@@ -274,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
           scores.push(doc.data());
         });
         console.log("Leaderboard:", scores);
-        // Update your UI with the leaderboard info if desired.
+        // Optional: Update the UI with leaderboard data.
       })
       .catch((error) => {
         console.error("Error getting leaderboard: ", error);
@@ -289,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gameOverMsg.textContent = message;
     gameOverOverlay.style.display = "flex";
     inputForm.style.display = "none";
-    // Submit the score to Firebase and then retrieve leaderboard for display.
+    // Submit high score and retrieve leaderboard
     submitHighScore(score);
     getLeaderboard();
   }
@@ -339,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       addAIMessage(transitionMsg);
       phase = "trivia";
-      normalRoundsCount = 0; // Reset normal rounds counter for the new phase.
+      normalRoundsCount = 0;
       setTimeout(startTriviaRound, 1500);
       return;
     }
@@ -377,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Normal Rounds: Criteria: round ≤ 4, [QB, RB, WR], value ≥ 20.
   function startTriviaRound() {
     phase = "trivia";
-    normalRoundsCount++;  // Increment the normal rounds counter
+    normalRoundsCount++;  // Increment normal round counter
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
       return info.round <= 4 &&
@@ -406,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
     inputForm.style.display = "block";
   }
 
-  // Binary Mode Rounds: Using filters based on the binary choice.
+  // Binary Mode Rounds: Using binary filters based on the binary choice.
   function startTriviaRoundFiltered(choice) {
     phase = "binary";
     let eligiblePlayers = [];
@@ -447,14 +433,14 @@ document.addEventListener('DOMContentLoaded', function() {
     hideBinaryChoices();
   }
 
-  // When normal rounds have been played for 3 rounds (normalRoundsCount), trigger binary mode for exactly 3 rounds.
+  // When conditions are met in normal rounds, trigger binary mode for 3 rounds.
   function askNextQuestion() {
     addAIMessage(dialogueBuckets.transitions ? dialogueBuckets.transitions[0] : "What's next?");
     setTimeout(() => {
       if (normalRoundsCount >= 3) {
         binaryModeActive = true;
         binaryRoundCount = 3;
-        normalRoundsCount = 0; // Reset for the next cycle.
+        normalRoundsCount = 0; // Reset normal round counter.
         correctStreak = 0;
         showBinaryChoices();
       } else if (correctStreak >= 4) {
@@ -587,9 +573,8 @@ document.addEventListener('DOMContentLoaded', function() {
     gameOverMsg.textContent = message;
     gameOverOverlay.style.display = "flex";
     inputForm.style.display = "none";
-    // --- High Score Submission ---
+    // Submit high score and retrieve leaderboard.
     submitHighScore(score);
-    // --- Retrieve Leaderboard ---
     getLeaderboard();
   }
 
@@ -618,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
           scores.push(doc.data());
         });
         console.log("Leaderboard:", scores);
-        // For now, simply log the leaderboard; you can later update the UI to display it.
+        // Optionally: update your UI with the leaderboard info.
       })
       .catch((error) => {
         console.error("Error getting leaderboard: ", error);
@@ -626,8 +611,4 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Duplicate Typing Indicator Removal ---
-  // (The duplicate definition of showTypingIndicator was removed.)
-  
-  // --- Duplicate Functions Removal ---
-  // (Ensure there are no duplicate function declarations.)
 });
