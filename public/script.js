@@ -28,37 +28,38 @@ document.addEventListener('DOMContentLoaded', function() {
   let collegeAliases     = {};
   let dialogueBuckets    = {};
   let gameStarted        = false;
-  let phase              = "easy";
+  let phase              = "easy";       // "easy", "trivia", "binary"
   let currentNFLPlayer   = "";
   let score              = 0;
   let gameActive         = true;
   let correctStreak      = 0;
-  let easyRounds         = 0;
-  let normalRoundsCount  = 0;
-  let recentSchools      = [];
+  let easyRounds         = 0;            // up to 3
+  let normalRoundsCount  = 0;            // up to 3
+  let recentSchools      = [];           // tracks last 7 schools
 
   let binaryModeActive   = false;
-  let binaryRoundCount   = 0;
+  let binaryRoundCount   = 0;            // 3 rounds once triggered
 
   let timerInterval;
   const playerExclusionList = ["russell wilson","jayden daniels"];
 
   // --- Fetch Data ---
   fetch('dialogue.json')
-    .then(r=>r.json())
-    .then(d=>{ dialogueBuckets=d; checkAndStartGame(); })
-    .catch(e=>console.error("dialogue.json failed:",e));
+    .then(r => r.json())
+    .then(d => { dialogueBuckets = d; checkAndStartGame(); })
+    .catch(e => console.error("dialogue.json failed:", e));
 
   fetch('college_aliases.csv')
-    .then(r=>r.text())
-    .then(t=>{ collegeAliases=parseCSVtoObject(t); })
-    .catch(e=>console.error("aliases CSV failed:",e));
+    .then(r => r.text())
+    .then(t => { collegeAliases = parseCSVtoObject(t); })
+    .catch(e => console.error("aliases CSV failed:", e));
 
   fetch('players.csv')
-    .then(r=>r.text())
-    .then(t=>{ nflToCollege=parsePlayersCSV(t); checkAndStartGame(); })
-    .catch(e=>console.error("players CSV failed:",e));
+    .then(r => r.text())
+    .then(t => { nflToCollege = parsePlayersCSV(t); checkAndStartGame(); })
+    .catch(e => console.error("players CSV failed:", e));
 
+  // --- Only start once ALL data loaded ---
   function checkAndStartGame(){
     if (!gameStarted
         && Object.keys(nflToCollege).length > 0
@@ -72,25 +73,30 @@ document.addEventListener('DOMContentLoaded', function() {
   function parseCSVtoObject(csv){
     const lines = csv.trim().split(/\r?\n/);
     const obj = {};
-    for (let i=1; i<lines.length; i++){
-      const p = lines[i].split(',');
-      const key = p[0].trim().toLowerCase();
-      if(!key) continue;
-      obj[key] = p.slice(1).map(a=>a.trim().toLowerCase()).filter(a=>a);
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(',');
+      const key = parts[0].trim().toLowerCase();
+      if (!key) continue;
+      obj[key] = parts.slice(1)
+                        .map(a => a.trim().toLowerCase())
+                        .filter(a => a);
     }
     return obj;
   }
+
   function parsePlayersCSV(csv){
     const lines = csv.trim().split(/\r?\n/);
     const obj = {};
-    for (let i=1; i<lines.length; i++){
+    for (let i = 1; i < lines.length; i++) {
       const p = lines[i].split(',');
-      if(p.length<7) continue;
+      if (p.length < 7) continue;
       const rnd = parseInt(p[0].trim());
-      const name = p[3].trim(), pos = p[4].trim(), col = p[5].trim();
-      const val = p[6].trim()===""?0:parseFloat(p[6].trim());
-      if(!isNaN(rnd) && name && pos && col){
-        obj[name] = { round:rnd, position:pos, college:col, value:val };
+      const name = p[3].trim();
+      const pos  = p[4].trim();
+      const col  = p[5].trim();
+      const val  = p[6].trim() === "" ? 0 : parseFloat(p[6].trim());
+      if (!isNaN(rnd) && name && pos && col) {
+        obj[name] = { round: rnd, position: pos, college: col, value: val };
       }
     }
     return obj;
@@ -99,318 +105,395 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Timer ---
   function startTimer(){
     clearTimer();
-    let t=7;
-    timerBar.style.width="100%";
-    timerInterval = setInterval(()=>{
-      t-=0.1;
+    let t = 7;
+    timerBar.style.width = "100%";
+    timerInterval = setInterval(() => {
+      t -= 0.1;
       timerBar.style.width = `${(t/7)*100}%`;
-      if(t<=0){
+      if (t <= 0) {
         clearTimer();
         gameOver("Time's up! Game Over!");
       }
-    },100);
+    }, 100);
   }
+
   function clearTimer(){
     clearInterval(timerInterval);
-    timerBar.style.width="0%";
+    timerBar.style.width = "0%";
   }
 
   // --- UI Helpers ---
-  function addMessage(txt,cls){
-    const d=document.createElement('div');
-    d.classList.add('message',cls);
-    d.textContent=txt;
+  function addMessage(txt, cls){
+    const d = document.createElement('div');
+    d.classList.add('message', cls);
+    d.textContent = txt;
     chatContainer.appendChild(d);
-    chatContainer.scrollTop=chatContainer.scrollHeight;
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   }
+
   function updateScore(){
-    scoreDisplay.textContent=`Score: ${score}`;
+    scoreDisplay.textContent = `Score: ${score}`;
   }
 
   // --- Dialogue Helpers ---
   function getBriefResponse(){
-    if(phase==="easy"){
-      const a=dialogueBuckets.confirmations||["nice"];
-      return a[Math.floor(Math.random()*a.length)];
+    if (phase === "easy") {
+      const arr = dialogueBuckets.confirmations || ["nice"];
+      return arr[Math.floor(Math.random()*arr.length)];
     }
-    if(Math.random()<0.1&&dialogueBuckets.big_compliments?.length){
-      return dialogueBuckets.big_compliments[Math.floor(Math.random()*dialogueBuckets.big_compliments.length)];
+    if (Math.random() < 0.1 && dialogueBuckets.big_compliments?.length) {
+      const arr = dialogueBuckets.big_compliments;
+      return arr[Math.floor(Math.random()*arr.length)];
     }
-    const a=dialogueBuckets.confirmations||["nice"];
-    return a[Math.floor(Math.random()*a.length)];
-  }
-  function getQuestionTemplate(){
-    const a=dialogueBuckets.questions||["How about XXXXX"];
-    return a[Math.floor(Math.random()*a.length)];
+    const arr = dialogueBuckets.confirmations || ["nice"];
+    return arr[Math.floor(Math.random()*arr.length)];
   }
 
-  // --- Normalization & Check ---
+  function getQuestionTemplate(){
+    const arr = dialogueBuckets.questions || ["How about XXXXX"];
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+
+  // --- Normalization & Checking ---
   function normalizeCollegeString(s){
-    let str=s.replace(/[^\w\s]/gi,"").toLowerCase().trim();
-    if(str.startsWith("university of ")) str=str.slice(14);
-    if(str.startsWith("college of "))    str=str.slice(11);
-    const tok=str.split(/\s+/);
-    let last=tok[tok.length-1];
-    if(last==="st"||last==="st.") tok[tok.length-1]="state";
-    str=tok.join(" ");
-    if(str.endsWith(" university")){
-      const t=str.slice(0,str.lastIndexOf(" university"));
-      if(t.split(" ").length>1) str=t;
+    let str = s.replace(/[^\w\s]/gi, "").toLowerCase().trim();
+    if (str.startsWith("university of ")) str = str.slice(14);
+    if (str.startsWith("college of "))    str = str.slice(11);
+    const tokens = str.split(/\s+/);
+    const last = tokens[tokens.length-1];
+    if (last === "st" || last === "st.") tokens[tokens.length-1] = "state";
+    str = tokens.join(" ");
+    if (str.endsWith(" university")) {
+      const tmp = str.slice(0, str.lastIndexOf(" university"));
+      if (tmp.split(" ").length > 1) str = tmp;
     }
     return str;
   }
-  function isCollegeAnswerCorrect(ans,correct){
-    const a=normalizeCollegeString(ans), c=normalizeCollegeString(correct);
-    if(a===c) return true;
-    return (collegeAliases[c]||[]).includes(a);
+
+  function isCollegeAnswerCorrect(ans, correct){
+    const a = normalizeCollegeString(ans);
+    const c = normalizeCollegeString(correct);
+    if (a === c) return true;
+    return (collegeAliases[c] || []).includes(a);
   }
 
   // --- Typing Indicator & AI Messaging ---
   function showTypingIndicator(cb){
-    const ind=document.createElement('div');
+    const ind = document.createElement('div');
     ind.classList.add('message','ai','typing-indicator');
-    ind.textContent="...";
+    ind.textContent = "...";
     chatContainer.appendChild(ind);
-    chatContainer.scrollTop=chatContainer.scrollHeight;
-    setTimeout(()=>{
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    setTimeout(() => {
       chatContainer.removeChild(ind);
       cb();
-    },1500);
+    }, 1500);
   }
 
-  function addAIMessage(txt){
+  /**
+   * addAIMessage(text, onDone?)
+   * - shows typing indicator
+   * - renders text
+   * - starts timer ONLY if text includes current player's name
+   * - then calls onDone() if provided
+   */
+  function addAIMessage(txt, onDone) {
     clearTimer();
-    showTypingIndicator(()=>{
-      addMessage(txt,"ai");
-      // ONLY start the timer if this message contains the current player's name
-      if(currentNFLPlayer && txt.includes(currentNFLPlayer)){
+    showTypingIndicator(() => {
+      addMessage(txt, "ai");
+      if (currentNFLPlayer && txt.includes(currentNFLPlayer)) {
         startTimer();
+      }
+      if (typeof onDone === "function") {
+        onDone();
       }
     });
   }
 
   // --- Game Over & Restart UI Flow ---
   function gameOver(msg){
-    gameActive=false;
+    gameActive = false;
     clearTimer();
     addAIMessage(msg);
-    gameOverMsg.textContent=msg;
-    gameOverOverlay.style.display="flex";
-    gameOverButtons.style.display="block";
-    usernameForm.style.display="none";
-    leaderboardContainer.style.display="none";
-    inputForm.style.display="none";
+    gameOverMsg.textContent = msg;
+    gameOverOverlay.style.display       = "flex";
+    gameOverButtons.style.display       = "block";
+    usernameForm.style.display          = "none";
+    leaderboardContainer.style.display  = "none";
+    inputForm.style.display             = "none";
   }
+
   restartBtn.addEventListener('click', restartGame);
-  submitScoreBtn.addEventListener('click',()=>{
-    gameOverButtons.style.display="none";
-    usernameForm.style.display="block";
+  submitScoreBtn.addEventListener('click', () => {
+    gameOverButtons.style.display = "none";
+    usernameForm.style.display   = "block";
   });
-  usernameSubmit.addEventListener('click',()=>{
-    const uname=usernameInput.value.trim();
-    if(!uname) return alert("Enter your username.");
+
+  usernameSubmit.addEventListener('click', () => {
+    const uname = usernameInput.value.trim();
+    if (!uname) return alert("Enter your username.");
     db.collection("highScores").add({
-      username:uname,
+      username: uname,
       score,
-      timestamp:firebase.firestore.FieldValue.serverTimestamp()
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(showLeaderboard)
-    .catch(e=>{ console.error(e); alert("Submit failed."); });
+    .catch(e => {
+      console.error(e);
+      alert("Submit failed.");
+    });
   });
-  leaderboardRestart.addEventListener('click',()=>{
-    leaderboardContainer.style.display="none";
-    usernameInput.value="";
+
+  leaderboardRestart.addEventListener('click', () => {
+    leaderboardContainer.style.display = "none";
+    usernameInput.value                 = "";
     restartGame();
   });
 
   function showLeaderboard(){
-    usernameForm.style.display="none";
-    leaderboardContainer.style.display="block";
-    leaderboardList.innerHTML="";
+    usernameForm.style.display         = "none";
+    leaderboardContainer.style.display = "block";
+    leaderboardList.innerHTML          = "";
+
     db.collection("highScores")
       .orderBy("score","desc")
       .limit(20)
       .get()
-      .then(snap=>{
-        if(snap.empty){
-          leaderboardList.innerHTML="<li>No scores yet.</li>";
+      .then(snap => {
+        if (snap.empty) {
+          leaderboardList.innerHTML = "<li>No scores yet.</li>";
         } else {
-          snap.forEach(doc=>{
-            const {username,score}=doc.data();
-            const li=document.createElement('li');
-            li.textContent=`${username}: ${score}`;
+          snap.forEach(doc => {
+            const { username, score } = doc.data();
+            const li = document.createElement('li');
+            li.textContent = `${username}: ${score}`;
             leaderboardList.appendChild(li);
           });
         }
       })
-      .catch(e=>{
+      .catch(e => {
         console.error(e);
-        leaderboardList.innerHTML="<li>Unable to load leaderboard.</li>";
+        leaderboardList.innerHTML = "<li>Unable to load leaderboard.</li>";
       });
   }
 
   // --- Restart Game Function ---
   function restartGame(){
     clearTimer();
-    phase="easy";
-    easyRounds=0;
-    normalRoundsCount=0;
-    currentNFLPlayer="";
-    score=0;
-    gameActive=true;
-    correctStreak=0;
-    binaryModeActive=false;
-    binaryRoundCount=0;
-    recentSchools=[];
+    phase              = "easy";
+    easyRounds         = 0;
+    normalRoundsCount  = 0;
+    currentNFLPlayer   = "";
+    score              = 0;
+    gameActive         = true;
+    correctStreak      = 0;
+    binaryModeActive   = false;
+    binaryRoundCount   = 0;
+    recentSchools      = [];
 
     updateScore();
-    chatContainer.innerHTML="";
-    userInput.value="";
-    inputForm.style.display="block";
+    chatContainer.innerHTML = "";
+    userInput.value         = "";
+    inputForm.style.display = "block";
 
     // Hide all overlays/forms
-    gameOverOverlay.style.display="none";
-    gameOverButtons.style.display="none";
-    usernameForm.style.display="none";
-    leaderboardContainer.style.display="none";
+    gameOverOverlay.style.display      = "none";
+    gameOverButtons.style.display      = "none";
+    usernameForm.style.display         = "none";
+    leaderboardContainer.style.display = "none";
 
     startIntro();
   }
 
-  // --- Intro and Rounds Logic ---
+  // --- Chained Intro: no overlapping typing ---
   function startIntro(){
-    addAIMessage(dialogueBuckets.greetings?.[0] || "You and I have to take an oath 🤝");
-    setTimeout(()=> addAIMessage(dialogueBuckets.greetings?.[1] || "No googling"), 1500);
-    setTimeout(()=>{
-      addAIMessage("We can start with some easy ones.");
-      phase="easy";
-      startEasyRound();
-    },3000);
+    addAIMessage(
+      dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
+      () => {
+        addAIMessage(
+          dialogueBuckets.greetings?.[1] || "no googling",
+          () => {
+            addAIMessage(
+              "We can start with some easy ones.",
+              () => {
+                phase = "easy";
+                startEasyRound();
+              }
+            );
+          }
+        );
+      }
+    );
   }
 
+  // --- Rounds Logic ---
   function startEasyRound(){
-    if(!gameActive) return;
-    if(easyRounds>=3){
+    if (!gameActive) return;
+    if (easyRounds >= 3){
       const tmsg = dialogueBuckets.easyTransition?.[
         Math.floor(Math.random()*dialogueBuckets.easyTransition.length)
       ] || "Ok, now let's have some fun";
-      addAIMessage(tmsg);
-      phase="trivia";
-      normalRoundsCount=0;
-      return setTimeout(startTriviaRound,1500);
+      addAIMessage(tmsg, () => {
+        phase = "trivia";
+        normalRoundsCount = 0;
+        startTriviaRound();
+      });
+      return;
     }
-    phase="easy";
-    let cand=Object.keys(nflToCollege).filter(p=>{
-      const i=nflToCollege[p];
-      return i.position.toUpperCase()==="QB"&&i.value>=40&&!playerExclusionList.includes(p.toLowerCase());
+
+    phase = "easy";
+    let candidates = Object.keys(nflToCollege).filter(p => {
+      const i = nflToCollege[p];
+      return i.position.toUpperCase()==="QB" && i.value>=40
+             && !playerExclusionList.includes(p.toLowerCase());
     });
-    const filt=cand.filter(p=>!recentSchools.includes(normalizeCollegeString(nflToCollege[p].college)));
-    if(filt.length) cand=filt;
-    if(!cand.length) return gameOver("No eligible easy players. Game Over!");
-    currentNFLPlayer=cand[Math.floor(Math.random()*cand.length)];
+    const filtered = candidates.filter(p =>
+      !recentSchools.includes(normalizeCollegeString(nflToCollege[p].college))
+    );
+    if (filtered.length) candidates = filtered;
+    if (!candidates.length) return gameOver("No eligible easy players. Game Over!");
+
+    currentNFLPlayer = candidates[Math.floor(Math.random()*candidates.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].college));
-    if(recentSchools.length>7) recentSchools.shift();
+    if (recentSchools.length>7) recentSchools.shift();
     easyRounds++;
-    const q=getQuestionTemplate().replace("XXXXX",currentNFLPlayer);
+    const q = getQuestionTemplate().replace("XXXXX", currentNFLPlayer);
     addAIMessage(q);
-    userInput.value="";
+    userInput.value = "";
   }
 
   function startTriviaRound(){
     phase="trivia"; normalRoundsCount++;
-    let cand=Object.keys(nflToCollege).filter(p=>{
-      const i=nflToCollege[p];
-      return i.round<=4&&["QB","RB","WR"].includes(i.position.toUpperCase())&&i.value>=20&&!playerExclusionList.includes(p.toLowerCase());
+    let candidates = Object.keys(nflToCollege).filter(p => {
+      const i = nflToCollege[p];
+      return i.round<=4
+             && ["QB","RB","WR"].includes(i.position.toUpperCase())
+             && i.value>=20
+             && !playerExclusionList.includes(p.toLowerCase());
     });
-    const filt=cand.filter(p=>!recentSchools.includes(normalizeCollegeString(nflToCollege[p].college)));
-    if(filt.length) cand=filt;
-    if(!cand.length) return gameOver("No eligible players. Game Over!");
-    currentNFLPlayer=cand[Math.floor(Math.random()*cand.length)];
+    const filtered = candidates.filter(p =>
+      !recentSchools.includes(normalizeCollegeString(nflToCollege[p].college))
+    );
+    if (filtered.length) candidates = filtered;
+    if (!candidates.length) return gameOver("No eligible players. Game Over!");
+
+    currentNFLPlayer = candidates[Math.floor(Math.random()*candidates.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].college));
-    if(recentSchools.length>7) recentSchools.shift();
-    const q=getQuestionTemplate().replace("XXXXX",currentNFLPlayer);
+    if (recentSchools.length>7) recentSchools.shift();
+    const q = getQuestionTemplate().replace("XXXXX", currentNFLPlayer);
     addAIMessage(q);
-    userInput.value="";
+    userInput.value = "";
   }
 
   function startTriviaRoundFiltered(choice){
     phase="binary"; binaryRoundCount--;
-    let cand=[];
-    if(choice==="tough"){
-      cand=Object.keys(nflToCollege).filter(p=>{
-        const i=nflToCollege[p];
-        return i.round>=2&&i.round<=7&&["QB","RB","WR"].includes(i.position.toUpperCase())&&i.value>=5&&i.value<=20;
+    let candidates = [];
+    if (choice==="tough"){
+      candidates = Object.keys(nflToCollege).filter(p => {
+        const i = nflToCollege[p];
+        return i.round>=2 && i.round<=7
+               && ["QB","RB","WR"].includes(i.position.toUpperCase())
+               && i.value>=5 && i.value<=20;
       });
     } else {
-      cand=Object.keys(nflToCollege).filter(p=>{
-        const i=nflToCollege[p];
-        return !["QB","RB","WR"].includes(i.position.toUpperCase())&&i.value>=49;
+      candidates = Object.keys(nflToCollege).filter(p => {
+        const i = nflToCollege[p];
+        return !["QB","RB","WR"].includes(i.position.toUpperCase())
+               && i.value>=49;
       });
     }
-    const filt=cand.filter(p=>!recentSchools.includes(normalizeCollegeString(nflToCollege[p].college)));
-    if(filt.length) cand=filt;
-    cand=cand.filter(p=>!playerExclusionList.includes(p.toLowerCase()));
-    if(!cand.length){
+    const filtered = candidates.filter(p =>
+      !recentSchools.includes(normalizeCollegeString(nflToCollege[p].college))
+    );
+    if (filtered.length) candidates = filtered;
+    candidates = candidates.filter(p => !playerExclusionList.includes(p.toLowerCase()));
+    if (!candidates.length){
       addAIMessage("Can't think of anyone, let's just keep going.");
       return setTimeout(startTriviaRound,1500);
     }
-    currentNFLPlayer=cand[Math.floor(Math.random()*cand.length)];
+
+    currentNFLPlayer = candidates[Math.floor(Math.random()*candidates.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].college));
-    if(recentSchools.length>7) recentSchools.shift();
-    const q=getQuestionTemplate().replace("XXXXX",currentNFLPlayer);
+    if (recentSchools.length>7) recentSchools.shift();
+    const q = getQuestionTemplate().replace("XXXXX", currentNFLPlayer);
     addAIMessage(q);
   }
 
   function askNextQuestion(){
-    addAIMessage(dialogueBuckets.transitions?.[0]||"What's next?");
-    setTimeout(()=>{
-      if(normalRoundsCount>=3){
-        binaryModeActive=true; binaryRoundCount=3; normalRoundsCount=0; correctStreak=0;
-        return showBinaryChoices();
+    addAIMessage(
+      dialogueBuckets.transitions?.[0] || "What's next?",
+      () => {
+        if (normalRoundsCount >= 3){
+          binaryModeActive = true;
+          binaryRoundCount = 3;
+          normalRoundsCount = 0;
+          correctStreak = 0;
+          showBinaryChoices();
+        } else {
+          startTriviaRound();
+        }
       }
-      startTriviaRound();
-    },1500);
+    );
   }
 
-  function showBinaryChoices(){ inputForm.style.display="none"; binaryChoices.style.display="block"; }
-  function hideBinaryChoices(){ binaryChoices.style.display="none"; inputForm.style.display="block"; }
+  function showBinaryChoices(){
+    inputForm.style.display = "none";
+    binaryChoices.style.display = "block";
+  }
+  function hideBinaryChoices(){
+    binaryChoices.style.display = "none";
+    inputForm.style.display = "block";
+  }
 
   function handleCollegeGuess(ans){
     clearTimer();
-    addMessage(ans,"user");
-    const correct=nflToCollege[currentNFLPlayer].college;
-    if(isCollegeAnswerCorrect(ans,correct)){
-      addAIMessage(getBriefResponse());
-      score++; updateScore(); correctStreak++;
-      if(phase==="easy"){
-        setTimeout(()=> easyRounds<3 ? startEasyRound() : startTriviaRound(),1500);
-      } else if(phase==="trivia"){
-        if(normalRoundsCount>=3) setTimeout(askNextQuestion,1500);
-        else setTimeout(startTriviaRound,1500);
-      } else {
-        if(binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,1500);
-        else { binaryModeActive=false; setTimeout(startTriviaRound,1500); }
-      }
+    addMessage(ans, "user");
+    const correct = nflToCollege[currentNFLPlayer].college;
+    if (isCollegeAnswerCorrect(ans, correct)){
+      addAIMessage(getBriefResponse(), () => {
+        score++;
+        updateScore();
+        correctStreak++;
+        if (phase === "easy"){
+          setTimeout(() => {
+            easyRounds < 3 ? startEasyRound() : startTriviaRound();
+          }, 500);
+        } else if (phase === "trivia"){
+          if (normalRoundsCount >= 3) setTimeout(askNextQuestion, 500);
+          else setTimeout(startTriviaRound, 500);
+        } else {
+          if (binaryModeActive && binaryRoundCount > 0) {
+            setTimeout(showBinaryChoices, 500);
+          } else {
+            binaryModeActive = false;
+            setTimeout(startTriviaRound, 500);
+          }
+        }
+      });
     } else {
       gameOver(`Nah, ${currentNFLPlayer} played at ${correct}. Better luck next time!`);
     }
   }
 
-  inputForm.addEventListener('submit', e=>{
+  inputForm.addEventListener('submit', e => {
     e.preventDefault();
-    if(!gameActive) return;
-    const ans=userInput.value.trim();
-    if(ans) handleCollegeGuess(ans);
-    userInput.value="";
+    if (!gameActive) return;
+    const ans = userInput.value.trim();
+    if (ans) handleCollegeGuess(ans);
+    userInput.value = "";
   });
 
-  choiceTough.onclick = ()=>{
-    addMessage("Hit me with a tough one","user");
-    hideBinaryChoices(); correctStreak=0; startTriviaRoundFiltered("tough");
+  choiceTough.onclick = () => {
+    addMessage("Hit me with a tough one", "user");
+    hideBinaryChoices();
+    correctStreak = 0;
+    startTriviaRoundFiltered("tough");
   };
-  choiceDefense.onclick = ()=>{
-    addMessage("Go defense","user");
-    hideBinaryChoices(); correctStreak=0; startTriviaRoundFiltered("defense");
+  choiceDefense.onclick = () => {
+    addMessage("Go defense", "user");
+    hideBinaryChoices();
+    correctStreak = 0;
+    startTriviaRoundFiltered("defense");
   };
 
 });
