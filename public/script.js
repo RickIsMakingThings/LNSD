@@ -22,14 +22,30 @@ document.addEventListener('DOMContentLoaded', function() {
   const choiceTough          = document.getElementById('choice-tough');
   const choiceDefense        = document.getElementById('choice-defense');
   const timerBar             = document.getElementById('timer-bar');
+  const gameContainer        = document.getElementById('game-container');
 
-  // Snap-back on mobile to prevent Safari from auto-scrolling
+  // --- Prevent Safari auto-scroll & keep chat in view ---
   function keepGameInView() {
-    setTimeout(() => window.scrollTo(0, 0), 0);
+    setTimeout(() => {
+      window.scrollTo(0,0);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }, 0);
   }
   userInput.addEventListener('focus', keepGameInView);
   userInput.addEventListener('blur',  keepGameInView);
   inputForm.addEventListener('submit', keepGameInView);
+
+  // --- Visual Viewport: adjust container on keyboard open/close ---
+  if (window.visualViewport) {
+    const adjustForKeyboard = () => {
+      const keyboardHeight = window.innerHeight - window.visualViewport.height;
+      gameContainer.style.bottom = `${keyboardHeight}px`;
+      // keep chat scrolled down
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
+    visualViewport.addEventListener('resize', adjustForKeyboard);
+    visualViewport.addEventListener('scroll', adjustForKeyboard);
+  }
 
   // --- Game State ---
   let nflToCollege       = {};
@@ -197,13 +213,10 @@ document.addEventListener('DOMContentLoaded', function() {
     clearTimer();
     showTypingIndicator(() => {
       addMessage(txt, "ai");
-      // Only start timer during active gameplay prompts
       if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
         startTimer();
       }
-      if (typeof onDone === "function") {
-        onDone();
-      }
+      if (typeof onDone === "function") onDone();
     });
   }
 
@@ -237,14 +250,14 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   leaderboardRestart.addEventListener('click', () => {
     leaderboardContainer.style.display = "none";
-    usernameInput.value = "";
+    usernameInput.value                = "";
     restartGame();
   });
 
   function showLeaderboard(){
     usernameForm.style.display         = "none";
     leaderboardContainer.style.display = "block";
-    leaderboardList.innerHTML = "";
+    leaderboardList.innerHTML          = "";
     db.collection("highScores")
       .orderBy("score","desc")
       .limit(20)
@@ -286,7 +299,6 @@ document.addEventListener('DOMContentLoaded', function() {
     userInput.value         = "";
     inputForm.style.display = "block";
 
-    // Hide all overlays/forms
     gameOverOverlay.style.display      = "none";
     gameOverButtons.style.display      = "none";
     usernameForm.style.display         = "none";
@@ -295,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function() {
     startIntro();
   }
 
-  // --- Chained Intro: no overlapping typing ---
+  // --- Chained Intro ---
   function startIntro(){
     addAIMessage(
       dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
@@ -316,9 +328,9 @@ document.addEventListener('DOMContentLoaded', function() {
     );
   }
 
-  // --- Gameplay Rounds (easy, trivia, binary) ---
+  // --- Rounds Logic ---
   function startEasyRound(){
-    if (!gameActive) return;
+    if (!gameActive) return;  
     if (easyRounds >= 3){
       const tmsg = dialogueBuckets.easyTransition?.[
         Math.floor(Math.random()*dialogueBuckets.easyTransition.length)
@@ -353,8 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function startTriviaRound(){
-    phase = "trivia";
-    normalRoundsCount++;
+    phase="trivia"; normalRoundsCount++;
     let candidates = Object.keys(nflToCollege).filter(p => {
       const i = nflToCollege[p];
       return i.round<=4
@@ -377,8 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function startTriviaRoundFiltered(choice){
-    phase="binary";
-    binaryRoundCount--;
+    phase="binary"; binaryRoundCount--;
     let candidates = [];
     if (choice==="tough"){
       candidates = Object.keys(nflToCollege).filter(p => {
@@ -394,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
                && i.value>=49;
       });
     }
-    const filtered = candidates.filter(p => 
+    const filtered = candidates.filter(p =>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[p].college))
     );
     if (filtered.length) candidates = filtered;
@@ -430,11 +440,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showBinaryChoices(){
     inputForm.style.display    = "none";
-    binaryChoices.style.display = "block";
+    binaryChoices.style.display= "block";
   }
   function hideBinaryChoices(){
-    binaryChoices.style.display = "none";
-    inputForm.style.display     = "block";
+    binaryChoices.style.display= "none";
+    inputForm.style.display    = "block";
   }
 
   function handleCollegeGuess(ans){
