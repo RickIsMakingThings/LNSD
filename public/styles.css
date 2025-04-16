@@ -4,6 +4,8 @@ html, body {
   padding: 0;
   height: 100%;
   overflow: hidden;
+  /* stop iOS/Chrome from panning the container */
+  overscroll-behavior: contain;
 }
 
 /* === Game Container fills viewport === */
@@ -14,6 +16,7 @@ html, body {
   flex-direction: column;
   background: white;
   font-family: Arial, sans-serif;
+  overscroll-behavior: contain;
 }
 
 /* === Score Bar pinned at top === */
