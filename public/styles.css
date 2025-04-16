@@ -1,112 +1,78 @@
-/* General Styles */
-body {
-  background: #f0f0f0;
-  font-family: Arial, sans-serif;
+/* === Prevent body scrolling & fix full‑screen container === */
+html, body {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}
-
-#game-container {
-  background: white;
-  width: 350px;
-  height: 600px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding: 0;
+  height: 100%;
   overflow: hidden;
+}
+
+/* === Game Container fills viewport === */
+#game-container {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
   display: flex;
   flex-direction: column;
-  position: relative;
-  z-index: 2;
+  background: white;
+  font-family: Arial, sans-serif;
 }
 
+/* === Score Bar pinned at top === */
 #score {
+  flex: 0 0 auto;
   background: #007aff;
-  color: white;
-  padding: 8px 12px;
-  font-weight: bold;
+  color: #fff;
   text-align: center;
+  padding: 10px;
+  font-weight: bold;
 }
 
+/* === Chat History scrolls internally === */
 #chat-container {
   flex: 1;
-  padding: 10px;
   overflow-y: auto;
-  background: white;
+  -webkit-overflow-scrolling: touch; /* smooth on iOS */
+  padding: 10px;
+  background: #e5ddd5;
 }
 
-/* Message Bubbles */
-.message {
-  max-width: 80%;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  border-radius: 18px;
-  clear: both;
-  word-wrap: break-word;
-  border: 1px solid #ccc;
-}
-.ai {
-  float: left;
-  background: #e5e5e5;
-  color: black;
-}
-.user {
-  float: right;
-  background: #007aff;
-  color: white;
-}
-
-/* Typing Indicator */
-.typing-indicator {
-  max-width: 80%;
-  margin-bottom: 10px;
-  padding: 8px 12px;
-  border-radius: 18px;
-  background: #e5e5e5;
-  color: #555;
-  font-style: italic;
-  border: 1px solid #ccc;
-}
-
-/* Timer Container */
+/* === Timer Bar pinned above input === */
 #timer-container {
-  height: 4px;             /* Thin horizontal bar */
-  background-color: #ccc;    /* Light grey background */
-  width: 100%;
-  margin: 5px 0;
+  flex: 0 0 auto;
+  height: 4px;
+  background: #ccc;
 }
 #timer-bar {
   height: 100%;
-  background-color: #007aff;  /* Blue fill color */
-  width: 100%;
-  transition: width 0.1s linear; /* Smooth decrement animation */
+  width: 0%;
+  background: #007aff;
+  transition: width 0.1s linear;
 }
 
-
-/* Binary Choices Container */
+/* === Binary Choice Buttons pinned above input form === */
 #binary-choices {
+  flex: 0 0 auto;
   display: none;
   text-align: center;
-  margin-bottom: 10px;
+  padding: 5px;
+  background: white;
 }
 #binary-choices button {
-  padding: 8px 12px;
   margin: 0 5px;
+  padding: 8px 12px;
   border: none;
   background: #007aff;
-  color: white;
+  color: #fff;
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
 }
 
-/* Input Form */
+/* === Input Form pinned at bottom === */
 #input-form {
+  flex: 0 0 auto;
   display: flex;
   border-top: 1px solid #ddd;
-  padding: 5px;
+  background: white;
 }
 #user-input {
   flex: 1;
@@ -120,20 +86,50 @@ body {
 #input-form button {
   border: none;
   background: #007aff;
-  color: white;
-  padding: 10px 15px;
+  color: #fff;
+  padding: 0 15px;
   cursor: pointer;
   font-size: 16px;
 }
 
-/* Game Over Overlay */
+/* === Message bubbles === */
+.message {
+  max-width: 80%;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  clear: both;
+  border: 1px solid #ccc;
+}
+.ai {
+  float: left;
+  background: #e5e5e5;
+  color: #000;
+}
+.user {
+  float: right;
+  background: #007aff;
+  color: #fff;
+}
+
+/* === Typing Indicator Bubble === */
+.typing-indicator {
+  max-width: 80%;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 18px;
+  background: #e5e5e5;
+  color: #555;
+  font-style: italic;
+  clear: both;
+  border: 1px solid #ccc;
+}
+
+/* === Game Over Overlay covers entire container === */
 #game-over {
   position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  height: 100%;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(255,255,255,0.95);
   display: none;
   flex-direction: column;
@@ -141,15 +137,14 @@ body {
   align-items: center;
   text-align: center;
   padding: 20px;
-  z-index: 10;
 }
 #game-over p {
-  font-size: 16px;
-  text-align: center;
-  margin: 0 auto 20px;
+  font-size: 18px;
+  margin-bottom: 20px;
   word-wrap: break-word;
 }
 #game-over button {
+  margin: 5px;
   border: none;
   background: #007aff;
   color: white;

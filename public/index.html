@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <!-- Prevent zooming/panning on mobile and fix viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Conversational Football Trivia</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="styles.css" />
 
-  <!-- Firebase compat libraries (must load before script.js) -->
+  <!-- Firebase compat libraries -->
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
   <script>
@@ -26,7 +27,10 @@
 </head>
 <body>
   <div id="game-container">
+    <!-- Score Bar -->
     <div id="score">Score: 0</div>
+
+    <!-- Chat History (scrollable) -->
     <div id="chat-container"></div>
 
     <!-- Timer Bar -->
@@ -42,7 +46,7 @@
 
     <!-- User Input -->
     <form id="input-form">
-      <input type="text" id="user-input" placeholder="Type your answer here..." autocomplete="off"/>
+      <input type="text" id="user-input" placeholder="Type your answer here..." autocomplete="off" />
       <button type="submit">Send</button>
     </form>
 
@@ -50,20 +54,20 @@
     <div id="game-over">
       <p id="game-over-msg">Game Over!</p>
 
-      <!-- Buttons shown immediately at game over -->
+      <!-- Initial Game Over Buttons -->
       <div id="game-over-buttons">
         <button id="submit-score">Submit Score</button>
         <button id="restart">Restart Game</button>
       </div>
 
-      <!-- Username form (shown after clicking Submit Score) -->
+      <!-- Username Prompt -->
       <div id="username-form" style="display:none;">
         <p>Please enter your Boom Fantasy username:</p>
-        <input type="text" id="username-input" placeholder="Username"/>
+        <input type="text" id="username-input" placeholder="Username" />
         <button id="username-submit">Submit</button>
       </div>
 
-      <!-- Leaderboard display (shown after username submission) -->
+      <!-- Leaderboard -->
       <div id="leaderboard-container" style="display:none;">
         <button id="leaderboard-restart">Restart Game</button>
         <h3>Leaderboard (Top 20)</h3>
