@@ -28,17 +28,17 @@ document.addEventListener('DOMContentLoaded', function() {
   let collegeAliases     = {};
   let dialogueBuckets    = {};
   let gameStarted        = false;
-  let phase              = "easy";  // "easy", "trivia", "binary"
+  let phase              = "easy";
   let currentNFLPlayer   = "";
   let score              = 0;
   let gameActive         = true;
   let correctStreak      = 0;
-  let easyRounds         = 0;      // up to 3
-  let normalRoundsCount  = 0;      // up to 3
-  let recentSchools      = [];     // last 7 schools
+  let easyRounds         = 0;
+  let normalRoundsCount  = 0;
+  let recentSchools      = [];
 
   let binaryModeActive   = false;
-  let binaryRoundCount   = 0;      // 3 rounds once triggered
+  let binaryRoundCount   = 0;
 
   let timerInterval;
   const playerExclusionList = ["russell wilson","jayden daniels"];
@@ -46,20 +46,19 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Fetch Data ---
   fetch('dialogue.json')
     .then(r=>r.json())
-    .then(d=>{ dialogueBuckets=d; console.log("Dialogue loaded."); checkAndStartGame(); })
+    .then(d=>{ dialogueBuckets=d; checkAndStartGame(); })
     .catch(e=>console.error("dialogue.json failed:",e));
 
   fetch('college_aliases.csv')
     .then(r=>r.text())
-    .then(t=>{ collegeAliases=parseCSVtoObject(t); console.log("Aliases loaded."); })
+    .then(t=>{ collegeAliases=parseCSVtoObject(t); })
     .catch(e=>console.error("aliases CSV failed:",e));
 
   fetch('players.csv')
     .then(r=>r.text())
-    .then(t=>{ nflToCollege=parsePlayersCSV(t); console.log("Players loaded."); checkAndStartGame(); })
+    .then(t=>{ nflToCollege=parsePlayersCSV(t); checkAndStartGame(); })
     .catch(e=>console.error("players CSV failed:",e));
 
-  // --- Only start once ALL data loaded ---
   function checkAndStartGame(){
     if (!gameStarted
         && Object.keys(nflToCollege).length > 0
@@ -73,28 +72,25 @@ document.addEventListener('DOMContentLoaded', function() {
   function parseCSVtoObject(csv){
     const lines = csv.trim().split(/\r?\n/);
     const obj = {};
-    for (let i = 1; i < lines.length; i++) {
-      const parts = lines[i].split(',');
-      const key = parts[0].trim().toLowerCase();
-      if (!key) continue;
-      obj[key] = parts.slice(1).map(a=>a.trim().toLowerCase()).filter(a=>a);
+    for (let i=1; i<lines.length; i++){
+      const p = lines[i].split(',');
+      const key = p[0].trim().toLowerCase();
+      if(!key) continue;
+      obj[key] = p.slice(1).map(a=>a.trim().toLowerCase()).filter(a=>a);
     }
     return obj;
   }
-
   function parsePlayersCSV(csv){
     const lines = csv.trim().split(/\r?\n/);
     const obj = {};
-    for (let i = 1; i < lines.length; i++) {
-      const parts = lines[i].split(',');
-      if (parts.length < 7) continue;
-      const roundNum = parseInt(parts[0].trim());
-      const name     = parts[3].trim();
-      const pos      = parts[4].trim();
-      const college  = parts[5].trim();
-      const value    = parts[6].trim() === "" ? 0 : parseFloat(parts[6].trim());
-      if (!isNaN(roundNum) && name && pos && college) {
-        obj[name] = { round: roundNum, position: pos, college, value };
+    for (let i=1; i<lines.length; i++){
+      const p = lines[i].split(',');
+      if(p.length<7) continue;
+      const rnd = parseInt(p[0].trim());
+      const name = p[3].trim(), pos = p[4].trim(), col = p[5].trim();
+      const val = p[6].trim()===""?0:parseFloat(p[6].trim());
+      if(!isNaN(rnd) && name && pos && col){
+        obj[name] = { round:rnd, position:pos, college:col, value:val };
       }
     }
     return obj;
@@ -103,191 +99,180 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Timer ---
   function startTimer(){
     clearTimer();
-    let t = 7;
-    timerBar.style.width = "100%";
+    let t=7;
+    timerBar.style.width="100%";
     timerInterval = setInterval(()=>{
-      t -= 0.1;
+      t-=0.1;
       timerBar.style.width = `${(t/7)*100}%`;
-      if (t <= 0) {
+      if(t<=0){
         clearTimer();
         gameOver("Time's up! Game Over!");
       }
-    }, 100);
+    },100);
   }
   function clearTimer(){
     clearInterval(timerInterval);
-    timerBar.style.width = "0%";
+    timerBar.style.width="0%";
   }
 
   // --- UI Helpers ---
   function addMessage(txt,cls){
-    const d = document.createElement('div');
+    const d=document.createElement('div');
     d.classList.add('message',cls);
-    d.textContent = txt;
+    d.textContent=txt;
     chatContainer.appendChild(d);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    chatContainer.scrollTop=chatContainer.scrollHeight;
   }
   function updateScore(){
-    scoreDisplay.textContent = `Score: ${score}`;
+    scoreDisplay.textContent=`Score: ${score}`;
   }
 
   // --- Dialogue Helpers ---
   function getBriefResponse(){
-    if (phase === "easy") {
-      const a = dialogueBuckets.confirmations || ["nice"];
+    if(phase==="easy"){
+      const a=dialogueBuckets.confirmations||["nice"];
       return a[Math.floor(Math.random()*a.length)];
     }
-    if (Math.random()<0.1 && dialogueBuckets.big_compliments?.length) {
+    if(Math.random()<0.1&&dialogueBuckets.big_compliments?.length){
       return dialogueBuckets.big_compliments[Math.floor(Math.random()*dialogueBuckets.big_compliments.length)];
     }
-    const a = dialogueBuckets.confirmations || ["nice"];
+    const a=dialogueBuckets.confirmations||["nice"];
     return a[Math.floor(Math.random()*a.length)];
   }
   function getQuestionTemplate(){
-    const a = dialogueBuckets.questions || ["How about XXXXX"];
+    const a=dialogueBuckets.questions||["How about XXXXX"];
     return a[Math.floor(Math.random()*a.length)];
   }
 
-  // --- Normalization & Checking ---
+  // --- Normalization & Check ---
   function normalizeCollegeString(s){
-    let str = s.replace(/[^\w\s]/gi,"").toLowerCase().trim();
-    if (str.startsWith("university of ")) str = str.slice(14);
-    if (str.startsWith("college of "))    str = str.slice(11);
-    const tokens = str.split(/\s+/);
-    let last = tokens[tokens.length-1];
-    if (last === "st" || last === "st.") tokens[tokens.length-1] = "state";
-    str = tokens.join(" ");
-    if (str.endsWith(" university")) {
-      const tmp = str.slice(0, str.lastIndexOf(" university"));
-      if (tmp.split(" ").length > 1) str = tmp;
+    let str=s.replace(/[^\w\s]/gi,"").toLowerCase().trim();
+    if(str.startsWith("university of ")) str=str.slice(14);
+    if(str.startsWith("college of "))    str=str.slice(11);
+    const tok=str.split(/\s+/);
+    let last=tok[tok.length-1];
+    if(last==="st"||last==="st.") tok[tok.length-1]="state";
+    str=tok.join(" ");
+    if(str.endsWith(" university")){
+      const t=str.slice(0,str.lastIndexOf(" university"));
+      if(t.split(" ").length>1) str=t;
     }
     return str;
   }
   function isCollegeAnswerCorrect(ans,correct){
-    const a = normalizeCollegeString(ans);
-    const c = normalizeCollegeString(correct);
-    if (a === c) return true;
-    return (collegeAliases[c] || []).includes(a);
+    const a=normalizeCollegeString(ans), c=normalizeCollegeString(correct);
+    if(a===c) return true;
+    return (collegeAliases[c]||[]).includes(a);
   }
 
   // --- Typing Indicator & AI Messaging ---
   function showTypingIndicator(cb){
-    const ind = document.createElement('div');
+    const ind=document.createElement('div');
     ind.classList.add('message','ai','typing-indicator');
-    ind.textContent = "...";
+    ind.textContent="...";
     chatContainer.appendChild(ind);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    chatContainer.scrollTop=chatContainer.scrollHeight;
     setTimeout(()=>{
       chatContainer.removeChild(ind);
       cb();
     },1500);
   }
+
   function addAIMessage(txt){
     clearTimer();
     showTypingIndicator(()=>{
       addMessage(txt,"ai");
-      startTimer();
+      // ONLY start the timer if this message contains the current player's name
+      if(currentNFLPlayer && txt.includes(currentNFLPlayer)){
+        startTimer();
+      }
     });
   }
 
   // --- Game Over & Restart UI Flow ---
   function gameOver(msg){
-    gameActive = false;
+    gameActive=false;
     clearTimer();
     addAIMessage(msg);
-    gameOverMsg.textContent = msg;
-
-    gameOverOverlay.style.display = "flex";
-    gameOverButtons.style.display      = "block";
-    usernameForm.style.display        = "none";
-    leaderboardContainer.style.display= "none";
-    inputForm.style.display           = "none";
+    gameOverMsg.textContent=msg;
+    gameOverOverlay.style.display="flex";
+    gameOverButtons.style.display="block";
+    usernameForm.style.display="none";
+    leaderboardContainer.style.display="none";
+    inputForm.style.display="none";
   }
-
-  // Attach game-over buttons
-  restartBtn.addEventListener('click', () => {
-    restartGame();
+  restartBtn.addEventListener('click', restartGame);
+  submitScoreBtn.addEventListener('click',()=>{
+    gameOverButtons.style.display="none";
+    usernameForm.style.display="block";
   });
-  submitScoreBtn.addEventListener('click', () => {
-    gameOverButtons.style.display = "none";
-    usernameForm.style.display   = "block";
-  });
-
-  // Username submission
-  usernameSubmit.addEventListener('click', () => {
-    const uname = usernameInput.value.trim();
-    if (!uname) return alert("Enter your username.");
+  usernameSubmit.addEventListener('click',()=>{
+    const uname=usernameInput.value.trim();
+    if(!uname) return alert("Enter your username.");
     db.collection("highScores").add({
-      username: uname,
+      username:uname,
       score,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      timestamp:firebase.firestore.FieldValue.serverTimestamp()
     })
     .then(showLeaderboard)
-    .catch(e => {
-      console.error(e);
-      alert("Submit failed.");
-    });
+    .catch(e=>{ console.error(e); alert("Submit failed."); });
   });
-
-  // Leaderboard restart
-  leaderboardRestart.addEventListener('click', () => {
-    leaderboardContainer.style.display = "none";
-    usernameInput.value = "";
+  leaderboardRestart.addEventListener('click',()=>{
+    leaderboardContainer.style.display="none";
+    usernameInput.value="";
     restartGame();
   });
 
-  // Show the top‑20 leaderboard
   function showLeaderboard(){
-    usernameForm.style.display         = "none";
-    leaderboardContainer.style.display = "block";
-    leaderboardList.innerHTML          = "";
-
+    usernameForm.style.display="none";
+    leaderboardContainer.style.display="block";
+    leaderboardList.innerHTML="";
     db.collection("highScores")
       .orderBy("score","desc")
       .limit(20)
       .get()
-      .then(snap => {
-        if (snap.empty) {
-          leaderboardList.innerHTML = "<li>No scores yet.</li>";
+      .then(snap=>{
+        if(snap.empty){
+          leaderboardList.innerHTML="<li>No scores yet.</li>";
         } else {
-          snap.forEach(doc => {
-            const {username,score} = doc.data();
-            const li = document.createElement('li');
-            li.textContent = `${username}: ${score}`;
+          snap.forEach(doc=>{
+            const {username,score}=doc.data();
+            const li=document.createElement('li');
+            li.textContent=`${username}: ${score}`;
             leaderboardList.appendChild(li);
           });
         }
       })
-      .catch(e => {
+      .catch(e=>{
         console.error(e);
-        leaderboardList.innerHTML = "<li>Unable to load leaderboard.</li>";
+        leaderboardList.innerHTML="<li>Unable to load leaderboard.</li>";
       });
   }
 
   // --- Restart Game Function ---
   function restartGame(){
     clearTimer();
-    phase               = "easy";
-    easyRounds          = 0;
-    normalRoundsCount   = 0;
-    currentNFLPlayer    = "";
-    score               = 0;
-    gameActive          = true;
-    correctStreak       = 0;
-    binaryModeActive    = false;
-    binaryRoundCount    = 0;
-    recentSchools       = [];
+    phase="easy";
+    easyRounds=0;
+    normalRoundsCount=0;
+    currentNFLPlayer="";
+    score=0;
+    gameActive=true;
+    correctStreak=0;
+    binaryModeActive=false;
+    binaryRoundCount=0;
+    recentSchools=[];
 
     updateScore();
-    chatContainer.innerHTML = "";
-    userInput.value         = "";
-    inputForm.style.display = "block";
+    chatContainer.innerHTML="";
+    userInput.value="";
+    inputForm.style.display="block";
 
     // Hide all overlays/forms
-    gameOverOverlay.style.display       = "none";
-    gameOverButtons.style.display       = "none";
-    usernameForm.style.display          = "none";
-    leaderboardContainer.style.display  = "none";
+    gameOverOverlay.style.display="none";
+    gameOverButtons.style.display="none";
+    usernameForm.style.display="none";
+    leaderboardContainer.style.display="none";
 
     startIntro();
   }
@@ -298,97 +283,88 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(()=> addAIMessage(dialogueBuckets.greetings?.[1] || "No googling"), 1500);
     setTimeout(()=>{
       addAIMessage("We can start with some easy ones.");
-      phase = "easy";
+      phase="easy";
       startEasyRound();
     },3000);
   }
 
   function startEasyRound(){
-    if (!gameActive) return;
-    if (easyRounds >= 3) {
+    if(!gameActive) return;
+    if(easyRounds>=3){
       const tmsg = dialogueBuckets.easyTransition?.[
         Math.floor(Math.random()*dialogueBuckets.easyTransition.length)
       ] || "Ok, now let's have some fun";
       addAIMessage(tmsg);
-      phase = "trivia";
-      normalRoundsCount = 0;
+      phase="trivia";
+      normalRoundsCount=0;
       return setTimeout(startTriviaRound,1500);
     }
-    phase = "easy";
-    let cand = Object.keys(nflToCollege).filter(p => {
-      const i = nflToCollege[p];
-      return i.position.toUpperCase()==="QB" && i.value>=40 &&
-             !playerExclusionList.includes(p.toLowerCase());
+    phase="easy";
+    let cand=Object.keys(nflToCollege).filter(p=>{
+      const i=nflToCollege[p];
+      return i.position.toUpperCase()==="QB"&&i.value>=40&&!playerExclusionList.includes(p.toLowerCase());
     });
-    const filt = cand.filter(p =>
-      !recentSchools.includes(normalizeCollegeString(nflToCollege[p].college))
-    );
-    if (filt.length) cand = filt;
-    if (!cand.length) return gameOver("No eligible easy players. Game Over!");
-    currentNFLPlayer = cand[Math.floor(Math.random()*cand.length)];
+    const filt=cand.filter(p=>!recentSchools.includes(normalizeCollegeString(nflToCollege[p].college)));
+    if(filt.length) cand=filt;
+    if(!cand.length) return gameOver("No eligible easy players. Game Over!");
+    currentNFLPlayer=cand[Math.floor(Math.random()*cand.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].college));
-    if (recentSchools.length>7) recentSchools.shift();
+    if(recentSchools.length>7) recentSchools.shift();
     easyRounds++;
-    const q = getQuestionTemplate().replace("XXXXX", currentNFLPlayer);
+    const q=getQuestionTemplate().replace("XXXXX",currentNFLPlayer);
     addAIMessage(q);
-    userInput.value = "";
+    userInput.value="";
   }
 
   function startTriviaRound(){
     phase="trivia"; normalRoundsCount++;
-    let cand = Object.keys(nflToCollege).filter(p => {
-      const i = nflToCollege[p];
-      return i.round<=4 && ["QB","RB","WR"].includes(i.position.toUpperCase()) &&
-             i.value>=20 && !playerExclusionList.includes(p.toLowerCase());
+    let cand=Object.keys(nflToCollege).filter(p=>{
+      const i=nflToCollege[p];
+      return i.round<=4&&["QB","RB","WR"].includes(i.position.toUpperCase())&&i.value>=20&&!playerExclusionList.includes(p.toLowerCase());
     });
-    const filt = cand.filter(p =>
-      !recentSchools.includes(normalizeCollegeString(nflToCollege[p].college))
-    );
-    if (filt.length) cand = filt;
-    if (!cand.length) return gameOver("No eligible players. Game Over!");
-    currentNFLPlayer = cand[Math.floor(Math.random()*cand.length)];
+    const filt=cand.filter(p=>!recentSchools.includes(normalizeCollegeString(nflToCollege[p].college)));
+    if(filt.length) cand=filt;
+    if(!cand.length) return gameOver("No eligible players. Game Over!");
+    currentNFLPlayer=cand[Math.floor(Math.random()*cand.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].college));
-    if (recentSchools.length>7) recentSchools.shift();
-    const q = getQuestionTemplate().replace("XXXXX", currentNFLPlayer);
+    if(recentSchools.length>7) recentSchools.shift();
+    const q=getQuestionTemplate().replace("XXXXX",currentNFLPlayer);
     addAIMessage(q);
-    userInput.value = "";
+    userInput.value="";
   }
 
   function startTriviaRoundFiltered(choice){
     phase="binary"; binaryRoundCount--;
-    let cand = [];
-    if (choice==="tough") {
-      cand = Object.keys(nflToCollege).filter(p => {
-        const i = nflToCollege[p];
-        return i.round>=2&&i.round<=7&&["QB","RB","WR"].includes(i.position.toUpperCase())&&
-               i.value>=5&&i.value<=20;
+    let cand=[];
+    if(choice==="tough"){
+      cand=Object.keys(nflToCollege).filter(p=>{
+        const i=nflToCollege[p];
+        return i.round>=2&&i.round<=7&&["QB","RB","WR"].includes(i.position.toUpperCase())&&i.value>=5&&i.value<=20;
       });
     } else {
-      cand = Object.keys(nflToCollege).filter(p => {
-        const i = nflToCollege[p];
-        return !["QB","RB","WR"].includes(i.position.toUpperCase()) && i.value>=49;
+      cand=Object.keys(nflToCollege).filter(p=>{
+        const i=nflToCollege[p];
+        return !["QB","RB","WR"].includes(i.position.toUpperCase())&&i.value>=49;
       });
     }
-    const filt = cand.filter(p =>
-      !recentSchools.includes(normalizeCollegeString(nflToCollege[p].college))
-    );
-    if (filt.length) cand = filt;
-    cand = cand.filter(p => !playerExclusionList.includes(p.toLowerCase()));
-    if (!cand.length) {
+    const filt=cand.filter(p=>!recentSchools.includes(normalizeCollegeString(nflToCollege[p].college)));
+    if(filt.length) cand=filt;
+    cand=cand.filter(p=>!playerExclusionList.includes(p.toLowerCase()));
+    if(!cand.length){
       addAIMessage("Can't think of anyone, let's just keep going.");
       return setTimeout(startTriviaRound,1500);
     }
-    currentNFLPlayer = cand[Math.floor(Math.random()*cand.length)];
+    currentNFLPlayer=cand[Math.floor(Math.random()*cand.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].college));
-    if (recentSchools.length>7) recentSchools.shift();
-    const q = getQuestionTemplate().replace("XXXXX",currentNFLPlayer);
+    if(recentSchools.length>7) recentSchools.shift();
+    const q=getQuestionTemplate().replace("XXXXX",currentNFLPlayer);
     addAIMessage(q);
   }
 
   function askNextQuestion(){
-    addAIMessage(dialogueBuckets.transitions?.[0] || "What's next?");
+    addAIMessage(dialogueBuckets.transitions?.[0]||"What's next?");
     setTimeout(()=>{
-      if (normalRoundsCount>=3) {
+      if(normalRoundsCount>=3){
         binaryModeActive=true; binaryRoundCount=3; normalRoundsCount=0; correctStreak=0;
         return showBinaryChoices();
       }
@@ -396,29 +372,23 @@ document.addEventListener('DOMContentLoaded', function() {
     },1500);
   }
 
-  function showBinaryChoices(){
-    inputForm.style.display="none";
-    binaryChoices.style.display="block";
-  }
-  function hideBinaryChoices(){
-    binaryChoices.style.display="none";
-    inputForm.style.display="block";
-  }
+  function showBinaryChoices(){ inputForm.style.display="none"; binaryChoices.style.display="block"; }
+  function hideBinaryChoices(){ binaryChoices.style.display="none"; inputForm.style.display="block"; }
 
   function handleCollegeGuess(ans){
     clearTimer();
     addMessage(ans,"user");
-    const correct = nflToCollege[currentNFLPlayer].college;
-    if (isCollegeAnswerCorrect(ans,correct)){
+    const correct=nflToCollege[currentNFLPlayer].college;
+    if(isCollegeAnswerCorrect(ans,correct)){
       addAIMessage(getBriefResponse());
       score++; updateScore(); correctStreak++;
-      if (phase==="easy"){
+      if(phase==="easy"){
         setTimeout(()=> easyRounds<3 ? startEasyRound() : startTriviaRound(),1500);
-      } else if (phase==="trivia"){
-        if (normalRoundsCount>=3) setTimeout(askNextQuestion,1500);
+      } else if(phase==="trivia"){
+        if(normalRoundsCount>=3) setTimeout(askNextQuestion,1500);
         else setTimeout(startTriviaRound,1500);
       } else {
-        if (binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,1500);
+        if(binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,1500);
         else { binaryModeActive=false; setTimeout(startTriviaRound,1500); }
       }
     } else {
@@ -428,10 +398,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   inputForm.addEventListener('submit', e=>{
     e.preventDefault();
-    if (!gameActive) return;
-    const ans = userInput.value.trim();
-    if (ans) handleCollegeGuess(ans);
-    userInput.value = "";
+    if(!gameActive) return;
+    const ans=userInput.value.trim();
+    if(ans) handleCollegeGuess(ans);
+    userInput.value="";
   });
 
   choiceTough.onclick = ()=>{
