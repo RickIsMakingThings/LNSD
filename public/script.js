@@ -172,10 +172,10 @@ document.addEventListener('DOMContentLoaded', function() {
     timerBar.style.width      = '100%';
     void timerBar.offsetWidth;
     timerBar.style.transition = 'width 0.1s linear';
-    let t = 7;
+    let t = 9; // now 9 seconds
     timerInterval = setInterval(()=>{
       t -= 0.1;
-      timerBar.style.width = `${(t/7)*100}%`;
+      timerBar.style.width = `${(t/9)*100}%`;
       if (t <= 0) {
         clearTimer();
         gameOver("Time's up! Game Over!");
