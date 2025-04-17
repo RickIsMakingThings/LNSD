@@ -21,18 +21,40 @@ body {
 /* 3) Start screen overlay */
 #start-screen {
   position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 360px;         /* same as #game-container */
+  height: 600px;        /* ditto */
+  max-width: 100%;      /* mobile fallback */
+  border-radius: 12px;  /* match your container */
   background: white;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  text-align: center;   /* center the copy/buttons */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   z-index: 10;
 }
-#start-screen h1 {
-  margin-bottom: 1em;
-  font-size: 1.5em;
+
+/* Ensure your headings and paragraphs are centered */
+#start-screen h1,
+#start-screen p {
+  margin: 0 0 1em;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* Style your start button if needed */
+#start-button {
+  padding: 10px 20px;
+  background: var(--blue);
+  color: var(--text-white);
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
 }
 #start-button {
   padding: 10px 20px;
