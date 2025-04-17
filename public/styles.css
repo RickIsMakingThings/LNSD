@@ -18,7 +18,7 @@ body {
   min-height: 100vh;
 }
 
-/* 3) Start screen overlay – fills only #game-container */
+/* 3) Game container (always visible, hosts the overlay) */
 #game-container {
   background: white;
   max-width: 360px;
@@ -26,19 +26,18 @@ body {
   height: 600px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  /* show it immediately */
   display: flex;
   flex-direction: column;
-  position: relative;      /* anchor for the overlay */
-  overflow: hidden;        /* no horizontal scroll */
+  position: relative;
+  overflow: hidden;
 }
 
-/* Overlay now fills exactly its parent container */
+/* 4) Start‑screen overlay (fills #game-container exactly) */
 #start-screen {
   position: absolute;
-  inset: 0;                /* top:0; right:0; bottom:0; left:0; */
+  inset: 0;
   background: white;
-  border-radius: inherit;  /* match the game‐container corners */
+  border-radius: inherit;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -48,16 +47,13 @@ body {
   z-index: 10;
 }
 
-/* Centered text inside overlay */
+/* Centered, slightly smaller text */
 #start-screen h1,
 #start-screen p {
   margin: 0 0 1em;
   line-height: 1.55;
- text-align: center;
-
-  
-  font-size: 0.9rem;   /* adjust smaller or larger as needed */
-}
+  text-align: center;
+  font-size: 0.9rem;
 }
 
 /* Start button styling */
@@ -85,11 +81,11 @@ body {
   flex: 1;
   padding: 10px;
   background: white;
-  overflow-y: auto;        /* only vertical scroll */
-  overflow-x: hidden;      /* never horizontal */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* 7) Message base */
+/* 7) Message base (merged fade‑in/fade‑out utility + default) */
 .message {
   position: relative;
   max-width: 80%;
@@ -99,31 +95,20 @@ body {
   clear: both;
   word-wrap: break-word;
   border: 1px solid #ccc;
-  animation: fadeIn 100ms ease-out;  /* faster pop-in */
+
+  /* start invisible for cross‑fade */
+  opacity: 0;
+  animation: none;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to   { opacity: 1; transform: scale(1); }
+/* quick fadeIn keyframes (used by .fade-in class) */
+@keyframes fadeOpacity {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
-/* 8) AI bubble */
-.message.ai {
-  float: left;
-  background: var(--gray-light);
-  color: var(--text-black);
-}
-
-/* 9) User bubble */
-.message.user {
-  float: right;
-  background: var(--blue);
-  color: var(--text-white);
-}
-
-/* --- Typing Indicator (fixed size, dots spaced left-to-right) --- */
+/* typing indicator bubble stays fixed size */
 .typing-indicator {
-  position: relative;
   float: left;
   background: var(--gray-light);
   color: #555;
@@ -140,23 +125,29 @@ body {
   max-width: none;
 }
 
-/* Fade out an element over 200ms */
+/* 8) AI bubble */
+.message.ai {
+  float: left;
+  background: var(--gray-light);
+  color: var(--text-black);
+}
+
+/* 9) User bubble */
+.message.user {
+  float: right;
+  background: var(--blue);
+  color: var(--text-white);
+}
+
+/* Fade‑out helper */
 .fade-out {
   opacity: 0;
   transition: opacity 200ms ease-in;
 }
 
-/* Fade in an element over 200ms */
+/* Fade‑in helper */
 .fade-in {
-  opacity: 1;
-  transition: opacity 200ms ease-out;
-}
-
-/* Message bubbles start invisible */
-.message {
-  opacity: 0;
-  /* Remove any previous fadeIn animation */
-  animation: none;
+  animation: fadeOpacity 200ms ease-out forwards;
 }
 
 /* 11) Timer bar */
