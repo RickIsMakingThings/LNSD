@@ -88,13 +88,12 @@ document.addEventListener('DOMContentLoaded', function() {
       tryStartGame();
     }).catch(console.error);
 
-  // --- Load college_aliases.csv ---
+  // --- Load CSVs ---
   fetch('college_aliases.csv')
     .then(r=>r.text())
     .then(t=>{ collegeAliases = parseCSVtoObject(t); })
     .catch(console.error);
 
-  // --- Load players.csv ---
   fetch('players.csv')
     .then(r=>r.text())
     .then(t=>{
@@ -105,41 +104,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- CSV Parsers ---
   function parseCSVtoObject(csv) {
-    const lines = csv.trim().split(/\r?\n/);
-    const obj = {};
-    for (let i=1; i<lines.length; i++) {
-      const cols = lines[i].split(',');
+    return csv.trim().split(/\r?\n/).slice(1).reduce((o,line)=>{
+      const cols = line.split(',');
       const key  = cols[0].trim().toLowerCase();
-      if (!key) continue;
-      obj[key] = cols.slice(1).map(a=>a.trim().toLowerCase()).filter(a=>a);
-    }
-    return obj;
+      if (key) o[key] = cols.slice(1).map(a=>a.trim().toLowerCase()).filter(a=>a);
+      return o;
+    },{});
   }
   function parsePlayersCSV(csv) {
-    const lines = csv.trim().split(/\r?\n/);
-    const obj = {};
-    for (let i=1; i<lines.length; i++) {
-      const p = lines[i].split(',');
-      if (p.length < 10) continue;
-      const draftYear = parseInt(p[0].trim(),10);
-      const round     = parseInt(p[1].trim(),10);
-      const name      = p[4].trim();
-      const pos       = p[5].trim();
-      const col1      = p[6].trim();
-      const col2      = p[7].trim();
-      const col3      = p[8].trim();
-      const val       = p[9].trim()===''?0:parseFloat(p[9].trim());
-      if (!isNaN(draftYear)&&!isNaN(round)&&name&&pos&&col1) {
-        obj[name] = {
+    return csv.trim().split(/\r?\n/).slice(1).reduce((o,line)=>{
+      const p = line.split(',');
+      if (p.length<10) return o;
+      const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
+      const draftYear = parseInt(dy,10), round = parseInt(rnd,10);
+      const value     = val.trim()===''?0:parseFloat(val);
+      if (!isNaN(draftYear)&&!isNaN(round)&&name&&pos&&c1) {
+        o[name] = {
           draftYear,
           round,
           position: pos,
-          colleges: [col1, col2, col3].filter(c=>c),
-          value: val
+          colleges: [c1,c2,c3].filter(c=>c),
+          value
         };
       }
-    }
-    return obj;
+      return o;
+    },{});
   }
 
   // --- Timer ---
@@ -147,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
     clearTimer();
     let t=7; timerBar.style.width='100%';
     timerInterval = setInterval(()=>{
-      t -= 0.1;
-      timerBar.style.width = `${(t/7)*100}%`;
+      t-=0.1;
+      timerBar.style.width=`${(t/7)*100}%`;
       if (t<=0) {
         clearTimer();
         gameOver("Time's up! Game Over!");
@@ -214,26 +203,35 @@ document.addEventListener('DOMContentLoaded', function() {
     return a===c||(collegeAliases[c]||[]).includes(a);
   }
 
-  // --- Typing & AI Messaging ---
+  // --- Typing Indicator & AI Messaging ---
   function showTypingIndicator(cb) {
     const ind=document.createElement('div');
     ind.classList.add('message','ai','typing-indicator');
-    ind.textContent='...';
     chatContainer.appendChild(ind);
     chatContainer.scrollTop=chatContainer.scrollHeight;
+
+    let count=1, max=3, step=400;
+    ind.textContent='ₒ';
+    const dotTimer=setInterval(()=>{
+      count++;
+      ind.textContent='ₒ '.repeat(count).trim();
+      if (count>=max) clearInterval(dotTimer);
+    },step);
+
     setTimeout(()=>{
-      chatContainer.removeChild(ind);
+      clearInterval(dotTimer);
+      if(ind.parentNode) ind.parentNode.removeChild(ind);
       cb();
-    },1500);
+    }, step*max + 100);
   }
   function addAIMessage(txt,onDone) {
     clearTimer();
     showTypingIndicator(()=>{
       addMessage(txt,'ai');
-      if (gameActive&&currentNFLPlayer&&txt.includes(currentNFLPlayer)) {
+      if(gameActive&&currentNFLPlayer&&txt.includes(currentNFLPlayer)){
         startTimer();
       }
-      if (typeof onDone==='function') onDone();
+      if(typeof onDone==='function') onDone();
     });
   }
 
@@ -255,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   usernameSubmit.addEventListener('click',()=>{
     const uname=usernameInput.value.trim();
-    if (!uname) return alert('Enter username.');
+    if(!uname) return alert('Enter username.');
     db.collection('highScores').add({
       username:uname,
       score,
@@ -274,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
     db.collection('highScores')
       .orderBy('score','desc').limit(20)
       .get().then(snap=>{
-        if (snap.empty) leaderboardList.innerHTML='<li>No scores yet.</li>';
+        if(snap.empty) leaderboardList.innerHTML='<li>No scores yet.</li>';
         else snap.forEach(doc=>{
           const {username,score}=doc.data();
           const li=document.createElement('li');
@@ -288,10 +286,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Restart Game ---
-  function restartGame() {
+  function restartGame(){
     clearTimer();
-    phase='easy';
-    easyRounds=0; normalRoundsCount=0;
+    phase='easy'; easyRounds=0; normalRoundsCount=0;
     currentNFLPlayer=''; score=0; gameActive=true;
     binaryModeActive=false; binaryRoundCount=0; recentSchools=[];
     updateScore();
@@ -305,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Intro Sequence ---
-  function startIntro() {
+  function startIntro(){
     addAIMessage(
       dialogueBuckets.greetings?.[0]||"you and I have to take an oath 🤝",
       ()=>addAIMessage(
@@ -319,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Easy Round ---
-  function startEasyRound() {
+  function startEasyRound(){
     if(!gameActive) return;
     if(easyRounds>=3) return;
     phase='easy';
@@ -342,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Trivia Round with Non-Linear Weighting ---
-  function startTriviaRound() {
+  function startTriviaRound(){
     phase='trivia'; normalRoundsCount++;
     let cands=Object.keys(nflToCollege).filter(name=>{
       const p=nflToCollege[name];
@@ -371,91 +368,86 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Binary Round Filtered (tough & defense tweaks) ---
-  function startTriviaRoundFiltered(choice) {
+  function startTriviaRoundFiltered(choice){
     phase='binary'; binaryRoundCount--;
-    let cands = [];
-    if (choice === 'tough') {
-      cands = Object.keys(nflToCollege).filter(name => {
-        const p = nflToCollege[name];
-        return p.round >= 2 && p.round <= 7 &&
-               ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
-               p.value >= 9 && p.value <= 15;
+    let cands=[];
+    if(choice==='tough'){
+      cands=Object.keys(nflToCollege).filter(name=>{
+        const p=nflToCollege[name];
+        return p.round>=2&&p.round<=7&&
+               ['QB','RB','WR'].includes(p.position.toUpperCase())&&
+               p.value>=9&&p.value<=15;
       });
-    } else {  // defense
-      const defPositions = ['DE','DT','LB','OLB','ILB','CB','S'];
-      cands = Object.keys(nflToCollege).filter(name => {
-        const p = nflToCollege[name];
-        return defPositions.includes(p.position.toUpperCase()) &&
-               p.value >= 49;
+    } else {
+      const defPos=['DE','DT','LB','OLB','ILB','CB','S'];
+      cands=Object.keys(nflToCollege).filter(name=>{
+        const p=nflToCollege[name];
+        return defPos.includes(p.position.toUpperCase())&&p.value>=49;
       });
     }
-    const filt2 = cands.filter(name =>
+    const filt2=cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
     );
-    if (filt2.length) cands = filt2;
-    if (!cands.length) {
+    if(filt2.length) cands=filt2;
+    if(!cands.length){
       addAIMessage("Can't think of anyone, let's just keep going.");
-      return setTimeout(startTriviaRound, 1500);
+      return setTimeout(startTriviaRound,1500);
     }
-    currentNFLPlayer = cands[Math.floor(Math.random()*cands.length)];
+    currentNFLPlayer=cands[Math.floor(Math.random()*cands.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
-    if (recentSchools.length>7) recentSchools.shift();
-    const q = getQuestionTemplate().replace('XXXXX', currentNFLPlayer);
+    if(recentSchools.length>7) recentSchools.shift();
+    const q=getQuestionTemplate().replace('XXXXX',currentNFLPlayer);
     addAIMessage(q);
   }
 
   // --- Ask Next or Trigger Binary ---
-  function askNextQuestion() {
+  function askNextQuestion(){
     addAIMessage(
       dialogueBuckets.transitions?.[0]||"What's next?",
-      () => {
-        if (normalRoundsCount >= 3) {
-          binaryModeActive   = true;
-          binaryRoundCount   = 3;
-          normalRoundsCount  = 0;
+      ()=>{
+        if(normalRoundsCount>=3){
+          binaryModeActive=true;
+          binaryRoundCount=3;
+          normalRoundsCount=0;
           addAIMessage("Alright, pick an option:", showBinaryChoices);
-        } else {
-          startTriviaRound();
-        }
+        } else startTriviaRound();
       }
     );
   }
-
-  function showBinaryChoices() {
+  function showBinaryChoices(){
     inputForm.style.display='none';
     binaryChoices.style.display='block';
   }
-  function hideBinaryChoices() {
+  function hideBinaryChoices(){
     binaryChoices.style.display='none';
     inputForm.style.display='block';
   }
 
   // --- Handle Guess & Transfers ---
-  function handleCollegeGuess(ans) {
+  function handleCollegeGuess(ans){
     clearTimer();
     addMessage(ans,'user');
-    const cols = nflToCollege[currentNFLPlayer].colleges;
-    const idx = cols.findIndex(c=>isCollegeAnswerCorrect(ans,c));
-    if (idx>=0) {
-      const resp = idx===0 ? getBriefResponse() : getTransferCompliment();
-      addAIMessage(resp, ()=>{
+    const cols=nflToCollege[currentNFLPlayer].colleges;
+    const idx=cols.findIndex(c=>isCollegeAnswerCorrect(ans,c));
+    if(idx>=0){
+      const resp=idx===0?getBriefResponse():getTransferCompliment();
+      addAIMessage(resp,()=>{
         score++; updateScore();
-        if (phase==='easy') {
-          if (easyRounds<3) setTimeout(startEasyRound,500);
+        if(phase==='easy'){
+          if(easyRounds<3) setTimeout(startEasyRound,500);
           else {
             const et=dialogueBuckets.easyTransition||[];
             const msg=et.length?et[Math.floor(Math.random()*et.length)]
                                 :"Ok, now let's have some fun";
             addAIMessage(msg,()=>{
-              phase='trivia'; normalRoundsCount=0;
-              startTriviaRound();
+              phase='trivia'; normalRoundsCount=0; startTriviaRound();
             });
           }
-        } else if (phase==='trivia') {
-          if (normalRoundsCount>=3) setTimeout(askNextQuestion,500);
+        } else if(phase==='trivia'){
+          if(normalRoundsCount>=3) setTimeout(askNextQuestion,500);
           else setTimeout(startTriviaRound,500);
         } else {
-          if (binaryModeActive&&binaryRoundCount>0) setTimeout(showBinaryChoices,500);
+          if(binaryModeActive&&binaryRoundCount>0) setTimeout(showBinaryChoices,500);
           else { binaryModeActive=false; setTimeout(startTriviaRound,500); }
         }
       });
@@ -467,20 +459,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Form & Choice Listeners ---
   inputForm.addEventListener('submit',e=>{
     e.preventDefault();
-    if(!gameActive) return;
+    if(!gameActive)return;
     const ans=userInput.value.trim();
     if(ans) handleCollegeGuess(ans);
     userInput.value='';
   });
   choiceTough.addEventListener('click',()=>{
     addMessage('Hit me with a tough one','user');
-    hideBinaryChoices();
-    startTriviaRoundFiltered('tough');
+    hideBinaryChoices(); startTriviaRoundFiltered('tough');
   });
   choiceDefense.addEventListener('click',()=>{
     addMessage('Go defense','user');
-    hideBinaryChoices();
-    startTriviaRoundFiltered('defense');
+    hideBinaryChoices(); startTriviaRoundFiltered('defense');
   });
 
 });
