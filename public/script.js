@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const recentBigCompliments      = [];
   const recentTransferCompliments = [];
 
+  // --- Weight Capping ---
+  const MAX_WEIGHT = 100;
+
   // --- Helper: pick with cooldown ---
   function pickWithCooldown(arr, recentArr) {
     const choices = arr.filter(item => !recentArr.includes(item));
@@ -278,12 +281,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function gameOver(msg) {
     gameActive = false; clearTimer();
     addAIMessage(msg);
-    gameOverMsg.textContent      = msg;
-    gameOverOverlay.style.display= 'flex';
-    gameOverButtons.style.display= 'block';
-    usernameForm.style.display   = 'none';
-    leaderboardCont.style.display= 'none';
-    inputForm.style.display      = 'none';
+    gameOverMsg.textContent       = msg;
+    gameOverOverlay.style.display = 'flex';
+    gameOverButtons.style.display = 'block';
+    usernameForm.style.display    = 'none';
+    leaderboardCont.style.display = 'none';
+    inputForm.style.display       = 'none';
   }
   restartBtn.addEventListener('click',restartGame);
   submitScoreBtn.addEventListener('click',()=>{
@@ -302,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   leaderboardRestart.addEventListener('click',()=>{
     leaderboardCont.style.display = 'none';
-    usernameInput.value = '';
+    usernameInput.value            = '';
     restartGame();
   });
   function showLeaderboard(){
@@ -338,9 +341,9 @@ document.addEventListener('DOMContentLoaded', function() {
     binaryRoundCount    = 0;
     recentSchools       = [];
     updateScore();
-    chatContainer.innerHTML     = '';
-    userInput.value             = '';
-    inputForm.style.display     = 'block';
+    chatContainer.innerHTML      = '';
+    userInput.value              = '';
+    inputForm.style.display      = 'block';
     gameOverOverlay.style.display= 'none';
     gameOverButtons.style.display= 'none';
     usernameForm.style.display   = 'none';
@@ -385,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // --- Trivia Round with Piecewise Boosting ---
+  // --- Trivia Round with Piecewise + Cap ---
   function startTriviaRound(){
     phase='trivia';
     normalRoundsCount++;
@@ -401,14 +404,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (filt.length) cands = filt;
     if (!cands.length) return gameOver('No eligible players.');
 
-    // piecewise boost based on draft year
+    // piecewise boost + cap
     const weighted = cands.map(name=>{
       const p = nflToCollege[name];
       let boost;
-      if (p.draftYear >= 2022)      boost = 1.5;
-      else if (p.draftYear >= 2018) boost = 1.2;
-      else                           boost = 0.8;
-      return { name, weight: p.value * boost };
+      if (p.draftYear >= 2024)       boost = 2.0;
+      else if (p.draftYear >= 2022)  boost = 1.8;
+      else if (p.draftYear >= 2018)  boost = 1.4;
+      else                            boost = 0.6;
+      const w = p.value * boost;
+      return { name, weight: Math.min(w, MAX_WEIGHT) };
     });
 
     currentNFLPlayer = weightedRandomPick(weighted);
@@ -423,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function() {
     phase='binary';
     binaryRoundCount--;
     let cands = [];
-    if (choice === 'tough') {
+    if (choice==='tough') {
       cands = Object.keys(nflToCollege).filter(name=>{
         const p = nflToCollege[name];
         return p.round >= 2 && p.round <= 7 &&
