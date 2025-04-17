@@ -18,7 +18,33 @@ body {
   min-height: 100vh;
 }
 
-/* 3) Game container: allow horizontal overflow for tails */
+/* 3) Start screen overlay */
+#start-screen {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+#start-screen h1 {
+  margin-bottom: 1em;
+  font-size: 1.5em;
+}
+#start-button {
+  padding: 10px 20px;
+  background: var(--blue);
+  color: var(--text-white);
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+/* 4) Game container */
 #game-container {
   background: white;
   max-width: 360px;
@@ -26,14 +52,13 @@ body {
   height: 600px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  display: flex;
+  display: none;           /* hidden until “Start” */
   flex-direction: column;
   position: relative;
-  z-index: 2;
-  overflow-x: visible; /* ← tails can poke out */
-  overflow-y: hidden;
+  overflow: hidden;        /* no horizontal scroll */
 }
 
+/* 5) Score bar */
 #score {
   background: var(--blue);
   color: var(--text-white);
@@ -42,26 +67,26 @@ body {
   text-align: center;
 }
 
-/* 4) Chat pane: vertical scroll, horizontal visible */
+/* 6) Chat area */
 #chat-container {
   flex: 1;
   padding: 10px;
   background: white;
-  overflow-y: auto;
-  overflow-x: visible; /* ← tails can poke out */
+  overflow-y: auto;        /* only vertical scroll */
+  overflow-x: hidden;      /* never horizontal */
 }
 
-/* 5) Message base */
+/* 7) Message base */
 .message {
-  position: relative;      /* for tail positioning */
+  position: relative;
   max-width: 80%;
   margin-bottom: 10px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: 18px;
   clear: both;
   word-wrap: break-word;
   border: 1px solid #ccc;
-  animation: fadeIn 200ms ease-out;
+  animation: fadeIn 100ms ease-out;  /* faster pop-in */
 }
 
 @keyframes fadeIn {
@@ -69,43 +94,23 @@ body {
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* 6) AI bubbles (+ inset & tail) */
+/* 8) AI bubble */
 .message.ai {
   float: left;
   background: var(--gray-light);
   color: var(--text-black);
-  margin-left: 12px; /* make room for tail */
-}
-.message.ai::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: -8px;
-  width: 0; height: 0;
-  border-top: 8px solid transparent;
-  border-right: 8px solid var(--gray-light);
-  border-bottom: 8px solid transparent;
+  margin-left: 0;  /* no inset */
 }
 
-/* 7) User bubbles (+ inset & tail) */
+/* 9) User bubble */
 .message.user {
   float: right;
   background: var(--blue);
   color: var(--text-white);
-  margin-right: 12px; /* make room for tail */
-}
-.message.user::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: -8px;
-  width: 0; height: 0;
-  border-top: 8px solid transparent;
-  border-left: 8px solid var(--blue);
-  border-bottom: 8px solid transparent;
+  margin-right: 0; /* no inset */
 }
 
-/* 8) Typing indicator (ₒ) */
+/* 10) Typing indicator */
 .typing-indicator {
   position: relative;
   float: left;
@@ -119,7 +124,7 @@ body {
   max-width: 40%;
 }
 
-/* 9) Timer bar */
+/* 11) Timer bar */
 #timer-container {
   height: 4px;
   background-color: #ccc;
@@ -133,7 +138,7 @@ body {
   transition: width 0.1s linear;
 }
 
-/* 10) Binary choices */
+/* 12) Binary choices */
 #binary-choices {
   display: none;
   text-align: center;
@@ -150,7 +155,7 @@ body {
   font-size: 14px;
 }
 
-/* 11) Input form */
+/* 13) Input form */
 #input-form {
   display: flex;
   border-top: 1px solid #ddd;
@@ -174,14 +179,12 @@ body {
   border-radius: 4px;
 }
 
-/* 12) Game over overlay */
+/* 14) Game‑over overlay */
 #game-over {
   position: absolute;
-  top: 0;
-  left: 50%;
+  top: 0; left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  height: 100%;
+  width: 90%; height: 100%;
   background: rgba(255,255,255,0.95);
   display: none;
   flex-direction: column;
@@ -194,7 +197,6 @@ body {
 #game-over p {
   font-size: 18px;
   margin: 0 auto 20px;
-  word-wrap: break-word;
 }
 #game-over button {
   border: none;
