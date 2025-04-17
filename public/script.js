@@ -240,8 +240,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // leave it there (never remove fade-in)—then invoke the callback
       setTimeout(() => {
         if (typeof cb === 'function') cb();
-      }, 200);
-    }, 200);
+      }, 100);
+    }, 100);
 
   }, step * max + 20);
 }
