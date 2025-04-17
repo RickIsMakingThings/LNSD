@@ -52,11 +52,11 @@ body {
 #start-screen h1,
 #start-screen p {
   margin: 0 0 1em;
-  line-height: 1.45;
+  line-height: 1.55;
  text-align: center;
 
   
-  font-size: 0.8rem;   /* adjust smaller or larger as needed */
+  font-size: 0.9rem;   /* adjust smaller or larger as needed */
 }
 }
 
