@@ -140,6 +140,25 @@ body {
   max-width: none;
 }
 
+/* Fade out an element over 200ms */
+.fade-out {
+  opacity: 0;
+  transition: opacity 200ms ease-in;
+}
+
+/* Fade in an element over 200ms */
+.fade-in {
+  opacity: 1;
+  transition: opacity 200ms ease-out;
+}
+
+/* Message bubbles start invisible */
+.message {
+  opacity: 0;
+  /* Remove any previous fadeIn animation */
+  animation: none;
+}
+
 /* 11) Timer bar */
 #timer-container {
   height: 4px;
