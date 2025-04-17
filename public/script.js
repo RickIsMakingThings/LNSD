@@ -207,41 +207,42 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Cross‑Fade Typing & AI Messaging ─────────────
-  function showTypingIndicator(txt, cb, step=200) {
-  // create one bubble
+  function showTypingIndicator(txt, cb, step = 200) {
+  // 1) Create one bubble that starts fully visible as the typing indicator
   const msg = document.createElement('div');
-  msg.classList.add('message','ai');
+  msg.classList.add('message','ai','typing-indicator','fade-in');
   chatContainer.appendChild(msg);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  // 1) animate the dots
+  // 2) Animate the dots inside that same bubble
   let count = 1, max = 3;
   msg.textContent = 'ₒ';
-  const dotTimer = setInterval(()=>{
+  const dotTimer = setInterval(() => {
     count++;
     msg.textContent = 'ₒ '.repeat(count).trim();
     if (count >= max) clearInterval(dotTimer);
   }, step);
 
-  // 2) after typing, cross‑fade into real text
-  setTimeout(()=>{
+  // 3) After the dots finish, cross‑fade into the real text
+  setTimeout(() => {
     clearInterval(dotTimer);
 
     // fade out the dots
+    msg.classList.remove('fade-in');
     msg.classList.add('fade-out');
 
-    setTimeout(()=>{
-      // swap content and fade in the real text
-      msg.classList.remove('fade-out');
+    setTimeout(() => {
+      // remove the typing styling, swap in the real text, then fade it in
+      msg.classList.remove('typing-indicator','fade-out');
       msg.textContent = txt;
       msg.classList.add('fade-in');
 
-      // after fade‑in completes, invoke callback—but do NOT remove fade‑in
-      setTimeout(()=>{
+      // leave it there (never remove fade-in)—then invoke the callback
+      setTimeout(() => {
         if (typeof cb === 'function') cb();
       }, 200);
-
     }, 200);
+
   }, step * max + 50);
 }
 
