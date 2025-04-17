@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // --- Trivia Round with Piecewise + Cap ---
+  // --- Trivia Round with Aggressive Piecewise + Cap ---
   function startTriviaRound(){
     phase='trivia';
     normalRoundsCount++;
@@ -404,14 +404,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (filt.length) cands = filt;
     if (!cands.length) return gameOver('No eligible players.');
 
-    // piecewise boost + cap
+    // aggressive piecewise boost + cap
     const weighted = cands.map(name=>{
       const p = nflToCollege[name];
       let boost;
-      if (p.draftYear >= 2024)       boost = 2.0;
-      else if (p.draftYear >= 2022)  boost = 1.8;
-      else if (p.draftYear >= 2018)  boost = 1.4;
-      else                            boost = 0.6;
+      if (p.draftYear >= 2024)       boost = 3.0;
+      else if (p.draftYear >= 2022)  boost = 2.5;
+      else if (p.draftYear >= 2018)  boost = 2.0;
+      else                            boost = 0.4;
       const w = p.value * boost;
       return { name, weight: Math.min(w, MAX_WEIGHT) };
     });
