@@ -162,22 +162,35 @@ document.addEventListener('DOMContentLoaded', function() {
     },{});
   }
 
-  // --- Timer ---
+  // --- Timer (instant fill, then smooth drain) ---
   function startTimer() {
     clearTimer();
-    let t=7; timerBar.style.width='100%';
+    // temporarily disable transition so width jump is instant
+    timerBar.style.transition = 'none';
+    timerBar.style.width = '100%';
+    // force reflow
+    void timerBar.offsetWidth;
+    // restore smooth transition
+    timerBar.style.transition = 'width 0.1s linear';
+
+    let t = 7;
     timerInterval = setInterval(()=>{
-      t-=0.1;
-      timerBar.style.width=`${(t/7)*100}%`;
-      if (t<=0) {
+      t -= 0.1;
+      timerBar.style.width = `${(t/7)*100}%`;
+      if (t <= 0) {
         clearTimer();
         gameOver("Time's up! Game Over!");
       }
-    },100);
+    }, 100);
   }
   function clearTimer() {
     clearInterval(timerInterval);
-    timerBar.style.width='0%';
+    // no transition needed when clearing
+    timerBar.style.transition = 'none';
+    timerBar.style.width = '0%';
+    void timerBar.offsetWidth;
+    // restore for next run
+    timerBar.style.transition = 'width 0.1s linear';
   }
 
   // --- UI Helpers ---
@@ -360,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
     if(filt.length) cands=filt;
     if(!cands.length) return gameOver('No eligible easy players.');
-    currentNFLPlayer=cands[Math.floor(Math.random()*cands.length)];
+    currentNFLPlayer=candidates[Math.floor(Math.random()*candidates.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
     if(recentSchools.length>7) recentSchools.shift();
     easyRounds++;
@@ -423,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
       addAIMessage("Can't think of anyone, let's just keep going.");
       return setTimeout(startTriviaRound,1500);
     }
-    currentNFLPlayer=cands[Math.floor(Math.random()*cands.length)];
+    currentNFLPlayer=candidates[Math.floor(Math.random()*candidates.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
     if(recentSchools.length>7) recentSchools.shift();
     const q=getQuestionTemplate().replace('XXXXX',currentNFLPlayer);
