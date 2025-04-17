@@ -208,38 +208,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ─── Cross‑Fade Typing & AI Messaging ─────────────
   function showTypingIndicator(txt, cb, step=200) {
-    // reuse one bubble for dots → text
-    const msg = document.createElement('div');
-    msg.classList.add('message','ai');
-    chatContainer.appendChild(msg);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+  // create one bubble
+  const msg = document.createElement('div');
+  msg.classList.add('message','ai');
+  chatContainer.appendChild(msg);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    // 1) animate dots
-    let count = 1, max = 3;
-    msg.textContent = 'ₒ';
-    const dotTimer = setInterval(()=>{
-      count++;
-      msg.textContent = 'ₒ '.repeat(count).trim();
-      if (count>=max) clearInterval(dotTimer);
-    }, step);
+  // 1) animate the dots
+  let count = 1, max = 3;
+  msg.textContent = 'ₒ';
+  const dotTimer = setInterval(()=>{
+    count++;
+    msg.textContent = 'ₒ '.repeat(count).trim();
+    if (count >= max) clearInterval(dotTimer);
+  }, step);
 
-    // 2) after typing, cross‑fade into real text
+  // 2) after typing, cross‑fade into real text
+  setTimeout(()=>{
+    clearInterval(dotTimer);
+
+    // fade out the dots
+    msg.classList.add('fade-out');
+
     setTimeout(()=>{
-      clearInterval(dotTimer);
-      // fade‑out dots
-      msg.classList.add('fade-out');
+      // swap content and fade in the real text
+      msg.classList.remove('fade-out');
+      msg.textContent = txt;
+      msg.classList.add('fade-in');
+
+      // after fade‑in completes, invoke callback—but do NOT remove fade‑in
       setTimeout(()=>{
-        // swap to real text, fade‑in
-        msg.classList.remove('fade-out');
-        msg.textContent = txt;
-        msg.classList.add('fade-in');
-        setTimeout(()=>{
-          msg.classList.remove('fade-in');
-          if(typeof cb==='function') cb();
-        },200);
-      },200);
-    }, step*max + 50);
-  }
+        if (typeof cb === 'function') cb();
+      }, 200);
+
+    }, 200);
+  }, step * max + 50);
+}
 
   function addAIMessage(txt, onDone) {
     clearTimer();
