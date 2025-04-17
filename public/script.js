@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 200);
     }, 200);
 
-  }, step * max + 20);
+  }, step * max + 10);
 }
 
   function addAIMessage(txt, onDone) {
