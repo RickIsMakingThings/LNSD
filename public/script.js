@@ -20,6 +20,23 @@ document.addEventListener('DOMContentLoaded', function() {
   let gameStarted       = false;
   let gameActive        = true;
 
+  // --- Dialog Cooldown Settings ---
+  const COOLDOWN = 5;
+  const recentQuestions           = [];
+  const recentConfirmations       = [];
+  const recentBigCompliments      = [];
+  const recentTransferCompliments = [];
+
+  // --- Helper: pick with cooldown ---
+  function pickWithCooldown(arr, recentArr) {
+    const choices = arr.filter(item => !recentArr.includes(item));
+    const pool = choices.length ? choices : arr;
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    recentArr.push(pick);
+    if (recentArr.length > COOLDOWN) recentArr.shift();
+    return pick;
+  }
+
   // --- DOM Elements ---
   const startScreen        = document.getElementById('start-screen');
   const startButton        = document.getElementById('start-button');
@@ -47,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let nflToCollege      = {};
   let collegeAliases    = {};
   let dialogueBuckets   = {};
-  let phase             = 'easy';       // "easy", "trivia", "binary"
+  let phase             = 'easy';
   let currentNFLPlayer  = '';
   let score             = 0;
   let easyRounds        = 0;
@@ -175,26 +192,25 @@ document.addEventListener('DOMContentLoaded', function() {
     scoreDisplay.textContent=`Score: ${score}`;
   }
 
-  // --- Dialogue Helpers ---
+  // --- Dialogue Helpers (with cooldown) ---
+  function getQuestionTemplate() {
+    const arr = dialogueBuckets.questions || ['How about XXXXX'];
+    return pickWithCooldown(arr, recentQuestions);
+  }
   function getBriefResponse() {
     if (phase==='easy') {
-      const arr=dialogueBuckets.confirmations||['nice'];
-      return arr[Math.floor(Math.random()*arr.length)];
+      const arr = dialogueBuckets.confirmations || ['nice'];
+      return pickWithCooldown(arr, recentConfirmations);
     }
     if (Math.random()<0.1 && dialogueBuckets.big_compliments?.length) {
-      const arr=dialogueBuckets.big_compliments;
-      return arr[Math.floor(Math.random()*arr.length)];
+      return pickWithCooldown(dialogueBuckets.big_compliments, recentBigCompliments);
     }
-    const arr=dialogueBuckets.confirmations||['nice'];
-    return arr[Math.floor(Math.random()*arr.length)];
+    const arr = dialogueBuckets.confirmations || ['nice'];
+    return pickWithCooldown(arr, recentConfirmations);
   }
   function getTransferCompliment() {
-    const arr=dialogueBuckets.transferCompliments||["I see what you did there"];
-    return arr[Math.floor(Math.random()*arr.length)];
-  }
-  function getQuestionTemplate() {
-    const arr=dialogueBuckets.questions||['How about XXXXX'];
-    return arr[Math.floor(Math.random()*arr.length)];
+    const arr = dialogueBuckets.transferCompliments || ["I see what you did there"];
+    return pickWithCooldown(arr, recentTransferCompliments);
   }
 
   // --- Normalize & Check ---
