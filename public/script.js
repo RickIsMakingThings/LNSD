@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
     if(filt.length) cands=filt;
     if(!cands.length) return gameOver('No eligible easy players.');
-    currentNFLPlayer=candidates[Math.floor(Math.random()*candidates.length)];
+    currentNFLPlayer=cands[Math.floor(Math.random()*cands.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
     if(recentSchools.length>7) recentSchools.shift();
     easyRounds++;
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
       addAIMessage("Can't think of anyone, let's just keep going.");
       return setTimeout(startTriviaRound,1500);
     }
-    currentNFLPlayer=candidates[Math.floor(Math.random()*candidates.length)];
+    currentNFLPlayer=cands[Math.floor(Math.random()*cands.length)];
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
     if(recentSchools.length>7) recentSchools.shift();
     const q=getQuestionTemplate().replace('XXXXX',currentNFLPlayer);
