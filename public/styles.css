@@ -110,20 +110,35 @@ body {
   margin-right: 0; /* no inset */
 }
 
-/* 10) Typing indicator */
+/* --- Typing Indicator (fixed size, dots spaced evenly) --- */
 .typing-indicator {
   position: relative;
   float: left;
   background: var(--gray-light);
   color: #555;
-  font-style: italic;
   border: 1px solid #ccc;
-  padding: 6px 12px;
   border-radius: 18px;
   margin-bottom: 10px;
-  max-width: 40%;
+
+  /* FIXED SIZE */
+  width: 60px;       /* adjust as needed to fit three dots comfortably */
+  height: 24px;      /* matches your padding + line‑height */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* remove padding so sizing is consistent */
+  padding: 0;
+
+  /* no max‑width constraint here */
+  max-width: none;
 }
 
+/* tweak the dot‑animation so it’s just text inside the box */
+.typing-indicator::before {
+  /* we’ll leave the animated “ₒ” sequence in JS, so nothing to change here */
+}
 /* 11) Timer bar */
 #timer-container {
   height: 4px;
