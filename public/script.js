@@ -248,33 +248,37 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Typing Indicator & AI Messaging ---
-  function showTypingIndicator(cb) {
+  function showTypingIndicator(cb, step = 200) {
     const ind = document.createElement('div');
     ind.classList.add('message','ai','typing-indicator');
     chatContainer.appendChild(ind);
     chatContainer.scrollTop = chatContainer.scrollHeight;
-    let count=1, max=3, step=400;
+
+    let count=1, max=3;
     ind.textContent='ₒ';
+
     const dotTimer = setInterval(()=>{
       count++;
       ind.textContent = 'ₒ '.repeat(count).trim();
-      if (count>=max) clearInterval(dotTimer);
+      if (count >= max) clearInterval(dotTimer);
     }, step);
+
     setTimeout(()=>{
       clearInterval(dotTimer);
       if (ind.parentNode) ind.parentNode.removeChild(ind);
       cb();
-    }, step*max + 100);
+    }, step * max + 50);
   }
-  function addAIMessage(txt,onDone) {
+
+  function addAIMessage(txt, onDone, speed) {
     clearTimer();
     showTypingIndicator(()=>{
       addMessage(txt,'ai');
       if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
         startTimer();
       }
-      if (typeof onDone==='function') onDone();
-    });
+      if (typeof onDone === 'function') onDone();
+    }, speed);
   }
 
   // --- Game Over & Leaderboard ---
@@ -423,65 +427,6 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // --- Binary Round Filtered (tough & defense tweaks) ---
-  function startTriviaRoundFiltered(choice){
-    phase='binary';
-    binaryRoundCount--;
-    let cands = [];
-    if (choice==='tough') {
-      cands = Object.keys(nflToCollege).filter(name=>{
-        const p = nflToCollege[name];
-        return p.round >= 2 && p.round <= 7 &&
-               ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
-               p.value >= 9 && p.value <= 15;
-      });
-    } else {
-      const defPos = ['DE','DT','LB','OLB','ILB','CB','S'];
-      cands = Object.keys(nflToCollege).filter(name=>{
-        const p = nflToCollege[name];
-        return defPos.includes(p.position.toUpperCase()) && p.value >= 49;
-      });
-    }
-    const filt2 = cands.filter(name=>
-      !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
-    );
-    if (filt2.length) cands = filt2;
-    if (!cands.length) {
-      addAIMessage("Can't think of anyone, let's just keep going.");
-      return setTimeout(startTriviaRound,1500);
-    }
-    currentNFLPlayer = cands[Math.floor(Math.random()*cands.length)];
-    recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
-    if (recentSchools.length>7) recentSchools.shift();
-    const q = getQuestionTemplate().replace('XXXXX',currentNFLPlayer);
-    addAIMessage(q);
-  }
-
-  // --- Ask Next or Trigger Binary ---
-  function askNextQuestion(){
-    addAIMessage(
-      dialogueBuckets.transitions?.[0] || "What's next?",
-      ()=>{
-        if (normalRoundsCount >= 3) {
-          binaryModeActive  = true;
-          binaryRoundCount  = 3;
-          normalRoundsCount = 0;
-          addAIMessage("Alright, pick an option:", showBinaryChoices);
-        } else {
-          startTriviaRound();
-        }
-      }
-    );
-  }
-  function showBinaryChoices(){
-    inputForm.style.display      = 'none';
-    binaryChoices.style.display  = 'block';
-  }
-  function hideBinaryChoices(){
-    binaryChoices.style.display  = 'none';
-    inputForm.style.display      = 'block';
-  }
-
   // --- Handle Guess & Transfers ---
   function handleCollegeGuess(ans){
     clearTimer();
@@ -492,7 +437,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const resp = idx===0
         ? getBriefResponse()
         : getTransferCompliment();
-      addAIMessage(resp,()=>{
+      // speed up compliments
+      addAIMessage(resp, ()=>{
         score++; updateScore();
         if (phase==='easy') {
           if (easyRounds < 3) setTimeout(startEasyRound,500);
@@ -501,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const msg = et.length
               ? et[Math.floor(Math.random()*et.length)]
               : "Ok, now let's have some fun";
-            addAIMessage(msg,()=>{
+            addAIMessage(msg, ()=>{
               phase='trivia';
               normalRoundsCount=0;
               startTriviaRound();
@@ -514,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function() {
           if (binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,500);
           else { binaryModeActive=false; setTimeout(startTriviaRound,500); }
         }
-      });
+      }, 100);
     } else {
       gameOver(`Nah, ${currentNFLPlayer} played at ${cols[0]}. Game Over!`);
     }
