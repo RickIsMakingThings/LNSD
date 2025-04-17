@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const adjustForKeyboard = () => {
       gameContainer.style.transform = `translateY(-${visualViewport.offsetTop}px)`;
     };
-    visualViewport.addEventListener('resize',  adjustForKeyboard);
-    visualViewport.addEventListener('scroll',  adjustForKeyboard);
+    visualViewport.addEventListener('resize', adjustForKeyboard);
+    visualViewport.addEventListener('scroll', adjustForKeyboard);
     window.addEventListener('beforeunload', () => {
       gameContainer.style.transform = '';
     });
@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Helper: pick with cooldown ---
   function pickWithCooldown(arr, recentArr) {
     const choices = arr.filter(item => !recentArr.includes(item));
-    const pool = choices.length ? choices : arr;
-    const pick = pool[Math.floor(Math.random() * pool.length)];
+    const pool    = choices.length ? choices : arr;
+    const pick    = pool[Math.floor(Math.random() * pool.length)];
     recentArr.push(pick);
     if (recentArr.length > COOLDOWN) recentArr.shift();
     return pick;
@@ -73,12 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let binaryModeActive  = false;
   let binaryRoundCount  = 0;
   let timerInterval;
-
-  // --- Draft‑Year Weighting Parameters ---
-  const minDraftYear = 2009;
-  const maxDraftYear = 2024;
-  const alphaMin     = 0.4;
-  const alphaMax     = 0.8;
 
   // --- Firestore Setup ---
   const db = firebase.firestore();
@@ -135,33 +129,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- CSV Parsers ---
   function parseCSVtoObject(csv) {
-    return csv
-      .trim()
-      .split(/\r?\n/)
-      .slice(1)
-      .reduce((map, line) => {
-        const cols = line.split(',').map(s => s.trim());
-        const rawName = cols[0];
-        if (!rawName) return map;
-        // NORMALIZE KEY
-        const key = normalizeCollegeString(rawName);
-        // NORMALIZE EACH ALIAS
-        const aliases = cols
-          .slice(1)
-          .map(a => normalizeCollegeString(a))
-          .filter(a => a);
-        map[key] = aliases;
-        return map;
-      }, {});
+    return csv.trim().split(/\r?\n/).slice(1).reduce((map,line)=>{
+      const cols   = line.split(',').map(s=>s.trim());
+      const rawKey = cols[0];
+      if (!rawKey) return map;
+      const key     = normalizeCollegeString(rawKey);
+      const aliases = cols.slice(1)
+                          .map(a=>normalizeCollegeString(a))
+                          .filter(a=>a);
+      map[key] = aliases;
+      return map;
+    }, {});
   }
   function parsePlayersCSV(csv) {
     return csv.trim().split(/\r?\n/).slice(1).reduce((o,line)=>{
       const p = line.split(',');
       if (p.length<10) return o;
       const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
-      const draftYear = parseInt(dy,10), round = parseInt(rnd,10);
-      const value     = val.trim()===''?0:parseFloat(val);
-      if (!isNaN(draftYear)&&!isNaN(round)&&name&&pos&&c1) {
+      const draftYear = parseInt(dy,10),
+            round     = parseInt(rnd,10),
+            value     = val.trim()==='' ? 0 : parseFloat(val);
+      if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
         o[name] = {
           draftYear,
           round,
@@ -171,14 +159,14 @@ document.addEventListener('DOMContentLoaded', function() {
         };
       }
       return o;
-    },{});
+    }, {});
   }
 
   // --- Timer (instant fill, then smooth drain) ---
   function startTimer() {
     clearTimer();
     timerBar.style.transition = 'none';
-    timerBar.style.width = '100%';
+    timerBar.style.width      = '100%';
     void timerBar.offsetWidth;
     timerBar.style.transition = 'width 0.1s linear';
     let t = 7;
@@ -194,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function clearTimer() {
     clearInterval(timerInterval);
     timerBar.style.transition = 'none';
-    timerBar.style.width = '0%';
+    timerBar.style.width      = '0%';
     void timerBar.offsetWidth;
     timerBar.style.transition = 'width 0.1s linear';
   }
@@ -203,12 +191,12 @@ document.addEventListener('DOMContentLoaded', function() {
   function addMessage(txt,cls) {
     const d=document.createElement('div');
     d.classList.add('message',cls);
-    d.textContent=txt;
+    d.textContent = txt;
     chatContainer.appendChild(d);
-    chatContainer.scrollTop=chatContainer.scrollHeight;
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   }
   function updateScore() {
-    scoreDisplay.textContent=`Score: ${score}`;
+    scoreDisplay.textContent = `Score: ${score}`;
   }
 
   // --- Dialogue Helpers (with cooldown) ---
@@ -234,47 +222,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Normalize & Check ---
   function normalizeCollegeString(str) {
-    // keep letters, numbers, spaces, and ampersand
     let s = str
-      .replace(/[^\w\s&]/gi, '')
+      .replace(/[^\w\s&]/gi,'')
       .toLowerCase()
       .trim();
-    if (s.startsWith('university of ')) s = s.slice('university of '.length).trim();
-    else if (s.startsWith('college of ')) s = s.slice('college of '.length).trim();
-
+    if (s.startsWith('university of ')) s = s.slice(14).trim();
+    else if (s.startsWith('college of ')) s = s.slice(11).trim();
     const toks = s.split(/\s+/);
-    const last = toks[toks.length - 1];
-    if (last === 'st' || last === 'st.') toks[toks.length - 1] = 'state';
+    const last = toks[toks.length-1];
+    if (last==='st' || last==='st.') toks[toks.length-1] = 'state';
     s = toks.join(' ');
-
     if (s.endsWith(' university')) {
-      const without = s.slice(0, -' university'.length).trim();
+      const without = s.slice(0, -11).trim();
       if (without.split(/\s+/).length > 1) s = without;
     }
     return s;
   }
   function isCollegeAnswerCorrect(ans,correct) {
-    const a=normalizeCollegeString(ans),
-          c=normalizeCollegeString(correct);
+    const a = normalizeCollegeString(ans),
+          c = normalizeCollegeString(correct);
     return a===c || (collegeAliases[c]||[]).includes(a);
   }
 
   // --- Typing Indicator & AI Messaging ---
   function showTypingIndicator(cb) {
-    const ind=document.createElement('div');
+    const ind = document.createElement('div');
     ind.classList.add('message','ai','typing-indicator');
     chatContainer.appendChild(ind);
-    chatContainer.scrollTop=chatContainer.scrollHeight;
+    chatContainer.scrollTop = chatContainer.scrollHeight;
     let count=1, max=3, step=400;
     ind.textContent='ₒ';
-    const dotTimer=setInterval(()=>{
+    const dotTimer = setInterval(()=>{
       count++;
-      ind.textContent='ₒ '.repeat(count).trim();
+      ind.textContent = 'ₒ '.repeat(count).trim();
       if (count>=max) clearInterval(dotTimer);
-    },step);
+    }, step);
     setTimeout(()=>{
       clearInterval(dotTimer);
-      if(ind.parentNode) ind.parentNode.removeChild(ind);
+      if (ind.parentNode) ind.parentNode.removeChild(ind);
       cb();
     }, step*max + 100);
   }
@@ -291,76 +276,84 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Game Over & Leaderboard ---
   function gameOver(msg) {
-    gameActive=false; clearTimer();
+    gameActive = false; clearTimer();
     addAIMessage(msg);
-    gameOverMsg.textContent=msg;
-    gameOverOverlay.style.display='flex';
-    gameOverButtons.style.display='block';
-    usernameForm.style.display='none';
-    leaderboardCont.style.display='none';
-    inputForm.style.display='none';
+    gameOverMsg.textContent      = msg;
+    gameOverOverlay.style.display= 'flex';
+    gameOverButtons.style.display= 'block';
+    usernameForm.style.display   = 'none';
+    leaderboardCont.style.display= 'none';
+    inputForm.style.display      = 'none';
   }
   restartBtn.addEventListener('click',restartGame);
   submitScoreBtn.addEventListener('click',()=>{
-    gameOverButtons.style.display='none';
-    usernameForm.style.display='block';
+    gameOverButtons.style.display = 'none';
+    usernameForm.style.display    = 'block';
   });
   usernameSubmit.addEventListener('click',()=>{
-    const uname=usernameInput.value.trim();
+    const uname = usernameInput.value.trim();
     if (!uname) return alert('Enter username.');
     db.collection('highScores').add({
-      username:uname,
+      username: uname,
       score,
-      timestamp:firebase.firestore.FieldValue.serverTimestamp()
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(showLeaderboard)
-      .catch(e=>{console.error(e);alert('Submit failed.')});
+      .catch(e=>{ console.error(e); alert('Submit failed.') });
   });
   leaderboardRestart.addEventListener('click',()=>{
-    leaderboardCont.style.display='none';
-    usernameInput.value=''; restartGame();
+    leaderboardCont.style.display = 'none';
+    usernameInput.value = '';
+    restartGame();
   });
   function showLeaderboard(){
-    usernameForm.style.display='none';
-    leaderboardCont.style.display='block';
-    leaderboardList.innerHTML='';
+    usernameForm.style.display    = 'none';
+    leaderboardCont.style.display = 'block';
+    leaderboardList.innerHTML     = '';
     db.collection('highScores')
       .orderBy('score','desc').limit(20)
       .get().then(snap=>{
-        if(snap.empty) leaderboardList.innerHTML='<li>No scores yet.</li>';
+        if (snap.empty) leaderboardList.innerHTML = '<li>No scores yet.</li>';
         else snap.forEach(doc=>{
-          const {username,score}=doc.data();
-          const li=document.createElement('li');
-          li.textContent=`${username}: ${score}`;
+          const { username, score } = doc.data();
+          const li = document.createElement('li');
+          li.textContent = `${username}: ${score}`;
           leaderboardList.appendChild(li);
         });
       }).catch(e=>{
         console.error(e);
-        leaderboardList.innerHTML='<li>Unable to load leaderboard.</li>';
+        leaderboardList.innerHTML = '<li>Unable to load leaderboard.</li>';
       });
   }
 
   // --- Restart Game ---
   function restartGame(){
     clearTimer();
-    phase='easy'; easyRounds=0; normalRoundsCount=0;
-    currentNFLPlayer=''; score=0; gameActive=true;
-    binaryModeActive=false; binaryRoundCount=0; recentSchools=[];
+    phase               = 'easy';
+    easyRounds          = 0;
+    normalRoundsCount   = 0;
+    currentNFLPlayer    = '';
+    score               = 0;
+    gameActive          = true;
+    binaryModeActive    = false;
+    binaryRoundCount    = 0;
+    recentSchools       = [];
     updateScore();
-    chatContainer.innerHTML=''; userInput.value='';
-    inputForm.style.display='block';
-    gameOverOverlay.style.display='none';
-    gameOverButtons.style.display='none';
-    usernameForm.style.display='none';
-    leaderboardCont.style.display='none';
+    chatContainer.innerHTML     = '';
+    userInput.value             = '';
+    inputForm.style.display     = 'block';
+    gameOverOverlay.style.display= 'none';
+    gameOverButtons.style.display= 'none';
+    usernameForm.style.display   = 'none';
+    leaderboardCont.style.display= 'none';
     startIntro();
   }
 
   // --- Intro Sequence ---
   function startIntro(){
     addAIMessage(
-      dialogueBuckets.greetings?.[0]||"you and I have to take an oath 🤝",
+      dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
       ()=>addAIMessage(
-        dialogueBuckets.greetings?.[1]||"no googling",
+        dialogueBuckets.greetings?.[1] || "no googling",
         ()=>addAIMessage(
           "We can start with some easy ones.",
           startEasyRound
@@ -372,12 +365,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Easy Round ---
   function startEasyRound(){
     if (!gameActive) return;
-    if (easyRounds>=3) return;
-    phase='easy';
+    if (easyRounds >= 3) return;
+    phase = 'easy';
     let cands = Object.keys(nflToCollege).filter(name=>{
-      const p=nflToCollege[name];
-      const pos=p.position.toUpperCase(), ok=p.value>=40;
-      return (pos==='QB'&&ok)||((pos==='RB'||pos==='WR')&&p.round<=2&&ok);
+      const p = nflToCollege[name];
+      const pos = p.position.toUpperCase(), ok = p.value >= 40;
+      return (pos==='QB' && ok) || ((pos==='RB'||pos==='WR') && p.round <= 2 && ok);
     });
     const filt = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
@@ -392,28 +385,32 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // --- Trivia Round with Non-Linear Weighting ---
+  // --- Trivia Round with Piecewise Boosting ---
   function startTriviaRound(){
-    phase='trivia'; normalRoundsCount++;
+    phase='trivia';
+    normalRoundsCount++;
     let cands = Object.keys(nflToCollege).filter(name=>{
-      const p=nflToCollege[name];
-      return p.round<=4 &&
+      const p = nflToCollege[name];
+      return p.round <= 4 &&
              ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
-             p.value>=20;
+             p.value >= 20;
     });
     const filt = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
     );
     if (filt.length) cands = filt;
     if (!cands.length) return gameOver('No eligible players.');
+
+    // piecewise boost based on draft year
     const weighted = cands.map(name=>{
-      const p=nflToCollege[name];
-      const norm=(p.draftYear-minDraftYear)/(maxDraftYear-minDraftYear);
-      const norm2=norm*norm;
-      const alpha=alphaMin+(alphaMax-alphaMin)*norm2;
-      const factor=1+alpha*(norm*2-1);
-      return { name, weight:p.value*factor };
+      const p = nflToCollege[name];
+      let boost;
+      if (p.draftYear >= 2022)      boost = 1.5;
+      else if (p.draftYear >= 2018) boost = 1.2;
+      else                           boost = 0.8;
+      return { name, weight: p.value * boost };
     });
+
     currentNFLPlayer = weightedRandomPick(weighted);
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
     if (recentSchools.length>7) recentSchools.shift();
@@ -423,27 +420,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Binary Round Filtered (tough & defense tweaks) ---
   function startTriviaRoundFiltered(choice){
-    phase='binary'; binaryRoundCount--;
+    phase='binary';
+    binaryRoundCount--;
     let cands = [];
-    if (choice==='tough'){
+    if (choice === 'tough') {
       cands = Object.keys(nflToCollege).filter(name=>{
-        const p=nflToCollege[name];
-        return p.round>=2&&p.round<=7&&
-               ['QB','RB','WR'].includes(p.position.toUpperCase())&&
-               p.value>=9&&p.value<=15;
+        const p = nflToCollege[name];
+        return p.round >= 2 && p.round <= 7 &&
+               ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
+               p.value >= 9 && p.value <= 15;
       });
     } else {
-      const defPos=['DE','DT','LB','OLB','ILB','CB','S'];
+      const defPos = ['DE','DT','LB','OLB','ILB','CB','S'];
       cands = Object.keys(nflToCollege).filter(name=>{
-        const p=nflToCollege[name];
-        return defPos.includes(p.position.toUpperCase())&&p.value>=49;
+        const p = nflToCollege[name];
+        return defPos.includes(p.position.toUpperCase()) && p.value >= 49;
       });
     }
     const filt2 = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
     );
     if (filt2.length) cands = filt2;
-    if (!cands.length){
+    if (!cands.length) {
       addAIMessage("Can't think of anyone, let's just keep going.");
       return setTimeout(startTriviaRound,1500);
     }
@@ -457,24 +455,26 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Ask Next or Trigger Binary ---
   function askNextQuestion(){
     addAIMessage(
-      dialogueBuckets.transitions?.[0]||"What's next?",
+      dialogueBuckets.transitions?.[0] || "What's next?",
       ()=>{
-        if (normalRoundsCount>=3){
-          binaryModeActive=true;
-          binaryRoundCount=3;
-          normalRoundsCount=0;
+        if (normalRoundsCount >= 3) {
+          binaryModeActive  = true;
+          binaryRoundCount  = 3;
+          normalRoundsCount = 0;
           addAIMessage("Alright, pick an option:", showBinaryChoices);
-        } else startTriviaRound();
+        } else {
+          startTriviaRound();
+        }
       }
     );
   }
   function showBinaryChoices(){
-    inputForm.style.display='none';
-    binaryChoices.style.display='block';
+    inputForm.style.display      = 'none';
+    binaryChoices.style.display  = 'block';
   }
   function hideBinaryChoices(){
-    binaryChoices.style.display='none';
-    inputForm.style.display='block';
+    binaryChoices.style.display  = 'none';
+    inputForm.style.display      = 'block';
   }
 
   // --- Handle Guess & Transfers ---
@@ -483,25 +483,27 @@ document.addEventListener('DOMContentLoaded', function() {
     addMessage(ans,'user');
     const cols = nflToCollege[currentNFLPlayer].colleges;
     const idx  = cols.findIndex(c=>isCollegeAnswerCorrect(ans,c));
-    if (idx>=0){
+    if (idx >= 0) {
       const resp = idx===0
         ? getBriefResponse()
         : getTransferCompliment();
       addAIMessage(resp,()=>{
         score++; updateScore();
-        if (phase==='easy'){
-          if (easyRounds<3) setTimeout(startEasyRound,500);
+        if (phase==='easy') {
+          if (easyRounds < 3) setTimeout(startEasyRound,500);
           else {
-            const et = dialogueBuckets.easyTransition||[];
+            const et = dialogueBuckets.easyTransition || [];
             const msg = et.length
               ? et[Math.floor(Math.random()*et.length)]
               : "Ok, now let's have some fun";
             addAIMessage(msg,()=>{
-              phase='trivia'; normalRoundsCount=0; startTriviaRound();
+              phase='trivia';
+              normalRoundsCount=0;
+              startTriviaRound();
             });
           }
-        } else if (phase==='trivia'){
-          if (normalRoundsCount>=3) setTimeout(askNextQuestion,500);
+        } else if (phase==='trivia') {
+          if (normalRoundsCount >= 3) setTimeout(askNextQuestion,500);
           else setTimeout(startTriviaRound,500);
         } else {
           if (binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,500);
@@ -514,7 +516,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Form & Choice Listeners ---
-  inputForm.addEventListener('submit',e=>{
+  inputForm.addEventListener('submit', e=>{
     e.preventDefault();
     if (!gameActive) return;
     const ans = userInput.value.trim();
@@ -523,11 +525,13 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   choiceTough.addEventListener('click',()=>{
     addMessage('Hit me with a tough one','user');
-    hideBinaryChoices(); startTriviaRoundFiltered('tough');
+    hideBinaryChoices();
+    startTriviaRoundFiltered('tough');
   });
   choiceDefense.addEventListener('click',()=>{
     addMessage('Go defense','user');
-    hideBinaryChoices(); startTriviaRoundFiltered('defense');
+    hideBinaryChoices();
+    startTriviaRoundFiltered('defense');
   });
 
 });
