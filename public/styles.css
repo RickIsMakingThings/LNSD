@@ -26,7 +26,8 @@ body {
   height: 600px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  display: none;           /* hidden until “Start” */
+  /* show it immediately */
+  display: flex;
   flex-direction: column;
   position: relative;      /* anchor for the overlay */
   overflow: hidden;        /* no horizontal scroll */
