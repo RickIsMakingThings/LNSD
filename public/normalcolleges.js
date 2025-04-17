@@ -1,37 +1,47 @@
-function normalizeCollege(str) {
-  // 1. Remove punctuation and lowercase.
-  let s = str.replace(/[^\w\s]/gi, "").toLowerCase().trim();
+/**
+ * Normalize any college name or alias into a consistent key.
+ * - Keeps ampersands (&) so that "A&M" → "a&m"
+ * - Strips out other punctuation
+ * - Lowercases everything
+ * - Removes leading "University of" / "College of"
+ * - Unifies "St." / "St" → "state"
+ * - Strips trailing "university" when it leaves at least two words
+ */
+export function normalizeCollege(str) {
+  // 1. Lowercase, remove all punctuation except ampersand (&), trim whitespace
+  let s = str
+    .replace(/[^\w\s&]/gi, '')  // allow letters, numbers, spaces, and '&'
+    .toLowerCase()
+    .trim();
 
-  // 2. Remove leading "university of" or "college of".
-  if (s.startsWith("university of ")) {
-    s = s.slice("university of ".length).trim();
-  } else if (s.startsWith("college of ")) {
-    s = s.slice("college of ".length).trim();
+  // 2. Remove leading "university of " or "college of "
+  if (s.startsWith('university of ')) {
+    s = s.slice('university of '.length).trim();
+  } else if (s.startsWith('college of ')) {
+    s = s.slice('college of '.length).trim();
   }
 
-  // 3. Split into tokens to unify "St." / "St" / "St" => "state"
+  // 3. Split into tokens and unify any trailing "st" or "st." → "state"
   let tokens = s.split(/\s+/);
   if (tokens.length > 1) {
-    let last = tokens[tokens.length - 1];
-    // If last token is "st", "st." => unify to "state"
-    if (["st", "st."].includes(last)) {
-      tokens[tokens.length - 1] = "state";
+    const last = tokens[tokens.length - 1];
+    if (last === 'st' || last === 'st.') {
+      tokens[tokens.length - 1] = 'state';
     }
-    // If last token is "state", do nothing (already "state").
   }
-  s = tokens.join(" ");
+  s = tokens.join(' ');
 
-  // 4. If the string ends with "university" and removing it 
-  //    won't leave a single token, remove it.
-  if (s.endsWith(" university")) {
-    let tmp = s.slice(0, s.lastIndexOf(" university")).trim();
-    if (tmp.split(/\s+/).length >= 2) {
-      s = tmp;
+  // 4. If it ends with " university" and dropping that
+  //    leaves at least two words, remove the trailing " university"
+  if (s.endsWith(' university')) {
+    const withoutUniv = s.slice(0, s.lastIndexOf(' university')).trim();
+    if (withoutUniv.split(/\s+/).length >= 2) {
+      s = withoutUniv;
     }
   }
 
-  // We do NOT remove trailing "college," "state," "tech," or "a&m"
-  // to respect the user's request for them to remain intact.
+  // 5. Do NOT strip off trailing "college", "state", "tech", or "a&m"
+  //    — they remain part of the normalized key.
 
   return s;
 }
