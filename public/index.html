@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Prevent zooming/panning on mobile and fix viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  />
   <title>Conversational Football Trivia</title>
-  <link rel="stylesheet" href="styles.css" />
-
-  <!-- Firebase compat libraries -->
+  <link rel="stylesheet" href="styles.css?v=3" />
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
   <script>
-    // Your Firebase configuration
+    // Firebase config (unchanged)
     const firebaseConfig = {
       apiKey: "AIzaSyAwBmdgqQ3XeG2vtNtpHcM67Xk5rviNh6Q",
       authDomain: "lnsd-13da9.firebaseapp.com",
@@ -21,53 +21,42 @@
       appId: "1:1000350992218:web:31e80c8e595afc00cc1563",
       measurementId: "G-JWM9SK7VRM"
     };
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
   </script>
 </head>
 <body>
+  <!-- START SCREEN OVERLAY -->
+  <div id="start-screen">
+    <h1>Let's Name Some Dudes</h1>
+    <p>This is one of your old buds. When you're bored, he names dudes and you name where they went to school. You can use abbreviations.<br>
+       You’ll earn points for correct answers—no Googling allowed!</p>
+    <button id="start-button">Start Game</button>
+  </div>
+
+  <!-- MAIN GAME CONTAINER -->
   <div id="game-container">
-    <!-- Score Bar -->
     <div id="score">Score: 0</div>
-
-    <!-- Chat History (scrollable) -->
     <div id="chat-container"></div>
-
-    <!-- Timer Bar -->
-    <div id="timer-container">
-      <div id="timer-bar"></div>
-    </div>
-
-    <!-- Binary Choice Buttons -->
+    <div id="timer-container"><div id="timer-bar"></div></div>
     <div id="binary-choices">
       <button id="choice-tough">Hit me with a tough one</button>
       <button id="choice-defense">Go defense</button>
     </div>
-
-    <!-- User Input -->
     <form id="input-form">
-      <input type="text" id="user-input" placeholder="Type your answer here..." autocomplete="off" />
+      <input type="text" id="user-input" placeholder="Type your answer here…" autocomplete="off" />
       <button type="submit">Send</button>
     </form>
-
-    <!-- Game Over / Leaderboard Overlay -->
     <div id="game-over">
       <p id="game-over-msg">Game Over!</p>
-
-      <!-- Initial Game Over Buttons -->
       <div id="game-over-buttons">
         <button id="submit-score">Submit Score</button>
         <button id="restart">Restart Game</button>
       </div>
-
-      <!-- Username Prompt -->
       <div id="username-form" style="display:none;">
         <p>Please enter your Boom Fantasy username:</p>
         <input type="text" id="username-input" placeholder="Username" />
         <button id="username-submit">Submit</button>
       </div>
-
-      <!-- Leaderboard -->
       <div id="leaderboard-container" style="display:none;">
         <button id="leaderboard-restart">Restart Game</button>
         <h3>Leaderboard (Top 20)</h3>
@@ -76,7 +65,6 @@
     </div>
   </div>
 
-  <!-- Main Game Script -->
-  <script src="script.js"></script>
+  <script src="script.js?v=3"></script>
 </body>
 </html>

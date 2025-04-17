@@ -1,22 +1,53 @@
-/* styles.css v2 */
+/* === Start Screen Overlay === */
+#start-screen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  z-index: 100;
+}
+#start-screen h1 {
+  margin-bottom: 0.5rem;
+}
+#start-screen p {
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+#start-button {
+  border: none;
+  background: #007aff;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
 /* === Prevent body scrolling & fix full‑screen container === */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-  overscroll-behavior: contain;  /* lock viewport on mobile */
+  overscroll-behavior: contain;
 }
 
-/* === Game Container fills viewport === */
+/* === Game Container fills viewport but hidden until Start === */
 #game-container {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  display: flex;
+  display: none; /* hidden until user presses Start */
   flex-direction: column;
   background: white;
   font-family: Arial, sans-serif;
   overscroll-behavior: contain;
+  z-index: 1;
 }
 
 /* === Score Bar pinned at top === */
@@ -33,9 +64,9 @@ html, body {
 #chat-container {
   flex: 1;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* smooth on iOS */
+  -webkit-overflow-scrolling: touch;
   padding: 10px;
-  background: white; /* always white, across all browsers */
+  background: white; /* consistent white background */
 }
 
 /* === Timer Bar pinned above input === */
@@ -140,6 +171,7 @@ html, body {
   align-items: center;
   text-align: center;
   padding: 20px;
+  z-index: 2;
 }
 #game-over p {
   font-size: 18px;
