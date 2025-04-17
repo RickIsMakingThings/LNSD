@@ -1,11 +1,11 @@
+/* styles.css v2 */
 /* === Prevent body scrolling & fix full‑screen container === */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-  /* stop iOS/Chrome from panning the container */
-  overscroll-behavior: contain;
+  overscroll-behavior: contain;  /* lock viewport on mobile */
 }
 
 /* === Game Container fills viewport === */
@@ -35,7 +35,7 @@ html, body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; /* smooth on iOS */
   padding: 10px;
-  background: #e5ddd5;
+  background: white; /* always white, across all browsers */
 }
 
 /* === Timer Bar pinned above input === */
