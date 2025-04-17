@@ -27,8 +27,16 @@ document.addEventListener('DOMContentLoaded', function() {
   const recentBigCompliments      = [];
   const recentTransferCompliments = [];
 
-  // --- Weight Capping ---
+  // --- Weight Capping & Draft‑Year Boost Groups ---
   const MAX_WEIGHT = 100;
+  function computeWeight(p) {
+    let boost;
+    if (p.draftYear >= 2024)       boost = 3.0;
+    else if (p.draftYear >= 2022)  boost = 2.5;
+    else if (p.draftYear >= 2018)  boost = 2.0;
+    else                            boost = 0.4;
+    return Math.min(p.value * boost, MAX_WEIGHT);
+  }
 
   // --- Helper: pick with cooldown ---
   function pickWithCooldown(arr, recentArr) {
@@ -82,13 +90,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Weighted Random Pick Helper ---
   function weightedRandomPick(items) {
-    const total = items.reduce((sum,i)=>sum+i.weight,0);
-    let r = Math.random()*total;
+    const total = items.reduce((sum,i)=>sum + i.weight, 0);
+    let r = Math.random() * total;
     for (const item of items) {
       if (r < item.weight) return item.name;
       r -= item.weight;
     }
-    return items[items.length-1].name;
+    return items[items.length - 1].name;
   }
 
   // --- Try Start ---
@@ -109,55 +117,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Load dialogue.json ---
   fetch('dialogue.json')
-    .then(r=>r.json())
-    .then(d=>{
+    .then(r => r.json())
+    .then(d => {
       dialogueBuckets = d;
       loadedData = !!Object.keys(nflToCollege).length;
       tryStartGame();
-    }).catch(console.error);
+    })
+    .catch(console.error);
 
   // --- Load CSVs ---
   fetch('college_aliases.csv')
-    .then(r=>r.text())
-    .then(t=>{ collegeAliases = parseCSVtoObject(t); })
+    .then(r => r.text())
+    .then(t => { collegeAliases = parseCSVtoObject(t); })
     .catch(console.error);
 
   fetch('players.csv')
-    .then(r=>r.text())
-    .then(t=>{
+    .then(r => r.text())
+    .then(t => {
       nflToCollege = parsePlayersCSV(t);
       loadedData = !!dialogueBuckets.questions;
       tryStartGame();
-    }).catch(console.error);
+    })
+    .catch(console.error);
 
   // --- CSV Parsers ---
   function parseCSVtoObject(csv) {
-    return csv.trim().split(/\r?\n/).slice(1).reduce((map,line)=>{
-      const cols   = line.split(',').map(s=>s.trim());
+    return csv.trim().split(/\r?\n/).slice(1).reduce((map, line) => {
+      const cols   = line.split(',').map(s => s.trim());
       const rawKey = cols[0];
       if (!rawKey) return map;
       const key     = normalizeCollegeString(rawKey);
       const aliases = cols.slice(1)
-                          .map(a=>normalizeCollegeString(a))
-                          .filter(a=>a);
+                          .map(a => normalizeCollegeString(a))
+                          .filter(a => a);
       map[key] = aliases;
       return map;
     }, {});
   }
   function parsePlayersCSV(csv) {
-    return csv.trim().split(/\r?\n/).slice(1).reduce((o,line)=>{
+    return csv.trim().split(/\r?\n/).slice(1).reduce((o, line) => {
       const p = line.split(',');
-      if (p.length<10) return o;
+      if (p.length < 10) return o;
       const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
-      const draftYear = parseInt(dy,10),
-            round     = parseInt(rnd,10),
-            value     = val.trim()==='' ? 0 : parseFloat(val);
+      const draftYear = parseInt(dy, 10),
+            round     = parseInt(rnd, 10),
+            value     = val.trim() === '' ? 0 : parseFloat(val);
       if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
         o[name] = {
           draftYear,
           round,
           position: pos,
-          colleges: [c1,c2,c3].filter(c=>c),
+          colleges: [c1, c2, c3].filter(c => c),
           value
         };
       }
@@ -172,10 +182,10 @@ document.addEventListener('DOMContentLoaded', function() {
     timerBar.style.width      = '100%';
     void timerBar.offsetWidth;
     timerBar.style.transition = 'width 0.1s linear';
-    let t = 9; // now 9 seconds
-    timerInterval = setInterval(()=>{
+    let t = 9; // now uses 9 seconds
+    timerInterval = setInterval(() => {
       t -= 0.1;
-      timerBar.style.width = `${(t/9)*100}%`;
+      timerBar.style.width = `${(t / 9) * 100}%`;
       if (t <= 0) {
         clearTimer();
         gameOver("Time's up! Game Over!");
@@ -191,9 +201,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- UI Helpers ---
-  function addMessage(txt,cls) {
-    const d=document.createElement('div');
-    d.classList.add('message',cls);
+  function addMessage(txt, cls) {
+    const d = document.createElement('div');
+    d.classList.add('message', cls);
     d.textContent = txt;
     chatContainer.appendChild(d);
     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -208,11 +218,11 @@ document.addEventListener('DOMContentLoaded', function() {
     return pickWithCooldown(arr, recentQuestions);
   }
   function getBriefResponse() {
-    if (phase==='easy') {
+    if (phase === 'easy') {
       const arr = dialogueBuckets.confirmations || ['nice'];
       return pickWithCooldown(arr, recentConfirmations);
     }
-    if (Math.random()<0.1 && dialogueBuckets.big_compliments?.length) {
+    if (Math.random() < 0.1 && dialogueBuckets.big_compliments?.length) {
       return pickWithCooldown(dialogueBuckets.big_compliments, recentBigCompliments);
     }
     const arr = dialogueBuckets.confirmations || ['nice'];
@@ -226,14 +236,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Normalize & Check ---
   function normalizeCollegeString(str) {
     let s = str
-      .replace(/[^\w\s&]/gi,'')
+      .replace(/[^\w\s&]/gi, '')
       .toLowerCase()
       .trim();
     if (s.startsWith('university of ')) s = s.slice(14).trim();
     else if (s.startsWith('college of ')) s = s.slice(11).trim();
     const toks = s.split(/\s+/);
-    const last = toks[toks.length-1];
-    if (last==='st' || last==='st.') toks[toks.length-1] = 'state';
+    const last = toks[toks.length - 1];
+    if (last === 'st' || last === 'st.') toks[toks.length - 1] = 'state';
     s = toks.join(' ');
     if (s.endsWith(' university')) {
       const without = s.slice(0, -11).trim();
@@ -241,10 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return s;
   }
-  function isCollegeAnswerCorrect(ans,correct) {
+  function isCollegeAnswerCorrect(ans, correct) {
     const a = normalizeCollegeString(ans),
           c = normalizeCollegeString(correct);
-    return a===c || (collegeAliases[c]||[]).includes(a);
+    return a === c || (collegeAliases[c] || []).includes(a);
   }
 
   // --- Typing Indicator & AI Messaging ---
@@ -254,25 +264,24 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.appendChild(ind);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    let count=1, max=3;
-    ind.textContent='ₒ';
+    let count = 1, max = 3;
+    ind.textContent = 'ₒ';
 
-    const dotTimer = setInterval(()=>{
+    const dotTimer = setInterval(() => {
       count++;
       ind.textContent = 'ₒ '.repeat(count).trim();
       if (count >= max) clearInterval(dotTimer);
     }, step);
 
-    setTimeout(()=>{
+    setTimeout(() => {
       clearInterval(dotTimer);
       if (ind.parentNode) ind.parentNode.removeChild(ind);
       cb();
     }, step * max + 50);
   }
-
   function addAIMessage(txt, onDone, speed) {
     clearTimer();
-    showTypingIndicator(()=>{
+    showTypingIndicator(() => {
       addMessage(txt,'ai');
       if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
         startTimer();
@@ -283,7 +292,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Game Over & Leaderboard ---
   function gameOver(msg) {
-    gameActive = false; clearTimer();
+    gameActive = false;
+    clearTimer();
     addAIMessage(msg);
     gameOverMsg.textContent       = msg;
     gameOverOverlay.style.display = 'flex';
@@ -292,12 +302,12 @@ document.addEventListener('DOMContentLoaded', function() {
     leaderboardCont.style.display = 'none';
     inputForm.style.display       = 'none';
   }
-  restartBtn.addEventListener('click',restartGame);
-  submitScoreBtn.addEventListener('click',()=>{
+  restartBtn.addEventListener('click', restartGame);
+  submitScoreBtn.addEventListener('click', () => {
     gameOverButtons.style.display = 'none';
     usernameForm.style.display    = 'block';
   });
-  usernameSubmit.addEventListener('click',()=>{
+  usernameSubmit.addEventListener('click', () => {
     const uname = usernameInput.value.trim();
     if (!uname) return alert('Enter username.');
     db.collection('highScores').add({
@@ -305,35 +315,35 @@ document.addEventListener('DOMContentLoaded', function() {
       score,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(showLeaderboard)
-      .catch(e=>{ console.error(e); alert('Submit failed.') });
+      .catch(e => { console.error(e); alert('Submit failed.'); });
   });
-  leaderboardRestart.addEventListener('click',()=>{
+  leaderboardRestart.addEventListener('click', () => {
     leaderboardCont.style.display = 'none';
     usernameInput.value            = '';
     restartGame();
   });
-  function showLeaderboard(){
+  function showLeaderboard() {
     usernameForm.style.display    = 'none';
     leaderboardCont.style.display = 'block';
     leaderboardList.innerHTML     = '';
     db.collection('highScores')
       .orderBy('score','desc').limit(20)
-      .get().then(snap=>{
+      .get().then(snap => {
         if (snap.empty) leaderboardList.innerHTML = '<li>No scores yet.</li>';
-        else snap.forEach(doc=>{
+        else snap.forEach(doc => {
           const { username, score } = doc.data();
           const li = document.createElement('li');
           li.textContent = `${username}: ${score}`;
           leaderboardList.appendChild(li);
         });
-      }).catch(e=>{
+      }).catch(e => {
         console.error(e);
         leaderboardList.innerHTML = '<li>Unable to load leaderboard.</li>';
       });
   }
 
   // --- Restart Game ---
-  function restartGame(){
+  function restartGame() {
     clearTimer();
     phase               = 'easy';
     easyRounds          = 0;
@@ -356,12 +366,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Intro Sequence ---
-  function startIntro(){
+  function startIntro() {
     addAIMessage(
       dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
-      ()=>addAIMessage(
+      () => addAIMessage(
         dialogueBuckets.greetings?.[1] || "no googling",
-        ()=>addAIMessage(
+        () => addAIMessage(
           "We can start with some easy ones.",
           startEasyRound
         )
@@ -369,81 +379,146 @@ document.addEventListener('DOMContentLoaded', function() {
     );
   }
 
-  // --- Easy Round ---
-  function startEasyRound(){
+  // --- Easy Round (now weighted) ---
+  function startEasyRound() {
     if (!gameActive) return;
     if (easyRounds >= 3) return;
     phase = 'easy';
-    let cands = Object.keys(nflToCollege).filter(name=>{
+    let cands = Object.keys(nflToCollege).filter(name => {
       const p = nflToCollege[name];
       const pos = p.position.toUpperCase(), ok = p.value >= 40;
       return (pos==='QB' && ok) || ((pos==='RB'||pos==='WR') && p.round <= 2 && ok);
     });
-    const filt = cands.filter(name=>
+    const filt = cands.filter(name =>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
     );
     if (filt.length) cands = filt;
     if (!cands.length) return gameOver('No eligible easy players.');
-    currentNFLPlayer = cands[Math.floor(Math.random()*cands.length)];
+
+    // apply weighting here
+    const weighted = cands.map(name => ({
+      name,
+      weight: computeWeight(nflToCollege[name])
+    }));
+    currentNFLPlayer = weightedRandomPick(weighted);
+
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
     if (recentSchools.length>7) recentSchools.shift();
     easyRounds++;
-    const q = getQuestionTemplate().replace('XXXXX',currentNFLPlayer);
+    const q = getQuestionTemplate().replace('XXXXX', currentNFLPlayer);
     addAIMessage(q);
   }
 
-  // --- Trivia Round with Aggressive Piecewise + Cap ---
-  function startTriviaRound(){
-    phase='trivia';
+  // --- Standard Trivia Round (already weighted) ---
+  function startTriviaRound() {
+    phase = 'trivia';
     normalRoundsCount++;
-    let cands = Object.keys(nflToCollege).filter(name=>{
+    let cands = Object.keys(nflToCollege).filter(name => {
       const p = nflToCollege[name];
       return p.round <= 4 &&
              ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
              p.value >= 20;
     });
-    const filt = cands.filter(name=>
+    const filt = cands.filter(name =>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
     );
     if (filt.length) cands = filt;
     if (!cands.length) return gameOver('No eligible players.');
 
-    // aggressive piecewise boost + cap
-    const weighted = cands.map(name=>{
-      const p = nflToCollege[name];
-      let boost;
-      if (p.draftYear >= 2024)       boost = 3.0;
-      else if (p.draftYear >= 2022)  boost = 2.5;
-      else if (p.draftYear >= 2018)  boost = 2.0;
-      else                            boost = 0.4;
-      const w = p.value * boost;
-      return { name, weight: Math.min(w, MAX_WEIGHT) };
-    });
-
+    const weighted = cands.map(name => ({
+      name,
+      weight: computeWeight(nflToCollege[name])
+    }));
     currentNFLPlayer = weightedRandomPick(weighted);
+
     recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
     if (recentSchools.length>7) recentSchools.shift();
-    const q = getQuestionTemplate().replace('XXXXX',currentNFLPlayer);
+    const q = getQuestionTemplate().replace('XXXXX', currentNFLPlayer);
     addAIMessage(q);
   }
 
+  // --- Binary Round Filtered (also weighted) ---
+  function startTriviaRoundFiltered(choice) {
+    phase = 'binary';
+    binaryRoundCount--;
+    let cands = [];
+    if (choice === 'tough') {
+      cands = Object.keys(nflToCollege).filter(name => {
+        const p = nflToCollege[name];
+        return p.round >= 2 && p.round <= 7 &&
+               ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
+               p.value >= 9 && p.value <= 15;
+      });
+    } else {
+      const defPos = ['DE','DT','LB','OLB','ILB','CB','S'];
+      cands = Object.keys(nflToCollege).filter(name => {
+        const p = nflToCollege[name];
+        return defPos.includes(p.position.toUpperCase()) && p.value >= 49;
+      });
+    }
+    const filt2 = cands.filter(name =>
+      !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
+    );
+    if (filt2.length) cands = filt2;
+    if (!cands.length) {
+      addAIMessage("Can't think of anyone, let's just keep going.");
+      return setTimeout(startTriviaRound, 1500);
+    }
+
+    // apply weighting here as well
+    const weighted = cands.map(name => ({
+      name,
+      weight: computeWeight(nflToCollege[name])
+    }));
+    currentNFLPlayer = weightedRandomPick(weighted);
+
+    recentSchools.push(normalizeCollegeString(nflToCollege[currentNFLPlayer].colleges[0]));
+    if (recentSchools.length>7) recentSchools.shift();
+    const q = getQuestionTemplate().replace('XXXXX', currentNFLPlayer);
+    addAIMessage(q);
+  }
+
+  // --- Ask Next or Trigger Binary ---
+  function askNextQuestion() {
+    addAIMessage(
+      dialogueBuckets.transitions?.[0] || "What's next?",
+      () => {
+        if (normalRoundsCount >= 3) {
+          binaryModeActive  = true;
+          binaryRoundCount  = 3;
+          normalRoundsCount = 0;
+          addAIMessage("Alright, pick an option:", showBinaryChoices);
+        } else {
+          startTriviaRound();
+        }
+      }
+    );
+  }
+  function showBinaryChoices() {
+    inputForm.style.display     = 'none';
+    binaryChoices.style.display = 'block';
+  }
+  function hideBinaryChoices() {
+    binaryChoices.style.display = 'none';
+    inputForm.style.display     = 'block';
+  }
+
   // --- Handle Guess & Transfers ---
-  function handleCollegeGuess(ans){
+  function handleCollegeGuess(ans) {
     clearTimer();
     addMessage(ans,'user');
     const cols = nflToCollege[currentNFLPlayer].colleges;
-    const idx  = cols.findIndex(c=>isCollegeAnswerCorrect(ans,c));
+    const idx  = cols.findIndex(c => isCollegeAnswerCorrect(ans,c));
     if (idx >= 0) {
-      const resp = idx===0
+      const resp = idx === 0
         ? getBriefResponse()
         : getTransferCompliment();
-      // speed up compliments
-      addAIMessage(resp, ()=>{
+      addAIMessage(resp, () => {
         score++; updateScore();
-        if (phase==='easy') {
+        if (phase === 'easy') {
           if (easyRounds < 3) setTimeout(startEasyRound,500);
           else {
-            const et = dialogueBuckets.easyTransition || [];
+            const et  = dialogueBuckets.easyTransition || [];
             const msg = et.length
               ? et[Math.floor(Math.random()*et.length)]
               : "Ok, now let's have some fun";
@@ -453,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
               startTriviaRound();
             });
           }
-        } else if (phase==='trivia') {
+        } else if (phase === 'trivia') {
           if (normalRoundsCount >= 3) setTimeout(askNextQuestion,500);
           else setTimeout(startTriviaRound,500);
         } else {
@@ -467,19 +542,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // --- Form & Choice Listeners ---
-  inputForm.addEventListener('submit', e=>{
+  inputForm.addEventListener('submit', e => {
     e.preventDefault();
     if (!gameActive) return;
     const ans = userInput.value.trim();
     if (ans) handleCollegeGuess(ans);
     userInput.value = '';
   });
-  choiceTough.addEventListener('click',()=>{
+  choiceTough.addEventListener('click', () => {
     addMessage('Hit me with a tough one','user');
     hideBinaryChoices();
     startTriviaRoundFiltered('tough');
   });
-  choiceDefense.addEventListener('click',()=>{
+  choiceDefense.addEventListener('click', () => {
     addMessage('Go defense','user');
     hideBinaryChoices();
     startTriviaRoundFiltered('defense');
