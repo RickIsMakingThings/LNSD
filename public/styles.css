@@ -53,6 +53,11 @@ body {
 #start-screen p {
   margin: 0 0 1em;
   line-height: 1.2;
+ text-align: center;
+
+  
+  font-size: 1.2rem;   /* adjust smaller or larger as needed */
+}
 }
 
 /* Start button styling */
