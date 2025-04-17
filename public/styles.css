@@ -1,5 +1,5 @@
 /* ========== styles.css ========== */
-/* 1) Color vars */
+/* 1) Color variables */
 :root {
   --blue: #007aff;
   --gray-light: #e5e5e5;
@@ -7,7 +7,7 @@
   --text-white: #fff;
 }
 
-/* 2) Base layout */
+/* 2) Base reset & layout */
 body {
   background: #f0f0f0;
   font-family: Arial, sans-serif;
@@ -18,7 +18,7 @@ body {
   min-height: 100vh;
 }
 
-/* 3) Game frame */
+/* 3) Game container: allow horizontal overflow for tails */
 #game-container {
   background: white;
   max-width: 360px;
@@ -30,8 +30,8 @@ body {
   flex-direction: column;
   position: relative;
   z-index: 2;
-  overflow-x: visible; /* allow tails */
-  overflow-y: hidden;  /* still hide vertical overflow */
+  overflow-x: visible; /* ← tails can poke out */
+  overflow-y: hidden;
 }
 
 #score {
@@ -42,18 +42,18 @@ body {
   text-align: center;
 }
 
-/* 4) Chat area */
+/* 4) Chat pane: vertical scroll, horizontal visible */
 #chat-container {
   flex: 1;
   padding: 10px;
   background: white;
-  overflow-y: auto;    /* vertical scroll */
-  overflow-x: visible; /* horizontal tails */
+  overflow-y: auto;
+  overflow-x: visible; /* ← tails can poke out */
 }
 
-/* 5) Bubble base */
+/* 5) Message base */
 .message {
-  position: relative;
+  position: relative;      /* for tail positioning */
   max-width: 80%;
   margin-bottom: 10px;
   padding: 10px 14px;
@@ -63,17 +63,18 @@ body {
   border: 1px solid #ccc;
   animation: fadeIn 200ms ease-out;
 }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.97); }
   to   { opacity: 1; transform: scale(1); }
 }
 
-/* 6) AI bubble + tail */
+/* 6) AI bubbles (+ inset & tail) */
 .message.ai {
   float: left;
   background: var(--gray-light);
   color: var(--text-black);
-  margin-left: 12px;   /* room for tail */
+  margin-left: 12px; /* make room for tail */
 }
 .message.ai::after {
   content: '';
@@ -86,12 +87,12 @@ body {
   border-bottom: 8px solid transparent;
 }
 
-/* 7) User bubble + tail */
+/* 7) User bubbles (+ inset & tail) */
 .message.user {
   float: right;
   background: var(--blue);
   color: var(--text-white);
-  margin-right: 12px;  /* room for tail */
+  margin-right: 12px; /* make room for tail */
 }
 .message.user::after {
   content: '';
@@ -104,7 +105,7 @@ body {
   border-bottom: 8px solid transparent;
 }
 
-/* 8) Typing indicator (ₒ dots) */
+/* 8) Typing indicator (ₒ) */
 .typing-indicator {
   position: relative;
   float: left;
@@ -149,7 +150,7 @@ body {
   font-size: 14px;
 }
 
-/* 11) Input area */
+/* 11) Input form */
 #input-form {
   display: flex;
   border-top: 1px solid #ddd;
@@ -173,7 +174,7 @@ body {
   border-radius: 4px;
 }
 
-/* 12) Game-over overlay */
+/* 12) Game over overlay */
 #game-over {
   position: absolute;
   top: 0;
