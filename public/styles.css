@@ -18,55 +18,7 @@ body {
   min-height: 100vh;
 }
 
-/* 3) Start screen overlay */
-#start-screen {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 360px;         /* same as #game-container */
-  height: 600px;        /* ditto */
-  max-width: 100%;      /* mobile fallback */
-  border-radius: 12px;  /* match your container */
-  background: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;   /* center the copy/buttons */
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 10;
-}
-
-/* Ensure your headings and paragraphs are centered */
-#start-screen h1,
-#start-screen p {
-  margin: 0 0 1em;
-  line-height: 1.2;
-  text-align: center;
-}
-
-/* Style your start button if needed */
-#start-button {
-  padding: 10px 20px;
-  background: var(--blue);
-  color: var(--text-white);
-  border: none;
-  border-radius: 5px;
-  font-size: 1em;
-  cursor: pointer;
-}
-#start-button {
-  padding: 10px 20px;
-  background: var(--blue);
-  color: var(--text-white);
-  border: none;
-  border-radius: 5px;
-  font-size: 1em;
-  cursor: pointer;
-}
-
-/* 4) Game container */
+/* 3) Start screen overlay – fills only #game-container */
 #game-container {
   background: white;
   max-width: 360px;
@@ -76,8 +28,41 @@ body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: none;           /* hidden until “Start” */
   flex-direction: column;
-  position: relative;
+  position: relative;      /* anchor for the overlay */
   overflow: hidden;        /* no horizontal scroll */
+}
+
+/* Overlay now fills exactly its parent container */
+#start-screen {
+  position: absolute;
+  inset: 0;                /* top:0; right:0; bottom:0; left:0; */
+  background: white;
+  border-radius: inherit;  /* match the game‐container corners */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+/* Centered text inside overlay */
+#start-screen h1,
+#start-screen p {
+  margin: 0 0 1em;
+  line-height: 1.2;
+}
+
+/* Start button styling */
+#start-button {
+  padding: 10px 20px;
+  background: var(--blue);
+  color: var(--text-white);
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
 }
 
 /* 5) Score bar */
@@ -121,7 +106,6 @@ body {
   float: left;
   background: var(--gray-light);
   color: var(--text-black);
-  margin-left: 0;  /* no inset */
 }
 
 /* 9) User bubble */
@@ -129,40 +113,27 @@ body {
   float: right;
   background: var(--blue);
   color: var(--text-white);
-  margin-right: 0; /* no inset */
 }
 
-/* --- Typing Indicator (fixed size, dots spaced evenly) --- */
+/* --- Typing Indicator (fixed size, dots spaced left-to-right) --- */
 .typing-indicator {
   position: relative;
   float: left;
   background: var(--gray-light);
   color: #555;
-  font-style: italic;         /* keep the italic style */
+  font-style: italic;
   border: 1px solid #ccc;
   border-radius: 18px;
   margin-bottom: 10px;
-
-  /* restore padding so shape matches other bubbles */
   padding: 6px 12px;
-
-  /* make width fixed but include padding in that width */
   box-sizing: border-box;
-  width: 60px;                /* adjust as needed */
-
-  /* flex container that left‑aligns the dots */
+  width: 60px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-
-  /* no max‑width limit here */
   max-width: none;
 }
 
-/* tweak the dot‑animation so it’s just text inside the box */
-.typing-indicator::before {
-  /* we’ll leave the animated “ₒ” sequence in JS, so nothing to change here */
-}
 /* 11) Timer bar */
 #timer-container {
   height: 4px;
