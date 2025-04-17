@@ -43,13 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
   let binaryRoundCount  = 0;
   let timerInterval;
 
-  // --- Draft‑Year Buckets & α values ---
+  // --- Draft‑Year Weighting Parameters ---
   const minDraftYear = 2009;
   const maxDraftYear = 2024;
-  const bucketSize   = (maxDraftYear - minDraftYear) / 3; // =5
-  const alphaMin     = 0.4;  // oldest bucket
-  const alphaMid     = 0.6;  // middle bucket
-  const alphaMax     = 0.8;  // newest bucket
+  const alphaMin     = 0.4;  // minimum boost for oldest
+  const alphaMax     = 0.8;  // maximum boost for newest
 
   // --- Firestore Setup ---
   const db = firebase.firestore();
@@ -65,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return items[items.length-1].name;
   }
 
-  // --- Try to start game ---
+  // --- Try to start game once data & user ready ---
   function tryStartGame() {
     if (loadedData && userStarted && !gameStarted) {
       gameStarted = true;
@@ -97,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(t => { collegeAliases = parseCSVtoObject(t); })
     .catch(console.error);
 
-  // --- Load players.csv (with College2 & 3) ---
+  // --- Load players.csv (with College2 & College3) ---
   fetch('players.csv')
     .then(r => r.text())
     .then(t => {
@@ -134,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const col3      = p[8].trim();
       const val       = p[9]?.trim()==='' ? 0 : parseFloat(p[9].trim());
       if (!isNaN(draftYear) && !isNaN(round) && name && pos && col1) {
-        // gather all colleges (primary + transfers)
         const colleges = [col1, col2, col3].filter(c => c);
         obj[name] = { draftYear, round, position: pos, colleges, value: val };
       }
@@ -335,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Easy Round (QBs ≥40 or RB/WR R1–2≥40) ---
   function startEasyRound() {
     if (!gameActive) return;
-    if (easyRounds >= 3) return; // transition in answer handler
+    if (easyRounds >= 3) return; // transition handled elsewhere
     phase = 'easy';
 
     let candidates = Object.keys(nflToCollege).filter(name => {
@@ -364,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // --- Trivia Round with DraftYear weighting & transfers ---
+  // --- Trivia Round with non-linear draftYear weighting & transfers ---
   function startTriviaRound() {
     phase = 'trivia';
     normalRoundsCount++;
@@ -385,16 +382,12 @@ document.addEventListener('DOMContentLoaded', function() {
       return gameOver('No eligible players. Game Over!');
     }
 
-    // Build weighted list
+    // Build weighted list with non-linear alpha
     const weighted = candidates.map(name => {
       const p = nflToCollege[name];
-      // choose alpha based on draftYear bucket
-      let alpha;
-      if (p.draftYear >= maxDraftYear - bucketSize) alpha = alphaMax;
-      else if (p.draftYear >= maxDraftYear - 2*bucketSize) alpha = alphaMid;
-      else alpha = alphaMin;
-      // normalized draftYear
-      const norm = (p.draftYear - minDraftYear) / (maxDraftYear - minDraftYear);
+      const norm  = (p.draftYear - minDraftYear) / (maxDraftYear - minDraftYear);
+      const norm2 = norm * norm;
+      const alpha = alphaMin + (alphaMax - alphaMin) * norm2;
       const factor = 1 + alpha * (norm * 2 - 1);
       return { name, weight: p.value * factor };
     });
@@ -408,30 +401,27 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // --- Handle user guess, including transfers ---
+  // --- Handle guess and transfers ---
   function handleCollegeGuess(ans) {
     clearTimer();
     addMessage(ans, 'user');
 
     const cols = nflToCollege[currentNFLPlayer].colleges;
-    // find match index
     const matchIndex = cols.findIndex(c => isCollegeAnswerCorrect(ans, c));
     if (matchIndex >= 0) {
-      // choose response
       const response = matchIndex === 0
         ? getBriefResponse()
         : getTransferCompliment();
       addAIMessage(response, () => {
         score++;
         updateScore();
-
         if (phase === 'easy') {
           if (easyRounds < 3) {
             setTimeout(startEasyRound, 500);
           } else {
             const et  = dialogueBuckets.easyTransition || [];
             const msg = et.length
-              ? et[Math.floor(Math.random() * et.length)]
+              ? et[Math.floor(Math.random()*et.length)]
               : "Ok, now let's have some fun";
             addAIMessage(msg, () => {
               phase = 'trivia';
@@ -439,11 +429,9 @@ document.addEventListener('DOMContentLoaded', function() {
               startTriviaRound();
             });
           }
-
         } else if (phase === 'trivia') {
           if (normalRoundsCount >= 3) setTimeout(askNextQuestion, 500);
           else setTimeout(startTriviaRound, 500);
-
         } else {
           if (binaryModeActive && binaryRoundCount > 0) {
             setTimeout(showBinaryChoices, 500);
@@ -478,5 +466,5 @@ document.addEventListener('DOMContentLoaded', function() {
     startTriviaRoundFiltered('defense');
   });
 
-  // ... rest of the code remains unchanged: binary rounds, askNextQuestion, restartGame, etc. ...
+  // ... (binary rounds, askNextQuestion, restartGame unchanged) ...
 });
