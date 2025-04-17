@@ -85,7 +85,8 @@ body {
   overflow-x: hidden;
 }
 
-/* 7) Message base (merged fade‑in/fade‑out utility + default) */
+/* 7) Message base */
+/* messages default to visible now */
 .message {
   position: relative;
   max-width: 80%;
@@ -95,13 +96,11 @@ body {
   clear: both;
   word-wrap: break-word;
   border: 1px solid #ccc;
-
-  /* start invisible for cross‑fade */
-  opacity: 0;
+  opacity: 1;
   animation: none;
 }
 
-/* quick fadeIn keyframes (used by .fade-in class) */
+/* quick fade‑in keyframes (used by .fade-in class) */
 @keyframes fadeOpacity {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -126,10 +125,12 @@ body {
 }
 
 /* 8) AI bubble */
+/* only AI bubbles start hidden */
 .message.ai {
   float: left;
   background: var(--gray-light);
   color: var(--text-black);
+  opacity: 0;
 }
 
 /* 9) User bubble */

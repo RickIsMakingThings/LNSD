@@ -208,35 +208,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ─── Cross‑Fade Typing & AI Messaging ─────────────
   function showTypingIndicator(txt, cb, step=200) {
-    const ind  = document.createElement('div');
-    ind.classList.add('message','ai','typing-indicator','fade-in');
-    chatContainer.appendChild(ind);
+    // reuse one bubble for dots → text
+    const msg = document.createElement('div');
+    msg.classList.add('message','ai');
+    chatContainer.appendChild(msg);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    const real = document.createElement('div');
-    real.classList.add('message','ai');
-    real.style.opacity = 0;
-    chatContainer.appendChild(real);
-
-    let count=1, max=3;
-    ind.textContent = 'ₒ';
+    // 1) animate dots
+    let count = 1, max = 3;
+    msg.textContent = 'ₒ';
     const dotTimer = setInterval(()=>{
-      count++; ind.textContent = 'ₒ '.repeat(count).trim();
+      count++;
+      msg.textContent = 'ₒ '.repeat(count).trim();
       if (count>=max) clearInterval(dotTimer);
     }, step);
 
+    // 2) after typing, cross‑fade into real text
     setTimeout(()=>{
       clearInterval(dotTimer);
-      real.textContent = txt;
-      ind.classList.remove('fade-in');
-      ind.classList.add('fade-out');
-      real.classList.add('fade-in');
+      // fade‑out dots
+      msg.classList.add('fade-out');
       setTimeout(()=>{
-        if(ind.parentNode) ind.parentNode.removeChild(ind);
-        cb();
+        // swap to real text, fade‑in
+        msg.classList.remove('fade-out');
+        msg.textContent = txt;
+        msg.classList.add('fade-in');
+        setTimeout(()=>{
+          msg.classList.remove('fade-in');
+          if(typeof cb==='function') cb();
+        },200);
       },200);
     }, step*max + 50);
   }
+
   function addAIMessage(txt, onDone) {
     clearTimer();
     showTypingIndicator(txt, ()=>{
@@ -261,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
   restartBtn.addEventListener('click', restartGame);
   submitScoreBtn.addEventListener('click', ()=>{
     gameOverButtons.style.display = 'none';
-    usernameForm.style.display = 'block';
+    usernameForm.style.display    = 'block';
   });
   usernameSubmit.addEventListener('click', ()=>{
     const uname = usernameInput.value.trim();
@@ -311,13 +315,13 @@ document.addEventListener('DOMContentLoaded', function() {
     binaryRoundCount  = 0;
     recentSchools     = [];
     updateScore();
-    chatContainer.innerHTML = '';
-    userInput.value         = '';
-    inputForm.style.display       = 'block';
-    gameOverOverlay.style.display = 'none';
-    gameOverButtons.style.display = 'none';
-    usernameForm.style.display    = 'none';
-    leaderboardCont.style.display = 'none';
+    chatContainer.innerHTML      = '';
+    userInput.value              = '';
+    inputForm.style.display      = 'block';
+    gameOverOverlay.style.display= 'none';
+    gameOverButtons.style.display= 'none';
+    usernameForm.style.display   = 'none';
+    leaderboardCont.style.display= 'none';
     startIntro();
   }
 
@@ -345,9 +349,10 @@ document.addEventListener('DOMContentLoaded', function() {
       const pos = p.position.toUpperCase(), ok = p.value >= 40;
       return (pos==='QB'&&ok) || ((pos==='RB'||pos==='WR')&&p.round<=2&&ok);
     });
-    cands = cands.filter(name=>
+    const filt = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
-    ) || cands;
+    );
+    if (filt.length) cands = filt;
     if (!cands.length) return gameOver('No eligible easy players.');
     const weighted = cands.map(name=>({
       name, weight: computeWeight(nflToCollege[name])
@@ -370,9 +375,10 @@ document.addEventListener('DOMContentLoaded', function() {
              ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
              p.value>=20;
     });
-    cands = cands.filter(name=>
+    const filt = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
-    ) || cands;
+    );
+    if (filt.length) cands = filt;
     if (!cands.length) return gameOver('No eligible players.');
     const weighted = cands.map(name=>({
       name, weight: computeWeight(nflToCollege[name])
@@ -403,9 +409,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return defPos.includes(p.position.toUpperCase())&&p.value>=49;
       });
     }
-    cands = cands.filter(name=>
+    const filt2 = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
-    ) || cands;
+    );
+    if (filt2.length) cands = filt2;
     if (!cands.length) {
       addAIMessage("Can't think of anyone, let's just keep going.");
       return setTimeout(startTriviaRound,1500);
@@ -425,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function askNextQuestion() {
     addAIMessage(
       dialogueBuckets.transitions?.[0] || "What's next?",
-      ()=>{
+      ()=>{  
         if (normalRoundsCount>=3) {
           binaryModeActive = true;
           binaryRoundCount = 3;
@@ -438,12 +445,12 @@ document.addEventListener('DOMContentLoaded', function() {
     );
   }
   function showBinaryChoices() {
-    inputForm.style.display = 'none';
+    inputForm.style.display     = 'none';
     binaryChoices.style.display = 'block';
   }
   function hideBinaryChoices() {
     binaryChoices.style.display = 'none';
-    inputForm.style.display = 'block';
+    inputForm.style.display     = 'block';
   }
 
   // ─── Handle User Guess ───────────────────────────
@@ -484,14 +491,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Event Listeners ─────────────────────────────
-  inputForm.addEventListener('submit', e => {
+  inputForm.addEventListener('submit', e=>{
     e.preventDefault();
     if (!gameActive) return;
     const ans = userInput.value.trim();
     if (ans) handleCollegeGuess(ans);
     userInput.value = '';
   });
-  choiceTough.addEventListener('click', ()=>{
+  choiceTough.addEventListener('click', ()=>{  
     addMessage('Hit me with a tough one','user');
     hideBinaryChoices();
     startTriviaRoundFiltered('tough');
