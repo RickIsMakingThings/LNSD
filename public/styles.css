@@ -23,11 +23,13 @@ body {
   height: 600px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 2;
+  /* allow tails at edges without scrollbars */
+  overflow-x: visible;
+  overflow-y: hidden;
 }
 
 #score {
@@ -41,13 +43,14 @@ body {
 #chat-container {
   flex: 1;
   padding: 10px;
-  overflow-y: auto;
   background: white;
+  overflow-y: auto;
+  overflow-x: visible; /* permit bubble tails to show */
 }
 
 /* Message Bubbles */
 .message {
-  position: relative;          /* needed for the tails */
+  position: relative;          /* for tail positioning */
   max-width: 80%;
   margin-bottom: 10px;
   padding: 10px 14px;
@@ -64,14 +67,15 @@ body {
 }
 
 /* AI messages */
-.ai {
+.message.ai {
   float: left;
   background: var(--gray-light);
   color: var(--text-black);
+  margin-left: 12px;    /* room for tail */
 }
 
 /* AI tail on bottom-left */
-.ai::after {
+.message.ai::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -83,14 +87,15 @@ body {
 }
 
 /* User messages */
-.user {
+.message.user {
   float: right;
   background: var(--blue);
   color: var(--text-white);
+  margin-right: 12px;   /* room for tail */
 }
 
 /* User tail on bottom-right */
-.user::after {
+.message.user::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -117,16 +122,16 @@ body {
 
 /* Timer Container */
 #timer-container {
-  height: 4px;             /* Thin horizontal bar */
-  background-color: #ccc;  /* Light grey background */
+  height: 4px;
+  background-color: #ccc;
   width: 100%;
   margin: 5px 0;
 }
 #timer-bar {
   height: 100%;
-  background-color: var(--blue);  /* Blue fill color */
+  background-color: var(--blue);
   width: 0%;
-  transition: width 0.1s linear;  /* Smooth decrement animation */
+  transition: width 0.1s linear;
 }
 
 /* Binary Choices Container */
