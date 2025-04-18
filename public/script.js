@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Cross‑Fade Typing & AI Messaging ─────────────
-  function showTypingIndicator(txt, cb, step=150) {
+  function showTypingIndicator(txt, cb, step=200) {
     const msg = document.createElement('div');
     msg.classList.add('message','ai','typing-indicator');
     msg.style.opacity = '1';
