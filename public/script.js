@@ -207,45 +207,33 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Cross‑Fade Typing & AI Messaging ─────────────
-  function showTypingIndicator(txt, cb, step = 150) {
-  // 1) Create one bubble that starts fully visible as the typing indicator
+ function showTypingIndicator(txt, cb, step = 80) {
+  // Create one bubble, visible immediately as typing indicator
   const msg = document.createElement('div');
-  msg.classList.add('message','ai','typing-indicator','fade-in');
+  msg.classList.add('message','ai','typing-indicator');
   chatContainer.appendChild(msg);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  // 2) Animate the dots inside that same bubble
+  // Animate up to 3 dots, then swap instantly
   let count = 1, max = 3;
   msg.textContent = 'ₒ';
   const dotTimer = setInterval(() => {
     count++;
     msg.textContent = 'ₒ '.repeat(count).trim();
-    if (count >= max) clearInterval(dotTimer);
-  }, step);
 
-  // 3) After the dots finish, cross‑fade into the real text
-  setTimeout(() => {
-    clearInterval(dotTimer);
+    if (count >= max) {
+      clearInterval(dotTimer);
 
-    // fade out the dots
-    msg.classList.remove('fade-in');
-    msg.classList.add('fade-out');
-
-    setTimeout(() => {
-      // remove the typing styling, swap in the real text, then fade it in
-      msg.classList.remove('typing-indicator','fade-out');
+      // Immediately switch to real text (no fade‑out delay)
+      msg.classList.remove('typing-indicator');
       msg.textContent = txt;
-      msg.classList.add('fade-in');
+      msg.classList.add('fade-in');  // you can keep this simple fade‑in
 
-      // leave it there (never remove fade-in)—then invoke the callback
-      setTimeout(() => {
-        if (typeof cb === 'function') cb();
-      }, 100);
-    }, 100);
-
-  }, step * max + 20);
+      // Fire callback right away
+      if (typeof cb === 'function') cb();
+    }
+  }, step);
 }
-
   function addAIMessage(txt, onDone) {
     clearTimer();
     showTypingIndicator(txt, ()=>{
