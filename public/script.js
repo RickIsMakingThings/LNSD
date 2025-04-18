@@ -208,28 +208,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ─── Cross‑Fade Typing & AI Messaging ─────────────
  function showTypingIndicator(txt, cb, step = 80) {
-  // Create one bubble, visible immediately as typing indicator
+  // 1) Create a single bubble, force it fully visible, and style it as the typing indicator
   const msg = document.createElement('div');
   msg.classList.add('message','ai','typing-indicator');
+  msg.style.opacity = '1';              // <- override CSS opacity:0
   chatContainer.appendChild(msg);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  // Animate up to 3 dots, then swap instantly
+  // 2) Animate up to three dots (ₒ)
   let count = 1, max = 3;
   msg.textContent = 'ₒ';
-  const dotTimer = setInterval(() => {
+  const dotTimer = setInterval(()=>{
     count++;
     msg.textContent = 'ₒ '.repeat(count).trim();
-
     if (count >= max) {
       clearInterval(dotTimer);
 
-      // Immediately switch to real text (no fade‑out delay)
+      // 3) Immediately swap to the real text—no gap, no fade‑out needed
       msg.classList.remove('typing-indicator');
       msg.textContent = txt;
-      msg.classList.add('fade-in');  // you can keep this simple fade‑in
 
-      // Fire callback right away
+      // 4) Callback right away
       if (typeof cb === 'function') cb();
     }
   }, step);
