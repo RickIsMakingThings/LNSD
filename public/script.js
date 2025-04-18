@@ -206,8 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
     return a===c || (collegeAliases[c]||[]).includes(a);
   }
 
-  // ─── Typing & AI Messaging ────────────────────────
-  function showTypingIndicator(txt, cb, step=150) {
+  // ─── Typing & AI Messaging (variable speeds) ─────
+  function showTypingIndicator(txt, cb, step) {
     const msg = document.createElement('div');
     msg.classList.add('message','ai','typing-indicator');
     msg.style.opacity = '1';
@@ -227,20 +227,21 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, step);
   }
-  function addAIMessage(txt, onDone) {
+  function addAIMessage(txt, onDone, step=200) {
+    // step=200 for intros/questions by default
     clearTimer();
     showTypingIndicator(txt, ()=>{
       if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
         startTimer();
       }
       if (typeof onDone==='function') onDone();
-    });
+    }, step);
   }
 
   // ─── Game Over & Leaderboard ──────────────────────
   function gameOver(msg) {
     gameActive = false; clearTimer();
-    addAIMessage(msg);
+    addAIMessage(msg, null, 200);
     gameOverMsg.textContent = msg;
     gameOverOverlay.style.display = 'flex';
     gameOverButtons.style.display = 'block';
@@ -315,13 +316,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function startIntro() {
     addAIMessage(
       dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
-      ()=> addAIMessage(
+      () => addAIMessage(
         dialogueBuckets.greetings?.[1] || "no googling",
-        ()=> addAIMessage(
+        () => addAIMessage(
           "We can start with some easy ones.",
-          startEasyRound
-        )
-      )
+          startEasyRound,
+          200
+        ),
+        200
+      ),
+      200
     );
   }
 
@@ -332,9 +336,9 @@ document.addEventListener('DOMContentLoaded', function() {
     phase = 'easy';
     let cands = Object.keys(nflToCollege).filter(name=>{
       const p = nflToCollege[name];
-      return (p.position.toUpperCase()==='QB' && p.value>=40)
-          || ((p.position.toUpperCase()==='RB' || p.position.toUpperCase()==='WR')
-              && p.round<=2 && p.value>=40);
+      return (p.position.toUpperCase()==='QB'&&p.value>=40)
+          || ((p.position.toUpperCase()==='RB'||p.position.toUpperCase()==='WR')
+              &&p.round<=2&&p.value>=40);
     });
     const filt = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
@@ -350,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
     easyRounds++;
     const q = pickWithCooldown(dialogueBuckets.questions||['How about XXXXX'], recentQuestions)
               .replace('XXXXX', currentNFLPlayer);
-    addAIMessage(q);
+    addAIMessage(q, null, 200);
   }
 
   // ─── Standard Trivia Round ────────────────────────
@@ -375,24 +379,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (recentSchools.length>7) recentSchools.shift();
     const q = pickWithCooldown(dialogueBuckets.questions||['How about XXXXX'], recentQuestions)
               .replace('XXXXX', currentNFLPlayer);
-    addAIMessage(q);
+    addAIMessage(q, null, 200);
   }
 
-  // ─── Binary Choice Round (once only) ─────────────
+  // ─── Binary Choice Round ──────────────────────────
   function startTriviaRoundFiltered(choice) {
-    phase = 'binary';
-    binaryRoundCount--; // will go from 1→0
+    phase = 'binary'; binaryRoundCount--;
     let cands = [];
     if (choice==='tough') {
-      // tough: value 10–20
       cands = Object.keys(nflToCollege).filter(name=>{
         const p = nflToCollege[name];
-        return p.round>=2 && p.round<=7
+        return p.round>=2&&p.round<=7
             && ['QB','RB','WR'].includes(p.position.toUpperCase())
-            && p.value>=10 && p.value<=20;
+            && p.value>=10&&p.value<=20;
       });
     } else {
-      // defense: include DL, value ≥60
       const defPos = ['DE','DT','DL','LB','OLB','ILB','CB','S'];
       cands = Object.keys(nflToCollege).filter(name=>{
         const p = nflToCollege[name];
@@ -404,7 +405,7 @@ document.addEventListener('DOMContentLoaded', function() {
     );
     if (filt2.length) cands = filt2;
     if (!cands.length) {
-      addAIMessage("Can't think of anyone, let's just keep going.");
+      addAIMessage("Can't think of anyone, let's just keep going.", null, 80);
       return setTimeout(startTriviaRound,1500);
     }
     const weighted = cands.map(name=>({
@@ -415,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (recentSchools.length>7) recentSchools.shift();
     const q = pickWithCooldown(dialogueBuckets.questions||['How about XXXXX'], recentQuestions)
               .replace('XXXXX', currentNFLPlayer);
-    addAIMessage(q);
+    addAIMessage(q, null, 200);
   }
 
   // ─── Ask Next / Trigger Binary Once ───────────────
@@ -424,15 +425,15 @@ document.addEventListener('DOMContentLoaded', function() {
       dialogueBuckets.transitions?.[0] || "What's next?",
       ()=>{  
         if (normalRoundsCount>=3) {
-          // only once!
           binaryModeActive = true;
-          binaryRoundCount = 1;   // ← was 3, now just 1
+          binaryRoundCount = 1;
           normalRoundsCount = 0;
-          addAIMessage("Alright, pick an option:", showBinaryChoices);
+          addAIMessage("Alright, pick an option:", showBinaryChoices, 200);
         } else {
           startTriviaRound();
         }
-      }
+      },
+      200
     );
   }
   function showBinaryChoices() {
@@ -451,6 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cols = nflToCollege[currentNFLPlayer].colleges;
     const idx  = cols.findIndex(c=>isCollegeAnswerCorrect(ans,c));
     if (idx>=0) {
+      // compliments stay fast
       const resp = idx===0
         ? pickWithCooldown(dialogueBuckets.confirmations||['nice'], recentConfirmations)
         : pickWithCooldown(dialogueBuckets.transferCompliments||["I see what you did there"], recentTransferCompliments);
@@ -466,20 +468,16 @@ document.addEventListener('DOMContentLoaded', function() {
             addAIMessage(msg, ()=>{
               phase='trivia'; normalRoundsCount=0;
               startTriviaRound();
-            });
+            }, 80);
           }
         } else if (phase==='trivia') {
           if (normalRoundsCount>=3) setTimeout(askNextQuestion,500);
           else setTimeout(startTriviaRound,500);
         } else {
-          // binaryModeActive && binaryRoundCount > 0 only true once
           if (binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,500);
-          else { 
-            binaryModeActive = false;
-            setTimeout(startTriviaRound,500);
-          }
+          else { binaryModeActive=false; setTimeout(startTriviaRound,500); }
         }
-      });
+      }, 80);
     } else {
       gameOver(`Nah, ${currentNFLPlayer} played at ${cols[0]}. Game Over!`);
     }
