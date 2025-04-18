@@ -206,8 +206,8 @@ document.addEventListener('DOMContentLoaded', function() {
     return a===c || (collegeAliases[c]||[]).includes(a);
   }
 
-  // ─── Cross‑Fade Typing & AI Messaging ─────────────
-  function showTypingIndicator(txt, cb, step=200) {
+  // ─── Typing & AI Messaging ────────────────────────
+  function showTypingIndicator(txt, cb, step=150) {
     const msg = document.createElement('div');
     msg.classList.add('message','ai','typing-indicator');
     msg.style.opacity = '1';
@@ -332,8 +332,9 @@ document.addEventListener('DOMContentLoaded', function() {
     phase = 'easy';
     let cands = Object.keys(nflToCollege).filter(name=>{
       const p = nflToCollege[name];
-      const pos = p.position.toUpperCase(), ok = p.value >= 40;
-      return (pos==='QB'&&ok) || ((pos==='RB'||pos==='WR')&&p.round<=2&&ok);
+      return (p.position.toUpperCase()==='QB' && p.value>=40)
+          || ((p.position.toUpperCase()==='RB' || p.position.toUpperCase()==='WR')
+              && p.round<=2 && p.value>=40);
     });
     const filt = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
@@ -357,9 +358,9 @@ document.addEventListener('DOMContentLoaded', function() {
     phase = 'trivia'; normalRoundsCount++;
     let cands = Object.keys(nflToCollege).filter(name=>{
       const p = nflToCollege[name];
-      return p.round<=4 &&
-             ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
-             p.value>=20;
+      return p.round<=4
+          && ['QB','RB','WR'].includes(p.position.toUpperCase())
+          && p.value>=20;
     });
     const filt = cands.filter(name=>
       !recentSchools.includes(normalizeCollegeString(nflToCollege[name].colleges[0]))
@@ -377,25 +378,25 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // ─── Binary Choice Round ──────────────────────────
+  // ─── Binary Choice Round (once only) ─────────────
   function startTriviaRoundFiltered(choice) {
-    phase = 'binary'; binaryRoundCount--;
+    phase = 'binary';
+    binaryRoundCount--; // will go from 1→0
     let cands = [];
     if (choice==='tough') {
-      // updated: value between 10 and 20
+      // tough: value 10–20
       cands = Object.keys(nflToCollege).filter(name=>{
         const p = nflToCollege[name];
-        return p.round>=2 && p.round<=7 &&
-               ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
-               p.value>=10 && p.value<=20;
+        return p.round>=2 && p.round<=7
+            && ['QB','RB','WR'].includes(p.position.toUpperCase())
+            && p.value>=10 && p.value<=20;
       });
     } else {
-      // updated: include DL, require value >=60
+      // defense: include DL, value ≥60
       const defPos = ['DE','DT','DL','LB','OLB','ILB','CB','S'];
       cands = Object.keys(nflToCollege).filter(name=>{
         const p = nflToCollege[name];
-        return defPos.includes(p.position.toUpperCase()) &&
-               p.value>=60;
+        return defPos.includes(p.position.toUpperCase()) && p.value>=60;
       });
     }
     const filt2 = cands.filter(name=>
@@ -417,14 +418,15 @@ document.addEventListener('DOMContentLoaded', function() {
     addAIMessage(q);
   }
 
-  // ─── Transition / Binary Trigger ─────────────────
+  // ─── Ask Next / Trigger Binary Once ───────────────
   function askNextQuestion() {
     addAIMessage(
       dialogueBuckets.transitions?.[0] || "What's next?",
       ()=>{  
         if (normalRoundsCount>=3) {
+          // only once!
           binaryModeActive = true;
-          binaryRoundCount = 3;
+          binaryRoundCount = 1;   // ← was 3, now just 1
           normalRoundsCount = 0;
           addAIMessage("Alright, pick an option:", showBinaryChoices);
         } else {
@@ -470,8 +472,12 @@ document.addEventListener('DOMContentLoaded', function() {
           if (normalRoundsCount>=3) setTimeout(askNextQuestion,500);
           else setTimeout(startTriviaRound,500);
         } else {
+          // binaryModeActive && binaryRoundCount > 0 only true once
           if (binaryModeActive && binaryRoundCount>0) setTimeout(showBinaryChoices,500);
-          else { binaryModeActive=false; setTimeout(startTriviaRound,500); }
+          else { 
+            binaryModeActive = false;
+            setTimeout(startTriviaRound,500);
+          }
         }
       });
     } else {
@@ -487,7 +493,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (ans) handleCollegeGuess(ans);
     userInput.value = '';
   });
-  choiceTough.addEventListener('click', ()=>{  
+  choiceTough.addEventListener('click', ()=>{
     addMessage('Hit me with a tough one','user');
     hideBinaryChoices();
     startTriviaRoundFiltered('tough');
