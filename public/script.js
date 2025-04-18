@@ -74,27 +74,27 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── DOM References ────────────────────────────────
-  const startScreen     = document.getElementById('start-screen');
-  const startButton     = document.getElementById('start-button');
-  const chatContainer   = document.getElementById('chat-container');
-  const inputForm       = document.getElementById('input-form');
-  const userInput       = document.getElementById('user-input');
-  const scoreDisplay    = document.getElementById('score');
-  const timerBar        = document.getElementById('timer-bar');
-  const binaryChoices   = document.getElementById('binary-choices');
-  const choiceTough     = document.getElementById('choice-tough');
-  const choiceDefense   = document.getElementById('choice-defense');
-  const gameOverOverlay = document.getElementById('game-over');
-  const gameOverMsg     = document.getElementById('game-over-msg');
-  const gameOverButtons = document.getElementById('game-over-buttons');
-  const submitScoreBtn  = document.getElementById('submit-score');
-  const restartBtn      = document.getElementById('restart');
-  const usernameForm    = document.getElementById('username-form');
-  const usernameInput   = document.getElementById('username-input');
-  const usernameSubmit  = document.getElementById('username-submit');
-  const leaderboardCont = document.getElementById('leaderboard-container');
-  const leaderboardList = document.getElementById('leaderboard');
-  const leaderboardRestart = document.getElementById('leaderboard-restart');
+  const startScreen       = document.getElementById('start-screen');
+  const startButton       = document.getElementById('start-button');
+  const chatContainer     = document.getElementById('chat-container');
+  const inputForm         = document.getElementById('input-form');
+  const userInput         = document.getElementById('user-input');
+  const scoreDisplay      = document.getElementById('score');
+  const timerBar          = document.getElementById('timer-bar');
+  const binaryChoices     = document.getElementById('binary-choices');
+  const choiceTough       = document.getElementById('choice-tough');
+  const choiceDefense     = document.getElementById('choice-defense');
+  const gameOverOverlay   = document.getElementById('game-over');
+  const gameOverMsg       = document.getElementById('game-over-msg');
+  const gameOverButtons   = document.getElementById('game-over-buttons');
+  const submitScoreBtn    = document.getElementById('submit-score');
+  const restartBtn        = document.getElementById('restart');
+  const usernameForm      = document.getElementById('username-form');
+  const usernameInput     = document.getElementById('username-input');
+  const usernameSubmit    = document.getElementById('username-submit');
+  const leaderboardCont   = document.getElementById('leaderboard-container');
+  const leaderboardList   = document.getElementById('leaderboard');
+  const leaderboardRestart= document.getElementById('leaderboard-restart');
 
   // ─── CSV Parsing Helpers ──────────────────────────
   function parseCSVtoObject(csv) {
@@ -207,32 +207,26 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Cross‑Fade Typing & AI Messaging ─────────────
- function showTypingIndicator(txt, cb, step = 200) {
-  // 1) Create a single bubble, force it fully visible, and style it as the typing indicator
-  const msg = document.createElement('div');
-  msg.classList.add('message','ai','typing-indicator');
-  msg.style.opacity = '1';              // <- override CSS opacity:0
-  chatContainer.appendChild(msg);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
+  function showTypingIndicator(txt, cb, step=150) {
+    const msg = document.createElement('div');
+    msg.classList.add('message','ai','typing-indicator');
+    msg.style.opacity = '1';
+    chatContainer.appendChild(msg);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  // 2) Animate up to three dots (ₒ)
-  let count = 1, max = 3;
-  msg.textContent = 'ₒ';
-  const dotTimer = setInterval(()=>{
-    count++;
-    msg.textContent = 'ₒ '.repeat(count).trim();
-    if (count >= max) {
-      clearInterval(dotTimer);
-
-      // 3) Immediately swap to the real text—no gap, no fade‑out needed
-      msg.classList.remove('typing-indicator');
-      msg.textContent = txt;
-
-      // 4) Callback right away
-      if (typeof cb === 'function') cb();
-    }
-  }, step);
-}
+    let count=1, max=3;
+    msg.textContent='ₒ';
+    const dotTimer = setInterval(()=>{
+      count++;
+      msg.textContent='ₒ '.repeat(count).trim();
+      if (count>=max) {
+        clearInterval(dotTimer);
+        msg.classList.remove('typing-indicator');
+        msg.textContent = txt;
+        if (typeof cb==='function') cb();
+      }
+    }, step);
+  }
   function addAIMessage(txt, onDone) {
     clearTimer();
     showTypingIndicator(txt, ()=>{
@@ -284,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (snap.empty) leaderboardList.innerHTML = '<li>No scores yet.</li>';
         else snap.forEach(doc=>{
           const {username,score}=doc.data();
-          const li = document.createElement('li');
+          const li=document.createElement('li');
           li.textContent = `${username}: ${score}`;
           leaderboardList.appendChild(li);
         });
@@ -388,17 +382,20 @@ document.addEventListener('DOMContentLoaded', function() {
     phase = 'binary'; binaryRoundCount--;
     let cands = [];
     if (choice==='tough') {
+      // updated: value between 10 and 20
       cands = Object.keys(nflToCollege).filter(name=>{
         const p = nflToCollege[name];
-        return p.round>=2&&p.round<=7 &&
+        return p.round>=2 && p.round<=7 &&
                ['QB','RB','WR'].includes(p.position.toUpperCase()) &&
-               p.value>=9&&p.value<=15;
+               p.value>=10 && p.value<=20;
       });
     } else {
-      const defPos = ['DE','DT','LB','OLB','ILB','CB','S'];
+      // updated: include DL, require value >=60
+      const defPos = ['DE','DT','DL','LB','OLB','ILB','CB','S'];
       cands = Object.keys(nflToCollege).filter(name=>{
         const p = nflToCollege[name];
-        return defPos.includes(p.position.toUpperCase())&&p.value>=49;
+        return defPos.includes(p.position.toUpperCase()) &&
+               p.value>=60;
       });
     }
     const filt2 = cands.filter(name=>
