@@ -94,28 +94,12 @@ body {
   margin-right: 12px;
 }
 #score-display {
-  position: relative;
-  font-weight: bold;
+  position: absolute;
   left: 12px;
-}
-
-#score-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-#plus-one {
-  color: green;
   font-weight: bold;
-  margin-left: 6px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
 }
 
-#plus-one.show {
-  opacity: 1;
-}/* ── 6) Chat area ──────────────────────────────── */
+/* ── 6) Chat area ──────────────────────────────── */
 #chat-container {
   flex: 1;
   padding: 20px;
@@ -127,18 +111,19 @@ body {
 
 /* ── 7) Messages ───────────────────────────────── */
 .message {
-  display: inline-block;
+  position: relative;
   max-width: 80%;
   margin-bottom: 10px;
   padding: 8px 12px;
   border-radius: 18px;
+  clear: both;
   word-wrap: break-word;
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: break-word;
   border: 1px solid #ccc;
   animation: fadeIn 100ms ease-out;
-  clear: both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
 }
 .message.ai {
   float: left;
@@ -150,6 +135,7 @@ body {
   background: var(--blue);
   color: var(--text-white);
 }
+
 /* ── 8) Typing indicator ───────────────────────── */
 .typing-indicator {
   float: left;

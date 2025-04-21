@@ -215,21 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateScore() {
     scoreDisplay.textContent = score;
   }
-  function showPlusOne() {
-  const plusOne = document.getElementById('plus-one');
-  plusOne.classList.add('show');
-  setTimeout(() => {
-    plusOne.classList.remove('show');
-  }, 600); // Show for 600ms
-}
-  // Trigger animation
-  requestAnimationFrame(() => {
-    plus.classList.add('show');
-  });
-
-  // Remove after animation
-  setTimeout(() => plus.remove(), 800);
-}
 
   // ─── Start Button Handler ─────────────────────────
   startButton.addEventListener('click', () => {
@@ -466,15 +451,11 @@ loadData.then(() => {
     const resp = idx===0
       ? pickWithCooldown(dialogueBuckets.confirmations||['nice'], recentConfirmations)
       : pickWithCooldown(dialogueBuckets.transferCompliments||["I see what you did there"], recentTransferCompliments);
-    score++;
-      showPlusOne();
-      updateScore();
 
     addAIMessage(resp, () => {
       // ← Restore this entire block:
       score++;
       updateScore();
-      showScorePlusOne();
 
       if (phase==='easy') {
         if (easyRounds < 3) {
