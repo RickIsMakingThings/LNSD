@@ -1,3 +1,5 @@
+/* ========== styles.css v6 ========== */
+/* 1) Color variables */
 :root {
   --blue: #007aff;
   --gray-light: #e5e5e5;
@@ -5,6 +7,7 @@
   --text-white: #fff;
 }
 
+/* 2) Base reset & layout */
 body {
   background: #f0f0f0;
   font-family: Arial, sans-serif;
@@ -15,7 +18,7 @@ body {
   min-height: 100vh;
 }
 
-/* ── Game container ─────────────────────────────── */
+/* 3) Game container (always visible, hosts the overlay) */
 #game-container {
   background: white;
   max-width: 360px;
@@ -29,12 +32,12 @@ body {
   overflow: hidden;
 }
 
-/* ── Start‑screen overlay ───────────────────────── */
+/* 4) Start‑screen overlay (fills #game-container exactly) */
 #start-screen {
   position: absolute;
-  inset: 0;                  /* fill its parent exactly */
+  inset: 0;
   background: white;
-  border-radius: inherit;    /* match game-container corners */
+  border-radius: inherit;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -49,41 +52,47 @@ body {
   line-height: 1.4;
   font-size: 0.9rem;
 }
+#start-screen button {
+  padding: 10px 20px;
+  background: var(--blue);
+  color: var(--text-white);
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+  margin-bottom: 1em;
+}
+#example-image {
+  max-width: 80%;
+  border-radius: 8px;
+}
 
-/* ── iMessage‑style header ─────────────────────── */
+/* 5) iMessage‑style header */
 #header {
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 88px;              /* doubled from 44px */
-  background: var(--gray-light);
+  height: 48px;
+  background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5;
+  position: relative;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
 }
 #score-display {
   position: absolute;
   left: 12px;
-  font-size: 18px;           /* bumped a bit */
   font-weight: bold;
   color: var(--text-black);
 }
 #header-logo {
-  width: 36px;
-  height: 36px;
-  background: white;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: var(--text-black);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  object-fit: cover;
 }
 
-/* Make room under header */
+/* 6) Chat area */
 #chat-container {
-  margin-top: 88px;          /* match header height */
   flex: 1;
   padding: 10px;
   background: white;
@@ -91,33 +100,40 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Message bubbles ───────────────────────────── */
+/* 7) Message base */
 .message {
+  position: relative;
   max-width: 80%;
   margin-bottom: 10px;
   padding: 8px 12px;
   border-radius: 18px;
   clear: both;
   word-wrap: break-word;
+  border: 1px solid #ccc;
   animation: fadeIn 100ms ease-out;
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: scale(0.97); }
   to   { opacity: 1; transform: scale(1); }
 }
+
+/* 8) AI bubble */
 .message.ai {
   float: left;
   background: var(--gray-light);
   color: var(--text-black);
 }
+
+/* 9) User bubble */
 .message.user {
   float: right;
   background: var(--blue);
   color: var(--text-white);
 }
 
-/* ── Typing indicator ──────────────────────────── */
+/* 10) Typing Indicator */
 .typing-indicator {
+  position: relative;
   float: left;
   background: var(--gray-light);
   color: #555;
@@ -131,10 +147,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  max-width: none;
 }
 
-/* ── Timer bar ─────────────────────────────────── */
+/* 11) Timer bar */
 #timer-container {
   height: 4px;
   background-color: #ccc;
@@ -148,7 +163,7 @@ body {
   transition: width 0.1s linear;
 }
 
-/* ── Binary choices ────────────────────────────── */
+/* 12) Binary choices */
 #binary-choices {
   display: none;
   text-align: center;
@@ -165,7 +180,7 @@ body {
   font-size: 14px;
 }
 
-/* ── Input form ────────────────────────────────── */
+/* 13) Input form */
 #input-form {
   display: flex;
   border-top: 1px solid #ddd;
@@ -178,9 +193,7 @@ body {
   padding: 10px;
   font-size: 16px;
 }
-#user-input:focus {
-  outline: none;
-}
+#user-input:focus { outline: none; }
 #input-form button {
   border: none;
   background: var(--blue);
@@ -191,13 +204,12 @@ body {
   border-radius: 4px;
 }
 
-/* ── Game‑over overlay ─────────────────────────── */
+/* 14) Game‑over overlay */
 #game-over {
   position: absolute;
   top: 0; left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  height: 100%;
+  width: 90%; height: 100%;
   background: rgba(255,255,255,0.95);
   display: none;
   flex-direction: column;
