@@ -169,29 +169,33 @@ body {
 /* Input form */
 #input-form {
   display: flex;
+  align-items: center;
   border-top: 1px solid #ddd;
-  padding: 5px;
+  /* shrink horizontal padding so buttons hug the edges */
+  padding: 5px 4px;  
   background: #fafafa;
 }
+
 #user-input {
+  /* grow to fill most of the row */
   flex: 1;
+  margin-right: 8px;     /* a small gap between text‑field and button */
   border: none;
   padding: 10px;
   font-size: 16px;
 }
-#user-input:focus {
-  outline: none;
-}
+
 #input-form button {
-  border: none;
+  /* no extra right‑margin so it lives close to the edge */
+  margin: 0;
   background: var(--blue);
   color: var(--text-white);
+  border: none;
   padding: 10px 15px;
-  cursor: pointer;
   font-size: 16px;
   border-radius: 4px;
+  cursor: pointer;
 }
-
 /* Game‑over overlay */
 #game-over {
   position: absolute;
