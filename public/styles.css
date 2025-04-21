@@ -290,4 +290,12 @@ body {
     width: 100%;
     flex: 0 0 auto;
   }
+  .tip-text {
+  margin-top: 20px;
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #666;
+  text-align: center;
+  max-width: 80%;
+}
 }
