@@ -239,13 +239,17 @@ document.addEventListener('DOMContentLoaded', function() {
   dialogueBuckets = {}, collegeAliases = {}, nflToCollege = {};
 
 const loadData = Promise.all([
-  fetch('dialogue.json')
-  .then(r => r.json())
-  .then(d => dialogueBuckets = d)
-  .catch(err => console.error("Failed to load dialogue.json", err));
+  fetch('dialogue.json').then(r => r.json()).then(d => dialogueBuckets = d),
   fetch('college_aliases.csv').then(r => r.text()).then(t => collegeAliases = parseCSVtoObject(t)),
   fetch('players.csv').then(r => r.text()).then(t => nflToCollege = parsePlayersCSV(t))
-]);
+])
+.then(() => {
+  startButton.disabled = false;
+  console.log("✅ All data loaded");
+})
+.catch(err => {
+  console.error("❌ Data loading failed", err);
+});
 
 // disable the start button until data is in
 startButton.disabled = true;
