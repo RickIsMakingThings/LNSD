@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
   // ─── Data Loading ──────────────────────────────────
-  let dialogueBuckets = {}, collegeAliases = {}, nflToCollege = {};
+  dialogueBuckets = {}, collegeAliases = {}, nflToCollege = {};
 
 const loadData = Promise.all([
   fetch('dialogue.json').then(r => r.json()).then(d => dialogueBuckets = d),
