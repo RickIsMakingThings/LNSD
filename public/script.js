@@ -215,12 +215,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateScore() {
     scoreDisplay.textContent = score;
   }
-  function showScorePlusOne() {
-  const plus = document.createElement('span');
-  plus.className = 'score-plus-one';
-  plus.textContent = '+1';
-  scoreDisplay.appendChild(plus);
-
+  function showPlusOne() {
+  const plusOne = document.getElementById('plus-one');
+  plusOne.classList.add('show');
+  setTimeout(() => {
+    plusOne.classList.remove('show');
+  }, 600); // Show for 600ms
+}
   // Trigger animation
   requestAnimationFrame(() => {
     plus.classList.add('show');
@@ -465,6 +466,9 @@ loadData.then(() => {
     const resp = idx===0
       ? pickWithCooldown(dialogueBuckets.confirmations||['nice'], recentConfirmations)
       : pickWithCooldown(dialogueBuckets.transferCompliments||["I see what you did there"], recentTransferCompliments);
+    score++;
+      showPlusOne();
+      updateScore();
 
     addAIMessage(resp, () => {
       // ← Restore this entire block:
