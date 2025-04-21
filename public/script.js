@@ -239,7 +239,10 @@ document.addEventListener('DOMContentLoaded', function() {
   dialogueBuckets = {}, collegeAliases = {}, nflToCollege = {};
 
 const loadData = Promise.all([
-  fetch('dialogue.json').then(r => r.json()).then(d => dialogueBuckets = d),
+  fetch('dialogue.json')
+  .then(r => r.json())
+  .then(d => dialogueBuckets = d)
+  .catch(err => console.error("Failed to load dialogue.json", err));
   fetch('college_aliases.csv').then(r => r.text()).then(t => collegeAliases = parseCSVtoObject(t)),
   fetch('players.csv').then(r => r.text()).then(t => nflToCollege = parsePlayersCSV(t))
 ]);
