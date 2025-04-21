@@ -86,13 +86,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // ─── Utility: Draft‑Year Boost ─────────────────────
   const MAX_WEIGHT = 100;
   function computeWeight(p) {
-    let boost;
-    if (p.draftYear >= 2024)      boost = 3.0;
-    else if (p.draftYear >= 2022) boost = 2.5;
-    else if (p.draftYear >= 2018) boost = 2.0;
-    else                           boost = 0.4;
-    return Math.min(p.value * boost, MAX_WEIGHT);
-  }
+  // give all 2023 & 2024 draftees a +10 flat boost
+  const baseValue = p.value + (p.draftYear >= 2023 ? 10 : 0);
+
+  let boost;
+  if      (p.draftYear >= 2024)      boost = 3.0;
+  else if (p.draftYear >= 2022)      boost = 2.5;
+  else if (p.draftYear >= 2018)      boost = 2.0;
+  else                                boost = 0.4;
+
+  return Math.min(baseValue * boost, MAX_WEIGHT);
+}
 
   // ─── Utility: Pick With Cooldown ──────────────────
   function pickWithCooldown(arr, recentArr) {
@@ -359,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let cands = Object.keys(nflToCollege).filter(name=>
       !easyNames.includes(name) &&
       nflToCollege[name].round<=4 &&
-      ['QB','RB','WR'].includes(nflToCollege[name].position.toUpperCase()) &&
+      ['QB','RB','WR','TE'].includes(nflToCollege[name].position.toUpperCase()) &&
       nflToCollege[name].value>=20
     );
     cands = cands.filter(name =>
