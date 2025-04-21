@@ -516,6 +516,6 @@ document.addEventListener('DOMContentLoaded', function() {
     addMessage('Go defense','user');
     hideBinaryChoices();
     startTriviaRoundFiltered('defense');
-  });
+ 
 
-; // end DOMContentLoaded
+}); // end DOMContentLoaded
