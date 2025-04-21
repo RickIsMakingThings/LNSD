@@ -112,9 +112,10 @@ body {
 /* Chat & messages */
 #chat-container {
   flex: 1;
-  padding: 10px;
+  padding: 60px;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   border-top: 1px solid var(--gray-separator);
 }
 .message {
@@ -267,4 +268,19 @@ body {
 }
 #toast.show {
   opacity: 1;
+/* only on phones/tablets */
+@media (max-width: 600px) {
+  html, body {
+    height: 100%;
+    overflow: hidden;              /* page itself won’t scroll */
+    overscroll-behavior: none;     /* stop bounce/scroll chaining */
+  }
+
+  #game-container {
+    position: fixed;  /* pin the whole game to the viewport */
+    top: 0; left: 0; right: 0; bottom: 0;
+    margin: 0 auto;
+    width: 360px;
+    height: 600px;
+  }
 }
