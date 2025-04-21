@@ -1,5 +1,3 @@
-/* ========== styles.css ========== */
-/* 1) Color variables */
 :root {
   --blue: #007aff;
   --gray-light: #e5e5e5;
@@ -7,7 +5,6 @@
   --text-white: #fff;
 }
 
-/* 2) Base reset & layout */
 body {
   background: #f0f0f0;
   font-family: Arial, sans-serif;
@@ -18,7 +15,7 @@ body {
   min-height: 100vh;
 }
 
-/* 3) Game container (always visible, hosts the overlay) */
+/* Main game container */
 #game-container {
   background: white;
   max-width: 360px;
@@ -32,51 +29,47 @@ body {
   overflow: hidden;
 }
 
-/* 4) Start‑screen overlay (fills #game-container exactly) */
-#start-screen {
+/* iMessage‑style header replacing the old score bar */
+#header {
   position: absolute;
-  inset: 0;
-  background: white;
-  border-radius: inherit;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: var(--gray-light);
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  z-index: 10;
+  justify-content: center;
+  z-index: 5;
 }
 
-/* Centered, slightly smaller text */
-#start-screen h1,
-#start-screen p {
-  margin: 0 0 1em;
-  line-height: 1.55;
-  text-align: center;
-  font-size: 0.9rem;
-}
-
-/* Start button styling */
-#start-button {
-  padding: 10px 20px;
-  background: var(--blue);
-  color: var(--text-white);
-  border: none;
-  border-radius: 5px;
-  font-size: 1em;
-  cursor: pointer;
-}
-
-/* 5) Score bar */
-#score {
-  background: var(--blue);
-  color: var(--text-white);
-  padding: 8px 12px;
+/* score number on left */
+#score-display {
+  position: absolute;
+  left: 12px;
+  font-size: 16px;
   font-weight: bold;
-  text-align: center;
+  color: var(--text-black);
 }
 
-/* 6) Chat area */
+/* circle logo in center */
+#header-logo {
+  width: 28px;
+  height: 28px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--text-black);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* push chat and inputs below header */
+#chat-container { margin-top: 44px; }
+
+/* Chat area */
 #chat-container {
   flex: 1;
   padding: 10px;
@@ -85,28 +78,24 @@ body {
   overflow-x: hidden;
 }
 
-/* 7) Message base */
-/* messages default to visible now */
+/* Message bubbles */
 .message {
-  position: relative;
   max-width: 80%;
   margin-bottom: 10px;
   padding: 8px 12px;
   border-radius: 18px;
   clear: both;
   word-wrap: break-word;
-  border: 1px solid #ccc;
-  opacity: 1;
-  animation: none;
+  animation: fadeIn 100ms ease-out;
 }
-
-/* quick fade‑in keyframes (used by .fade-in class) */
-@keyframes fadeOpacity {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
 }
+.message.ai { float: left; background: var(--gray-light); color: var(--text-black); }
+.message.user { float: right; background: var(--blue); color: var(--text-white); }
 
-/* typing indicator bubble stays fixed size */
+/* Typing indicator */
 .typing-indicator {
   float: left;
   background: var(--gray-light);
@@ -124,34 +113,7 @@ body {
   max-width: none;
 }
 
-/* 8) AI bubble */
-/* only AI bubbles start hidden */
-.message.ai {
-  float: left;
-  background: var(--gray-light);
-  color: var(--text-black);
-  opacity: 0;
-}
-
-/* 9) User bubble */
-.message.user {
-  float: right;
-  background: var(--blue);
-  color: var(--text-white);
-}
-
-/* Fade‑out helper */
-.fade-out {
-  opacity: 0;
-  transition: opacity 200ms ease-in;
-}
-
-/* Fade‑in helper */
-.fade-in {
-  animation: fadeOpacity 200ms ease-out forwards;
-}
-
-/* 11) Timer bar */
+/* Timer bar */
 #timer-container {
   height: 4px;
   background-color: #ccc;
@@ -165,7 +127,7 @@ body {
   transition: width 0.1s linear;
 }
 
-/* 12) Binary choices */
+/* Binary choices */
 #binary-choices {
   display: none;
   text-align: center;
@@ -182,7 +144,7 @@ body {
   font-size: 14px;
 }
 
-/* 13) Input form */
+/* Input form */
 #input-form {
   display: flex;
   border-top: 1px solid #ddd;
@@ -206,7 +168,7 @@ body {
   border-radius: 4px;
 }
 
-/* 14) Game‑over overlay */
+/* Game‑over overlay */
 #game-over {
   position: absolute;
   top: 0; left: 50%;

@@ -74,27 +74,27 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── DOM References ────────────────────────────────
-  const startScreen       = document.getElementById('start-screen');
-  const startButton       = document.getElementById('start-button');
-  const chatContainer     = document.getElementById('chat-container');
-  const inputForm         = document.getElementById('input-form');
-  const userInput         = document.getElementById('user-input');
-  const scoreDisplay      = document.getElementById('score');
-  const timerBar          = document.getElementById('timer-bar');
-  const binaryChoices     = document.getElementById('binary-choices');
-  const choiceTough       = document.getElementById('choice-tough');
-  const choiceDefense     = document.getElementById('choice-defense');
-  const gameOverOverlay   = document.getElementById('game-over');
-  const gameOverMsg       = document.getElementById('game-over-msg');
-  const gameOverButtons   = document.getElementById('game-over-buttons');
-  const submitScoreBtn    = document.getElementById('submit-score');
-  const restartBtn        = document.getElementById('restart');
-  const usernameForm      = document.getElementById('username-form');
-  const usernameInput     = document.getElementById('username-input');
-  const usernameSubmit    = document.getElementById('username-submit');
-  const leaderboardCont   = document.getElementById('leaderboard-container');
-  const leaderboardList   = document.getElementById('leaderboard');
-  const leaderboardRestart= document.getElementById('leaderboard-restart');
+  const startScreen     = document.getElementById('start-screen');
+  const startButton     = document.getElementById('start-button');
+  const chatContainer   = document.getElementById('chat-container');
+  const inputForm       = document.getElementById('input-form');
+  const userInput       = document.getElementById('user-input');
+  const scoreDisplay    = document.getElementById('score-display'); // now just the number
+  const timerBar        = document.getElementById('timer-bar');
+  const binaryChoices   = document.getElementById('binary-choices');
+  const choiceTough     = document.getElementById('choice-tough');
+  const choiceDefense   = document.getElementById('choice-defense');
+  const gameOverOverlay = document.getElementById('game-over');
+  const gameOverMsg     = document.getElementById('game-over-msg');
+  const gameOverButtons = document.getElementById('game-over-buttons');
+  const submitScoreBtn  = document.getElementById('submit-score');
+  const restartBtn      = document.getElementById('restart');
+  const usernameForm    = document.getElementById('username-form');
+  const usernameInput   = document.getElementById('username-input');
+  const usernameSubmit  = document.getElementById('username-submit');
+  const leaderboardCont = document.getElementById('leaderboard-container');
+  const leaderboardList = document.getElementById('leaderboard');
+  const leaderboardRestart = document.getElementById('leaderboard-restart');
 
   // ─── CSV Parsing Helpers ──────────────────────────
   function parseCSVtoObject(csv) {
@@ -137,7 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
     tryStartGame();
   });
   fetch('dialogue.json').then(r=>r.json()).then(d=>{
-    dialogueBuckets = d; tryStartGame();
+    dialogueBuckets = d;
+    tryStartGame();
   });
   fetch('college_aliases.csv').then(r=>r.text()).then(t=>{
     collegeAliases = parseCSVtoObject(t);
@@ -182,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
   function updateScore() {
-    scoreDisplay.textContent = `Score: ${score}`;
+    scoreDisplay.textContent = score;  // now just the number
   }
 
   // ─── Normalize & Check ────────────────────────────
@@ -206,35 +207,45 @@ document.addEventListener('DOMContentLoaded', function() {
     return a===c || (collegeAliases[c]||[]).includes(a);
   }
 
-  // ─── Typing & AI Messaging ────────────────────────
-  function showTypingIndicator(txt, cb, step=150) {
-    const msg = document.createElement('div');
-    msg.classList.add('message','ai','typing-indicator');
-    msg.style.opacity = '1';
-    chatContainer.appendChild(msg);
+  // ─── Typing/Cross‑fade & AI Messaging ─────────────
+  function showTypingIndicator(txt, cb, step=200) {
+    const ind  = document.createElement('div');
+    ind.classList.add('message','ai','typing-indicator');
+    chatContainer.appendChild(ind);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
+    const real = document.createElement('div');
+    real.classList.add('message','ai');
+    real.style.opacity = '0';
+    chatContainer.appendChild(real);
+
     let count=1, max=3;
-    msg.textContent='ₒ';
+    ind.textContent = 'ₒ';
     const dotTimer = setInterval(()=>{
       count++;
-      msg.textContent='ₒ '.repeat(count).trim();
-      if (count>=max) {
-        clearInterval(dotTimer);
-        msg.classList.remove('typing-indicator');
-        msg.textContent = txt;
-        if (typeof cb==='function') cb();
-      }
+      ind.textContent = 'ₒ '.repeat(count).trim();
+      if (count>=max) clearInterval(dotTimer);
     }, step);
+
+    setTimeout(()=>{
+      clearInterval(dotTimer);
+      real.textContent = txt;
+      ind.style.transition = 'opacity 150ms ease-in';
+      real.style.transition = 'opacity 150ms ease-out';
+      ind.style.opacity = '0';
+      real.style.opacity = '1';
+      setTimeout(()=>{
+        if(ind.parentNode) ind.parentNode.removeChild(ind);
+        if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
+          startTimer();
+        }
+        cb();
+      },150);
+    }, step*max + 50);
   }
-  function addAIMessage(txt, onDone) {
+  function addAIMessage(txt,onDone) {
     clearTimer();
-    showTypingIndicator(txt, ()=>{
-      if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
-        startTimer();
-      }
-      if (typeof onDone==='function') onDone();
-    });
+    showTypingIndicator(txt, onDone);
   }
 
   // ─── Game Over & Leaderboard ──────────────────────
@@ -277,8 +288,8 @@ document.addEventListener('DOMContentLoaded', function() {
       .get().then(snap=>{
         if (snap.empty) leaderboardList.innerHTML = '<li>No scores yet.</li>';
         else snap.forEach(doc=>{
-          const {username,score}=doc.data();
-          const li=document.createElement('li');
+          const {username,score} = doc.data();
+          const li = document.createElement('li');
           li.textContent = `${username}: ${score}`;
           leaderboardList.appendChild(li);
         });
@@ -301,13 +312,13 @@ document.addEventListener('DOMContentLoaded', function() {
     binaryRoundCount  = 0;
     recentSchools     = [];
     updateScore();
-    chatContainer.innerHTML      = '';
-    userInput.value              = '';
-    inputForm.style.display      = 'block';
-    gameOverOverlay.style.display= 'none';
-    gameOverButtons.style.display= 'none';
-    usernameForm.style.display   = 'none';
-    leaderboardCont.style.display= 'none';
+    chatContainer.innerHTML = '';
+    userInput.value         = '';
+    inputForm.style.display       = 'block';
+    gameOverOverlay.style.display = 'none';
+    gameOverButtons.style.display = 'none';
+    usernameForm.style.display    = 'none';
+    leaderboardCont.style.display = 'none';
     startIntro();
   }
 
@@ -324,6 +335,9 @@ document.addEventListener('DOMContentLoaded', function() {
       )
     );
   }
+
+  // ─── … rest of your rounds & handlers (unchanged) …
+});
 
   // ─── Easy Round ───────────────────────────────────
   function startEasyRound() {
