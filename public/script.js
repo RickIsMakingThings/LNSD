@@ -140,43 +140,55 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Typing/Cross‑fade & AI Messaging ─────────────
-  // ─── Typing/Cross‑fade & AI Messaging ─────────────
 function showTypingIndicator(txt, cb = () => {}, step = 200) {
-  const ind  = document.createElement('div');
-  ind.classList.add('message','ai','typing-indicator');
-  chatContainer.appendChild(ind);
+  // create one bubble
+  const bubble = document.createElement('div');
+  bubble.classList.add('message','ai');
+  chatContainer.appendChild(bubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  const real = document.createElement('div');
-  real.classList.add('message','ai');
-  real.style.opacity = '0';
-  chatContainer.appendChild(real);
+  // two spans: dots + real text
+  const indSpan = document.createElement('span');
+  indSpan.classList.add('typing-indicator');
+  indSpan.textContent = 'ₒ';
+  const realSpan = document.createElement('span');
+  realSpan.textContent = txt;
+  realSpan.style.opacity = '0';
+  realSpan.style.transition = 'opacity 150ms ease-out';
 
+  bubble.append(indSpan, realSpan);
+
+  // dot animation
   let count = 1, max = 3;
-  ind.textContent = 'ₒ';
   const dotTimer = setInterval(() => {
     count++;
-    ind.textContent = 'ₒ '.repeat(count).trim();
+    indSpan.textContent = 'ₒ '.repeat(count).trim();
     if (count >= max) clearInterval(dotTimer);
   }, step);
 
+  // after dots, cross‑fade
   setTimeout(() => {
     clearInterval(dotTimer);
-    real.textContent = txt;
-    ind.style.transition  = 'opacity 150ms ease-in';
-    real.style.transition = 'opacity 150ms ease-out';
-    ind.style.opacity     = '0';
-    real.style.opacity    = '1';
+    indSpan.style.transition = 'opacity 150ms ease-in';
+    indSpan.style.opacity = '0';
+    realSpan.style.opacity = '1';
+
+    // once faded, remove the indicator span
     setTimeout(() => {
-      if (ind.parentNode) ind.parentNode.removeChild(ind);
+      bubble.removeChild(indSpan);
+      // start the timer if this was a player question
       if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
         startTimer();
       }
-      cb();  // now guaranteed to be a function
+      cb();
     }, 150);
   }, step * max + 50);
 }
 
+function addAIMessage(txt, onDone = () => {}) {
+  clearTimer();
+  showTypingIndicator(txt, onDone);
+}
 function addAIMessage(txt, onDone = () => {}) {
   clearTimer();
   showTypingIndicator(txt, onDone);
