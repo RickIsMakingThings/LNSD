@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const startScreen       = document.getElementById('start-screen');
   const startButton       = document.getElementById('start-button');
   const chatContainer     = document.getElementById('chat-container');
+  const gameContainer = document.getElementById('game-container');
   const inputForm         = document.getElementById('input-form');
   const userInput         = document.getElementById('user-input');
   const scoreDisplay      = document.getElementById('score-display');
