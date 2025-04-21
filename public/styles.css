@@ -67,9 +67,9 @@ body {
   border-radius: 8px;
 }
 
-/* 5) iMessage‑style header */
+/* 5) iMessage‑style header (50% taller) */
 #header {
-  height: 48px;
+  height: 72px;            /* was 48px */
   background: white;
   display: flex;
   align-items: center;
@@ -84,9 +84,10 @@ body {
   font-weight: bold;
   color: var(--text-black);
 }
+/* scale logo up by 50% */
 #header-logo {
-  width: 32px;
-  height: 32px;
+  width: 48px;             /* was 32px */
+  height: 48px;            /* was 32px */
   border-radius: 50%;
   object-fit: cover;
 }
