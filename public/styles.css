@@ -71,6 +71,8 @@ body {
 }
 #intro-image {
   max-width: 80%;
+  width: auto;
+  height: auto;
   border-radius: 8px;
 }
 
