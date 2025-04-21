@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateScore();
     chatContainer.innerHTML      = '';
     userInput.value              = '';
-    inputForm.style.display      = 'block';
+    inputForm.style.display = 'flex';
     gameOverOverlay.style.display= 'none';
     gameOverButtons.style.display= 'none';
     usernameForm.style.display   = 'none';
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function hideBinaryChoices(){
     binaryChoices.style.display = 'none';
-    inputForm.style.display     = 'block';
+    inputForm.style.display     = 'flex';
   }
 
   // ─── Handle User Guess ───────────────────────────
