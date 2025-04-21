@@ -94,11 +94,27 @@ body {
   margin-right: 12px;
 }
 #score-display {
-  position: absolute;
-  left: 12px;
+  position: relative;
   font-weight: bold;
+  left: 12px;
 }
 
+.score-plus-one {
+  position: absolute;
+  top: 0;
+  left: 100%; /* right of score */
+  color: green;
+  font-size: 0.9em;
+  opacity: 0;
+  transform: translateY(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  pointer-events: none;
+}
+
+.score-plus-one.show {
+  opacity: 1;
+  transform: translateY(-15px);
+}
 /* ── 6) Chat area ──────────────────────────────── */
 #chat-container {
   flex: 1;
