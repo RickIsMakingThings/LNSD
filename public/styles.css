@@ -23,12 +23,12 @@ body {
 /* ── 3) Game container (desktop) ───────────────── */
 #game-container {
   position: fixed;
-  top: 0; 
-  left: 50%;
+  top: 0;                  /* stick to the top */
+  left: 50%;               /* center horizontally */
   transform: translateX(-50%);
-  width: 360px;
-  height: 100vh;        /* fill the viewport height */
-  max-height: 100vh;
+  width: 100%;
+  max-width: 360px;        /* never wider than 360px */
+  height: 600px;           /* desktop height */
   display: flex;
   flex-direction: column;
   background: white;
@@ -262,11 +262,9 @@ body {
 }
 
 /* ── 14) Mobile-only pin & scroll behavior ─────── */
-@media (max-width: 600px) {
-  html, body {
-    height: 100%;
-    overflow: hidden;             /* page itself won’t scroll */
-    overscroll-behavior: none;    /* stop bounce/scroll chaining */
+@media (max-width: 400px) {
+  #game-container {
+    height: 100vh;
   }
   #game-container {
     position: fixed;              
@@ -276,11 +274,15 @@ body {
     height: 100vh;
   }
   #chat-container {
-    padding-bottom: 56px;         /* room for fixed input form */
-  }
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
   #input-form {
     position: absolute;
     bottom: 0; left: 0;
     width: 100%;
+    flex: 0 0 auto;
   }
 }
