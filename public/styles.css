@@ -17,11 +17,12 @@ body {
   min-height: 100vh;
   font-family: Arial, sans-serif;
   overflow-x: hidden;      /* no horizontal scroll ever */
+  overscroll-behavior: none;     /* stop rubber‑band bounce */
 }
 
 /* ── 3) Game container (desktop) ───────────────── */
 #game-container {
-  position: relative;
+  position: fixed;
   background: white;
   width: 100%;
   max-width: 360px;
