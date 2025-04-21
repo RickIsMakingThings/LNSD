@@ -338,18 +338,28 @@ loadData.then(() => {
   }
 
   // ─── Intro Sequence ──────────────────────────────
-  function startIntro(){
-    addAIMessage(
-      dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
-      ()=> addAIMessage(
-        dialogueBuckets.greetings?.[1] || "no googling",
-        ()=> addAIMessage(
-          "We can start with some easy ones.",
-          startEasyRound
-        )
-      )
-    );
-  }
+  let lastGreeting = null; // global var to track previous one
+
+function startIntro() {
+  const greetings = dialogueBuckets.greetings || [
+    "you and I have to take an oath 🤝",
+    "no googling",
+    "let's run it back"
+  ];
+
+  // Filter out last greeting to avoid repetition
+  const options = greetings.length > 1
+    ? greetings.filter(g => g !== lastGreeting)
+    : greetings;
+
+  // Random pick
+  const greeting = options[Math.floor(Math.random() * options.length)];
+  lastGreeting = greeting;
+
+  addAIMessage(greeting, () => {
+    addAIMessage("We can start with some easy ones.", startEasyRound);
+  });
+}
 
   // ─── Easy Round ───────────────────────────────────
   function startEasyRound(){
