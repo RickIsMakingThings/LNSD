@@ -37,14 +37,17 @@ body {
   border-radius: inherit;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   text-align: center;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   z-index: 10;
 }
-#start-screen h1,
+#start-screen h1 {
+  font-size: 2rem;          /* bump the title size */
+  margin: 0;                /* we'll control spacing below */
+}
 #start-screen p {
   margin: 0 0 1em;
   line-height: 1.4;
