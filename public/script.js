@@ -266,16 +266,19 @@ function addAIMessage(text, onDone) {
   });
   // ─── ADD YOUR SHARE SCORE HANDLER HERE ───
   shareScoreBtn.addEventListener('click', () => {
-    const lastPlayer = currentNFLPlayer || '…';
-    const msg        = `Lost on ${lastPlayer} but I got ${score}`;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(msg)
-        .then(() => alert('Copied to clipboard!'))
-        .catch(() => alert(`Copy failed. Here’s your text:\n${msg}`));
-    } else {
-      alert(`Your share text:\n${msg}`);
-    }
-  });
+  const lastPlayer = currentNFLPlayer || '…';
+  const msg        = `Lost on ${lastPlayer} but I got ${score}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(msg)
+      .then(() => showToast('Copied to clipboard!'))
+      .catch(() => {
+        showToast('Copy failed – see console');
+        console.warn('Share text:', msg);
+      });
+  } else {
+    showToast(`Share text: ${msg}`);
+  }
+});
   usernameSubmit.addEventListener('click', ()=>{
     const uname = usernameInput.value.trim();
     if (!uname) return alert('Enter username.');
@@ -532,4 +535,11 @@ function addAIMessage(text, onDone) {
     hideBinaryChoices();
     startTriviaRoundFiltered('defense');
   });
+// Toast helper
+  const toastEl = document.getElementById('toast');
+    function showToast(msg, duration = 1500) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  setTimeout(() => toastEl.classList.remove('show'), duration);
+}
 }); // end DOMContentLoaded
