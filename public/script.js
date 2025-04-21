@@ -438,19 +438,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ─── Handle User Guess ───────────────────────────
   function handleCollegeGuess(ans){
-    clearTimer();
-    addMessage(ans,'user');
-    const cols = nflToCollege[currentNFLPlayer].colleges;
-    const idx  = cols.findIndex(c=>isCollegeAnswerCorrect(ans,c));
-    if (idx>=0){
-      const resp = idx===0
-        ? pickWithCooldown(dialogueBuckets.confirmations||['nice'], recentConfirmations)
-        : pickWithCooldown(dialogueBuckets.transferCompliments||["I see what you did there"], recentTransferCompliments);
-      addAIMessage(resp, ()=>{ /* ... rest unchanged ... */ });
-    } else {
-      gameOver(`Nah, ${currentNFLPlayer} played at ${cols[0]}. Game Over!`);
-    }
+  clearTimer();
+  addMessage(ans,'user');
+  const cols = nflToCollege[currentNFLPlayer].colleges;
+  const idx  = cols.findIndex(c=>isCollegeAnswerCorrect(ans,c));
+  if (idx>=0){
+    const resp = idx===0
+      ? pickWithCooldown(dialogueBuckets.confirmations||['nice'], recentConfirmations)
+      : pickWithCooldown(dialogueBuckets.transferCompliments||["I see what you did there"], recentTransferCompliments);
+
+    addAIMessage(resp, () => {
+      // ← Restore this entire block:
+      score++;
+      updateScore();
+
+      if (phase==='easy') {
+        if (easyRounds < 3) {
+          setTimeout(startEasyRound, 500);
+        } else {
+          const et  = dialogueBuckets.easyTransition || [];
+          const msg = et.length
+            ? pickWithCooldown(et, [])
+            : "Ok, now let's have some fun";
+          addAIMessage(msg, () => {
+            phase = 'trivia';
+            normalRoundsCount = 0;
+            startTriviaRound();
+          });
+        }
+
+      } else if (phase==='trivia') {
+        if (normalRoundsCount >= 3) {
+          setTimeout(askNextQuestion, 500);
+        } else {
+          setTimeout(startTriviaRound, 500);
+        }
+
+      } else {  // binary phase
+        if (binaryModeActive && binaryRoundCount > 0) {
+          setTimeout(showBinaryChoices, 500);
+        } else {
+          binaryModeActive = false;
+          setTimeout(startTriviaRound, 500);
+        }
+      }
+      // —end restore—
+    });
+
+  } else {
+    gameOver(`Nah, ${currentNFLPlayer} played at ${cols[0]}. Game Over!`);
   }
+}
 
   // ─── Event Listeners ─────────────────────────────
   inputForm.addEventListener('submit', e=>{
