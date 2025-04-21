@@ -518,4 +518,4 @@ document.addEventListener('DOMContentLoaded', function() {
     startTriviaRoundFiltered('defense');
   });
 
-); // end DOMContentLoaded
+; // end DOMContentLoaded
