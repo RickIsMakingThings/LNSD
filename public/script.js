@@ -215,6 +215,18 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateScore() {
     scoreDisplay.textContent = score;
   }
+  function showScorePlusOne() {
+  const plusOne = document.createElement('span');
+  plusOne.className = 'score-plus-one';
+  plusOne.textContent = '+1';
+  scoreDisplay.appendChild(plusOne);
+
+  // Trigger fade out and remove after animation
+  requestAnimationFrame(() => {
+    plusOne.classList.add('show');
+    setTimeout(() => plusOne.remove(), 1000);
+  });
+}
 
   // ─── Start Button Handler ─────────────────────────
   startButton.addEventListener('click', () => {
@@ -456,6 +468,7 @@ loadData.then(() => {
       // ← Restore this entire block:
       score++;
       updateScore();
+      showScorePlusOne();
 
       if (phase==='easy') {
         if (easyRounds < 3) {
