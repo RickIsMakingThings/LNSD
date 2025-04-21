@@ -23,18 +23,18 @@ body {
 /* ── 3) Game container (desktop) ───────────────── */
 #game-container {
   position: fixed;
-  background: white;
-  width: 100%;
-  max-width: 360px;
-  height: 600px;
-  margin: 20px 0;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  top: 0; 
+  left: 50%;
+  transform: translateX(-50%);
+  width: 360px;
+  height: 100vh;        /* fill the viewport height */
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;        /* only chat scrolls */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
-
 /* ── 4) Start Screen ────────────────────────────── */
 #start-screen {
   position: absolute;
@@ -189,6 +189,8 @@ body {
   border-top: 1px solid #ddd;
   padding: 5px 4px;
   background: #fafafa;
+  flex: 0 0 auto;  /* so it always stays visible at the bottom */
+
 }
 #user-input {
   flex: 1;
