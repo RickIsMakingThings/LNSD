@@ -291,11 +291,13 @@ body {
     flex: 0 0 auto;
   }
   .tip-text {
-  margin-top: 20px;
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
   font-size: 0.9rem;
   font-style: italic;
   color: #666;
-  text-align: center;
-  max-width: 80%;
+  z-index: 9; /* sits behind the game-over overlay elements */
 }
 }
