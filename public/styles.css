@@ -262,9 +262,12 @@ body {
 }
 
 /* ── 14) Mobile-only pin & scroll behavior ─────── */
-@media (max-width: 400px) {
+@media (max-width: 360px) {
   #game-container {
-    height: 100vh;
+    left: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: none !important;
   }
   #game-container {
     position: fixed;              
