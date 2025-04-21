@@ -67,9 +67,10 @@ body {
   border-radius: 8px;
 }
 
-/* 5) iMessage‑style header (50% taller) */
+/* 5) iMessage‑style header (pushed down 10px) */
 #header {
-  height: 72px;            /* was 48px */
+  margin-top: 10px;       /* new — pushes the whole bar down */
+  height: 72px;
   background: white;
   display: flex;
   align-items: center;
