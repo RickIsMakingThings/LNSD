@@ -140,45 +140,48 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Typing/Cross‑fade & AI Messaging ─────────────
-  function showTypingIndicator(txt, cb, step=200) {
-    const ind  = document.createElement('div');
-    ind.classList.add('message','ai','typing-indicator');
-    chatContainer.appendChild(ind);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+  // ─── Typing/Cross‑fade & AI Messaging ─────────────
+function showTypingIndicator(txt, cb = () => {}, step = 200) {
+  const ind  = document.createElement('div');
+  ind.classList.add('message','ai','typing-indicator');
+  chatContainer.appendChild(ind);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    const real = document.createElement('div');
-    real.classList.add('message','ai');
-    real.style.opacity = '0';
-    chatContainer.appendChild(real);
+  const real = document.createElement('div');
+  real.classList.add('message','ai');
+  real.style.opacity = '0';
+  chatContainer.appendChild(real);
 
-    let count=1, max=3;
-    ind.textContent = 'ₒ';
-    const dotTimer = setInterval(()=>{
-      count++;
-      ind.textContent = 'ₒ '.repeat(count).trim();
-      if (count>=max) clearInterval(dotTimer);
-    }, step);
+  let count = 1, max = 3;
+  ind.textContent = 'ₒ';
+  const dotTimer = setInterval(() => {
+    count++;
+    ind.textContent = 'ₒ '.repeat(count).trim();
+    if (count >= max) clearInterval(dotTimer);
+  }, step);
 
-    setTimeout(()=>{
-      clearInterval(dotTimer);
-      real.textContent = txt;
-      ind.style.transition  = 'opacity 150ms ease-in';
-      real.style.transition = 'opacity 150ms ease-out';
-      ind.style.opacity     = '0';
-      real.style.opacity    = '1';
-      setTimeout(()=>{
-        if(ind.parentNode) ind.parentNode.removeChild(ind);
-        if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
-          startTimer();
-        }
-        cb();
-      },150);
-    }, step*max + 50);
-  }
-  function addAIMessage(txt, onDone) {
-    clearTimer();
-    showTypingIndicator(txt, onDone);
-  }
+  setTimeout(() => {
+    clearInterval(dotTimer);
+    real.textContent = txt;
+    ind.style.transition  = 'opacity 150ms ease-in';
+    real.style.transition = 'opacity 150ms ease-out';
+    ind.style.opacity     = '0';
+    real.style.opacity    = '1';
+    setTimeout(() => {
+      if (ind.parentNode) ind.parentNode.removeChild(ind);
+      if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
+        startTimer();
+      }
+      cb();  // now guaranteed to be a function
+    }, 150);
+  }, step * max + 50);
+}
+
+function addAIMessage(txt, onDone = () => {}) {
+  clearTimer();
+  showTypingIndicator(txt, onDone);
+}
+
 
   // ─── Timer ────────────────────────────────────────
   function startTimer() {
