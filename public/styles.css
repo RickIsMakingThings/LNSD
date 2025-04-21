@@ -1,3 +1,20 @@
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none; /* stops bounce/scroll chaining */
+}
+
+/* Pin the game UI in the viewport */
+#game-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* keep your existing width/height here */
+  width: 360px;
+  height: 600px;
+  overflow: hidden; /* chat scrolls internally, not the page */
+}
 :root {
   --blue: #007aff;
   --gray-light: #f2f2f2;       /* was #e5e5e5 */

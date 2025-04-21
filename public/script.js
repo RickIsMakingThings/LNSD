@@ -501,6 +501,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const ans = userInput.value.trim();
     if (ans) handleCollegeGuess(ans);
     userInput.value = '';
+  userInput.addEventListener('touchstart', () => {
+  window.scrollTo(0, 0);
+});
   });
   choiceTough.addEventListener('click',()=>{
     addMessage('Hit me with a tough one','user');
