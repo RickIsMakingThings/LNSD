@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Typing/Cross‑fade & AI Messaging ─────────────
-function showTypingIndicator(cb) {
+function showTypingIndicator(cb = () => {}) {
   // 1) Create an AI‐style bubble with dots
   const bubble = document.createElement('div');
   bubble.classList.add('message','ai');
@@ -164,7 +164,8 @@ function showTypingIndicator(cb) {
     bubble.style.opacity    = '0';
     bubble.addEventListener('transitionend', () => {
       bubble.remove();
-      cb();
+      // only call cb if it really is a function
+      if (typeof cb === 'function') cb();
     }, { once: true });
   }, 300 * 3 + 100);
 }
@@ -182,7 +183,7 @@ function addAIMessage(text, onDone = () => {}) {
     chatContainer.appendChild(bubble);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    // force a reflow so the transition kicks in
+    // force reflow so the transition kicks in
     void bubble.offsetWidth;
     bubble.style.opacity = '1';
 
@@ -191,11 +192,10 @@ function addAIMessage(text, onDone = () => {}) {
       if (gameActive && currentNFLPlayer && text.includes(currentNFLPlayer)) {
         startTimer();
       }
-      onDone();
+      if (typeof onDone === 'function') onDone();
     }, { once: true });
   });
-}
-function addAIMessage(txt, onDone = () => {}) {
+}function addAIMessage(txt, onDone = () => {}) {
   clearTimer();
   showTypingIndicator(txt, onDone);
 }
