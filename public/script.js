@@ -503,6 +503,8 @@ loadData.then(() => {
 
   } else {
     gameOver(`Nah, ${currentNFLPlayer} played at ${cols[0]}. Game Over!`);
+    document.getElementById('game-tip').textContent =
+  'Tip: ' + tips[Math.floor(Math.random() * tips.length)];
   }
 }
 
