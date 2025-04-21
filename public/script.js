@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
   "You can only win 500x on two picks at Boom Fantasy",
   "Transfer schools work!",
   "Nicknames are acceptable: Bama, Vandy, Ole Miss",
-  "Be sure to use your Boom username when you submit score",
+  "Be sure to use your Boom username when you Submit Score",
   "If you just guess MSU you can cover a few schools",
   "Never pet a burning dog",
   "Draft data goes back to the 2009."  
