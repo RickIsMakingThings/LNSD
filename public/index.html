@@ -25,33 +25,30 @@
   </script>
 </head>
 <body>
-  <!-- MAIN GAME CONTAINER (always visible) -->
   <div id="game-container">
     <!-- START SCREEN OVERLAY -->
     <div id="start-screen">
-      <h1>Let's Name Some Dudes</h1>
+      <h1>Let's Name Some Dudes</h1>
       <p>
         This is one of your old buds. When you're bored, he names dudes and you
-        name where they went to school. You can use abbreviations.<br />
+        name where they went to school. You can use abbreviations.<br>
         You’ll earn points for correct answers—no Googling allowed!
       </p>
-      <button id="start-button">Start Game</button>
-      <img id="example-image" src="example.png" alt="Example preview" />
+      <button id="start-button">Start Game</button>
+      <img src="example.png" alt="Example" id="intro-image" />
     </div>
 
     <!-- iMessage‑style header -->
     <div id="header">
+      <img src="boomlogo.png" alt="B" id="header-logo" />
       <div id="score-display">0</div>
-      <img id="header-logo" src="boomlogo.png" alt="Logo" />
     </div>
 
     <div id="chat-container"></div>
-    <div id="timer-container">
-      <div id="timer-bar"></div>
-    </div>
+    <div id="timer-container"><div id="timer-bar"></div></div>
     <div id="binary-choices">
-      <button id="choice-tough">Hit me with a tough one</button>
-      <button id="choice-defense">Go defense</button>
+      <button id="choice-tough">Hit me with a tough one</button>
+      <button id="choice-defense">Go defense</button>
     </div>
     <form id="input-form">
       <input
@@ -65,22 +62,24 @@
     <div id="game-over">
       <p id="game-over-msg">Game Over!</p>
       <div id="game-over-buttons">
-        <button id="submit-score">Submit Score</button>
-        <button id="restart">Restart Game</button>
+        <button id="submit-score">Submit Score</button>
+        <button id="restart">Restart Game</button>
+        <!-- New Share Button -->
+        <button id="share-score">Share Score</button>
       </div>
       <div id="username-form" style="display:none;">
-        <p>Please enter your Boom Fantasy username:</p>
+        <p>Please enter your Boom Fantasy username:</p>
         <input type="text" id="username-input" placeholder="Username" />
         <button id="username-submit">Submit</button>
       </div>
       <div id="leaderboard-container" style="display:none;">
-        <button id="leaderboard-restart">Restart Game</button>
-        <h3>Leaderboard (Top 20)</h3>
+        <button id="leaderboard-restart">Restart Game</button>
+        <h3>Leaderboard (Top 20)</h3>
         <ol id="leaderboard"></ol>
       </div>
     </div>
   </div>
 
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>

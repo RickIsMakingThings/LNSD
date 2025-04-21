@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const leaderboardCont = document.getElementById('leaderboard-container');
   const leaderboardList = document.getElementById('leaderboard');
   const leaderboardRestart = document.getElementById('leaderboard-restart');
+  const shareScoreBtn = document.getElementById('share-score');
+
 
   // ─── Firebase / Leaderboard Setup ─────────────────
   const db = firebase.firestore();
@@ -262,6 +264,18 @@ function addAIMessage(text, onDone) {
     gameOverButtons.style.display = 'none';
     usernameForm.style.display    = 'block';
   });
+  // ─── ADD YOUR SHARE SCORE HANDLER HERE ───
+  shareScoreBtn.addEventListener('click', () => {
+    const lastPlayer = currentNFLPlayer || '…';
+    const msg        = `Lost on ${lastPlayer} but I got ${score}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg)
+        .then(() => alert('Copied to clipboard!'))
+        .catch(() => alert(`Copy failed. Here’s your text:\n${msg}`));
+    } else {
+      alert(`Your share text:\n${msg}`);
+    }
+  });
   usernameSubmit.addEventListener('click', ()=>{
     const uname = usernameInput.value.trim();
     if (!uname) return alert('Enter username.');
@@ -295,6 +309,23 @@ function addAIMessage(text, onDone) {
         console.error(e);
         leaderboardList.innerHTML = '<li>Unable to load leaderboard.</li>';
       });
+  shareScoreBtn.addEventListener('click', () => {
+  // verbatim text
+  const lastPlayer = currentNFLPlayer || '…';
+  const msg = `Lost on ${lastPlayer} but I got ${score}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(msg)
+      .then(() => {
+        alert('Copied to clipboard!');
+      })
+      .catch(() => {
+        alert(`Copy failed. Here’s your text:\n${msg}`);
+      });
+  } else {
+    // fallback
+    alert(`Your share text:\n${msg}`);
+  }
+});
   }
 
   // ─── Restart Game ─────────────────────────────────
