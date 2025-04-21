@@ -290,14 +290,4 @@ body {
     width: 100%;
     flex: 0 0 auto;
   }
-  .tip-text {
-  position: absolute;
-  bottom: 10px;
-  width: 100%;
-  text-align: center;
-  font-size: 0.9rem;
-  font-style: italic;
-  color: #666;
-  z-index: 9; /* sits behind the game-over overlay elements */
-}
 }

@@ -31,17 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const recentConfirmations       = [];
   const recentBigCompliments      = [];
   const recentTransferCompliments = [];
-  const tips = [
-  "Try abbreviating colleges (like LSU, OSU, etc).",
-  "If you use Google, we will find you :)",
-  "You can only win 500x on two picks at Boom Fantasy",
-  "Transfer schools work!",
-  "Nicknames are acceptable: Bama, Vandy, Ole Miss",
-  "Be sure to use your Boom username when you Submit Score",
-  "If you just guess MSU you can cover a few schools",
-  "Never pet a burning dog",
-  "Draft data goes back to the 2009."  
-];
 
   // ─── DOM References ────────────────────────────────
   const startScreen       = document.getElementById('start-screen');
@@ -242,14 +231,7 @@ const loadData = Promise.all([
   fetch('dialogue.json').then(r => r.json()).then(d => dialogueBuckets = d),
   fetch('college_aliases.csv').then(r => r.text()).then(t => collegeAliases = parseCSVtoObject(t)),
   fetch('players.csv').then(r => r.text()).then(t => nflToCollege = parsePlayersCSV(t))
-])
-.then(() => {
-  startButton.disabled = false;
-  console.log("✅ All data loaded");
-})
-.catch(err => {
-  console.error("❌ Data loading failed", err);
-});
+]);
 
 // disable the start button until data is in
 startButton.disabled = true;
@@ -345,28 +327,18 @@ loadData.then(() => {
   }
 
   // ─── Intro Sequence ──────────────────────────────
-  let lastGreeting = null; // global var to track previous one
-
-function startIntro() {
-  const greetings = dialogueBuckets.greetings || [
-    "you and I have to take an oath 🤝",
-    "no googling",
-    "let's run it back"
-  ];
-
-  // Filter out last greeting to avoid repetition
-  const options = greetings.length > 1
-    ? greetings.filter(g => g !== lastGreeting)
-    : greetings;
-
-  // Random pick
-  const greeting = options[Math.floor(Math.random() * options.length)];
-  lastGreeting = greeting;
-
-  addAIMessage(greeting, () => {
-    addAIMessage("We can start with some easy ones.", startEasyRound);
-  });
-}
+  function startIntro(){
+    addAIMessage(
+      dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
+      ()=> addAIMessage(
+        dialogueBuckets.greetings?.[1] || "no googling",
+        ()=> addAIMessage(
+          "We can start with some easy ones.",
+          startEasyRound
+        )
+      )
+    );
+  }
 
   // ─── Easy Round ───────────────────────────────────
   function startEasyRound(){
@@ -520,8 +492,6 @@ function startIntro() {
 
   } else {
     gameOver(`Nah, ${currentNFLPlayer} played at ${cols[0]}. Game Over!`);
-    document.getElementById('game-tip').textContent =
-  'Tip: ' + tips[Math.floor(Math.random() * tips.length)];
   }
 }
 
