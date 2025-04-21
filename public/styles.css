@@ -112,7 +112,7 @@ body {
 /* Chat & messages */
 #chat-container {
   flex: 1;
-  padding: 60px;
+  padding: 20px;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -155,7 +155,7 @@ body {
   margin-bottom: 10px;
   padding: 6px 12px;
   box-sizing: border-box;
-  width: 15px;
+  width: 60px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
