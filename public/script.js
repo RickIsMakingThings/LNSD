@@ -217,15 +217,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // ─── Start Button Handler ─────────────────────────
   startButton.addEventListener('click', () => {
-    startScreen.style.display   = 'none';
-    gameContainer.style.display = 'flex';
-    startIntro();
-  });
+  if (startButton.disabled) return;        // still loading
+  startScreen.style.display   = 'none';
+  gameContainer.style.display = 'flex';
+  startIntro();
+});
 
   // ─── Data Loading ──────────────────────────────────
-  fetch('dialogue.json').then(r=>r.json()).then(d=>{ dialogueBuckets = d; });
-  fetch('college_aliases.csv').then(r=>r.text()).then(t=>{ collegeAliases = parseCSVtoObject(t); });
-  fetch('players.csv').then(r=>r.text()).then(t=>{ nflToCollege = parsePlayersCSV(t); });
+  let dialogueBuckets = {}, collegeAliases = {}, nflToCollege = {};
+
+const loadData = Promise.all([
+  fetch('dialogue.json').then(r => r.json()).then(d => dialogueBuckets = d),
+  fetch('college_aliases.csv').then(r => r.text()).then(t => collegeAliases = parseCSVtoObject(t)),
+  fetch('players.csv').then(r => r.text()).then(t => nflToCollege = parsePlayersCSV(t))
+]);
+
+// disable the start button until data is in
+startButton.disabled = true;
+loadData.then(() => {
+  startButton.disabled = false;
+})
+.catch(err => console.error("Data failed to load:", err));
 
   // ─── Game Over & Leaderboard ──────────────────────
   function gameOver(msg) {
