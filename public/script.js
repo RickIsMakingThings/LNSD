@@ -139,71 +139,49 @@ document.addEventListener('DOMContentLoaded', function() {
     return a===c || (collegeAliases[c]||[]).includes(a);
   }
 
-  // ─── Typing/Cross‑fade & AI Messaging ─────────────
-function showTypingIndicator(cb = () => {}) {
-  // 1) Create an AI‐style bubble with dots
-  const bubble = document.createElement('div');
-  bubble.classList.add('message','ai');
-  bubble.textContent = 'ₒ';
-  chatContainer.appendChild(bubble);
+// ─── Simplified Typing Indicator ─────────────────
+function showTypingIndicator(cb) {
+  const ind = document.createElement('div');
+  ind.classList.add('message','ai','typing-indicator');
+  // start with one dot
+  ind.textContent = 'ₒ';
+  chatContainer.appendChild(ind);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  // 2) Grow to three dots
   let count = 1;
+  const max   = 3;
+  const step  = 100; // 100ms per dot = 300ms total
+
   const dotTimer = setInterval(() => {
     count++;
-    bubble.textContent = 'ₒ '.repeat(count).trim();
-    if (count >= 3) clearInterval(dotTimer);
+    ind.textContent = 'ₒ '.repeat(count).trim();
+    if (count >= max) {
+      clearInterval(dotTimer);
+    }
     chatContainer.scrollTop = chatContainer.scrollHeight;
-  }, 300);
+  }, step);
 
-  // 3) After 3 pulses, fade this bubble out
+  // after all dots shown, remove bubble and fire callback
   setTimeout(() => {
-    clearInterval(dotTimer);
-    bubble.style.transition = 'opacity 150ms ease-in';
-    bubble.style.opacity    = '0';
-    bubble.addEventListener('transitionend', () => {
-      bubble.remove();
-      // only call cb if it really is a function
-      if (typeof cb === 'function') cb();
-    }, { once: true });
-  }, 300 * 3 + 100);
+    ind.remove();
+    if (typeof cb === 'function') cb();
+  }, step * max);
 }
 
 // ─── AI Message with Typing ───────────────────────
-function addAIMessage(text, onDone = () => {}) {
+function addAIMessage(text, onDone) {
   clearTimer();
   showTypingIndicator(() => {
-    // 4) Create the real text bubble, fading it in
-    const bubble = document.createElement('div');
-    bubble.classList.add('message','ai');
-    bubble.style.opacity    = '0';
-    bubble.style.transition = 'opacity 150ms ease-out';
-    bubble.textContent      = text;
-    chatContainer.appendChild(bubble);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-
-    // force reflow so the transition kicks in
-    void bubble.offsetWidth;
-    bubble.style.opacity = '1';
-
-    // once it’s fully visible, kick off the timer/next step
-    bubble.addEventListener('transitionend', () => {
-      if (gameActive && currentNFLPlayer && text.includes(currentNFLPlayer)) {
-        startTimer();
-      }
-      if (typeof onDone === 'function') onDone();
-    }, { once: true });
+    // now show the real AI bubble
+    addMessage(text, 'ai');
+    // if this was a question, start the timer
+    if (gameActive && currentNFLPlayer && text.includes(currentNFLPlayer)) {
+      startTimer();
+    }
+    // then chain into whatever comes next
+    if (typeof onDone === 'function') onDone();
   });
-}function addAIMessage(txt, onDone = () => {}) {
-  clearTimer();
-  showTypingIndicator(txt, onDone);
 }
-function addAIMessage(txt, onDone = () => {}) {
-  clearTimer();
-  showTypingIndicator(txt, onDone);
-}
-
 
   // ─── Timer ────────────────────────────────────────
   function startTimer() {
