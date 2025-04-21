@@ -1,53 +1,40 @@
-html, body {
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none; /* stops bounce/scroll chaining */
-}
-
-/* Pin the game UI in the viewport */
-#game-container {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /* keep your existing width/height here */
-  width: 360px;
-  height: 600px;
-  overflow: hidden; /* chat scrolls internally, not the page */
-}
+/* ── 1) Color vars ───────────────────────────────── */
 :root {
   --blue: #007aff;
-  --gray-light: #f2f2f2;       /* was #e5e5e5 */
+  --gray-light: #f2f2f2;
   --gray-separator: #d1d1d1;
   --text-black: #000;
   --text-white: #fff;
 }
 
+/* ── 2) Base & layout ───────────────────────────── */
 body {
-  background: #f0f0f0;
-  font-family: Arial, sans-serif;
   margin: 0;
+  background: #f0f0f0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
+  align-items: flex-start; /* desktop: stick at top */
   min-height: 100vh;
+  font-family: Arial, sans-serif;
+  overflow-x: hidden;      /* no horizontal scroll ever */
 }
 
-/* Game container */
+/* ── 3) Game container (desktop) ───────────────── */
 #game-container {
+  position: relative;
   background: white;
-  max-width: 360px;
   width: 100%;
+  max-width: 360px;
   height: 600px;
+  margin: 20px 0;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
-  position: relative;
-  overflow: hidden;
+  overflow: hidden;        /* only chat scrolls */
 }
 
-/* Start Screen */
+/* ── 4) Start Screen ────────────────────────────── */
 #start-screen {
   position: absolute;
   inset: 0;
@@ -63,8 +50,8 @@ body {
   z-index: 10;
 }
 #start-screen h1 {
-  font-size: 2rem;          /* bump the title size */
-  margin: 0;                /* we'll control spacing below */
+  font-size: 2rem;
+  margin: 0;
 }
 #start-screen p {
   margin: 0 0 1em;
@@ -86,7 +73,7 @@ body {
   border-radius: 8px;
 }
 
-/* Header */
+/* ── 5) Header (iMessage style) ───────────────── */
 #header {
   height: 80px;
   display: flex;
@@ -94,30 +81,32 @@ body {
   justify-content: center;
   padding: 15px 0;
   background: var(--gray-light);
-  /* add a subtle bottom border as separator */
   border-bottom: 1px solid var(--gray-separator);
 }
 #header-logo {
-  width: 35px;
-  height: 35px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
-  background: var(--gray-light);
+  overflow: hidden;
   margin-right: 12px;
 }
 #score-display {
   position: absolute;
-  left: 12px;              /* always stay on the left */
+  left: 12px;
   font-weight: bold;
 }
-/* Chat & messages */
+
+/* ── 6) Chat area ──────────────────────────────── */
 #chat-container {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
   overflow-x: hidden;
-  overscroll-behavior: contain;
+  overscroll-behavior: contain; 
   border-top: 1px solid var(--gray-separator);
 }
+
+/* ── 7) Messages ───────────────────────────────── */
 .message {
   position: relative;
   max-width: 80%;
@@ -144,7 +133,7 @@ body {
   color: var(--text-white);
 }
 
-/* Typing indicator */
+/* ── 8) Typing indicator ───────────────────────── */
 .typing-indicator {
   float: left;
   background: var(--gray-light);
@@ -161,7 +150,7 @@ body {
   justify-content: flex-start;
 }
 
-/* Timer */
+/* ── 9) Timer bar ──────────────────────────────── */
 #timer-container {
   height: 4px;
   background-color: #ccc;
@@ -175,7 +164,7 @@ body {
   transition: width 0.1s linear;
 }
 
-/* Binary choices */
+/* ── 10) Binary choices ────────────────────────── */
 #binary-choices {
   display: none;
   text-align: center;
@@ -192,27 +181,23 @@ body {
   font-size: 14px;
 }
 
-/* Input form */
+/* ── 11) Input form ───────────────────────────── */
 #input-form {
   display: flex;
   align-items: center;
   border-top: 1px solid #ddd;
-  /* shrink horizontal padding so buttons hug the edges */
-  padding: 5px 4px;  
+  padding: 5px 4px;
   background: #fafafa;
 }
-
 #user-input {
-  /* grow to fill most of the row */
   flex: 1;
-  margin-right: 8px;     /* a small gap between text‑field and button */
+  margin-right: 8px;
   border: none;
   padding: 10px;
   font-size: 16px;
 }
-
+#user-input:focus { outline: none; }
 #input-form button {
-  /* no extra right‑margin so it lives close to the edge */
   margin: 0;
   background: var(--blue);
   color: var(--text-white);
@@ -222,7 +207,8 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
-/* Game‑over overlay */
+
+/* ── 12) Game-over overlay ─────────────────────── */
 #game-over {
   position: absolute;
   top: 0; left: 50%;
@@ -249,11 +235,13 @@ body {
   cursor: pointer;
   font-size: 16px;
   border-radius: 5px;
-  margin: 6px 0; /* space between buttons */
+  margin: 6px 0;
 }
+
+/* ── 13) Toast ─────────────────────────────────── */
 #toast {
   position: absolute;
-  bottom: 70px;               /* sit just above the input area */
+  bottom: 70px;
   left: 50%;
   transform: translateX(-50%);
   padding: 8px 12px;
@@ -268,19 +256,28 @@ body {
 }
 #toast.show {
   opacity: 1;
-/* only on phones/tablets */
+}
+
+/* ── 14) Mobile-only pin & scroll behavior ─────── */
 @media (max-width: 600px) {
   html, body {
     height: 100%;
-    overflow: hidden;              /* page itself won’t scroll */
-    overscroll-behavior: none;     /* stop bounce/scroll chaining */
+    overflow: hidden;             /* page itself won’t scroll */
+    overscroll-behavior: none;    /* stop bounce/scroll chaining */
   }
-
   #game-container {
-    position: fixed;  /* pin the whole game to the viewport */
+    position: fixed;              
     top: 0; left: 0; right: 0; bottom: 0;
     margin: 0 auto;
     width: 360px;
-    height: 600px;
+    height: 100vh;
+  }
+  #chat-container {
+    padding-bottom: 56px;         /* room for fixed input form */
+  }
+  #input-form {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
   }
 }

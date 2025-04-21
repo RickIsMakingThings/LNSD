@@ -1,17 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // ─── Mobile Snappiness via Visual Viewport API ───
-  const gameContainer = document.getElementById('game-container');
-  if (window.visualViewport) {
-    const adjustForKeyboard = () => {
-      gameContainer.style.transform = `translateY(-${visualViewport.offsetTop}px)`;
-    };
-    visualViewport.addEventListener('resize',  adjustForKeyboard);
-    visualViewport.addEventListener('scroll',  adjustForKeyboard);
-    window.addEventListener('beforeunload', () => {
-      gameContainer.style.transform = '';
-    });
-  }
-
+  
   // ─── Curated Easy‑Round Names & Exclusion ───────
   const easyNames = [
     "Matthew Stafford","Cam Newton","Patrick Mahomes","Lamar Jackson","Kirk Cousins",
