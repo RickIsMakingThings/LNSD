@@ -140,51 +140,61 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ─── Typing/Cross‑fade & AI Messaging ─────────────
-function showTypingIndicator(txt, cb = () => {}, step = 200) {
-  // create one bubble
+function showTypingIndicator(cb) {
+  // 1) Create an AI‐style bubble with dots
   const bubble = document.createElement('div');
   bubble.classList.add('message','ai');
+  bubble.textContent = 'ₒ';
   chatContainer.appendChild(bubble);
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
-  // two spans: dots + real text
-  const indSpan = document.createElement('span');
-  indSpan.classList.add('typing-indicator');
-  indSpan.textContent = 'ₒ';
-  const realSpan = document.createElement('span');
-  realSpan.textContent = txt;
-  realSpan.style.opacity = '0';
-  realSpan.style.transition = 'opacity 150ms ease-out';
-
-  bubble.append(indSpan, realSpan);
-
-  // dot animation
-  let count = 1, max = 3;
+  // 2) Grow to three dots
+  let count = 1;
   const dotTimer = setInterval(() => {
     count++;
-    indSpan.textContent = 'ₒ '.repeat(count).trim();
-    if (count >= max) clearInterval(dotTimer);
-  }, step);
+    bubble.textContent = 'ₒ '.repeat(count).trim();
+    if (count >= 3) clearInterval(dotTimer);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }, 300);
 
-  // after dots, cross‑fade
+  // 3) After 3 pulses, fade this bubble out
   setTimeout(() => {
     clearInterval(dotTimer);
-    indSpan.style.transition = 'opacity 150ms ease-in';
-    indSpan.style.opacity = '0';
-    realSpan.style.opacity = '1';
-
-    // once faded, remove the indicator span
-    setTimeout(() => {
-      bubble.removeChild(indSpan);
-      // start the timer if this was a player question
-      if (gameActive && currentNFLPlayer && txt.includes(currentNFLPlayer)) {
-        startTimer();
-      }
+    bubble.style.transition = 'opacity 150ms ease-in';
+    bubble.style.opacity    = '0';
+    bubble.addEventListener('transitionend', () => {
+      bubble.remove();
       cb();
-    }, 150);
-  }, step * max + 50);
+    }, { once: true });
+  }, 300 * 3 + 100);
 }
 
+// ─── AI Message with Typing ───────────────────────
+function addAIMessage(text, onDone = () => {}) {
+  clearTimer();
+  showTypingIndicator(() => {
+    // 4) Create the real text bubble, fading it in
+    const bubble = document.createElement('div');
+    bubble.classList.add('message','ai');
+    bubble.style.opacity    = '0';
+    bubble.style.transition = 'opacity 150ms ease-out';
+    bubble.textContent      = text;
+    chatContainer.appendChild(bubble);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // force a reflow so the transition kicks in
+    void bubble.offsetWidth;
+    bubble.style.opacity = '1';
+
+    // once it’s fully visible, kick off the timer/next step
+    bubble.addEventListener('transitionend', () => {
+      if (gameActive && currentNFLPlayer && text.includes(currentNFLPlayer)) {
+        startTimer();
+      }
+      onDone();
+    }, { once: true });
+  });
+}
 function addAIMessage(txt, onDone = () => {}) {
   clearTimer();
   showTypingIndicator(txt, onDone);
