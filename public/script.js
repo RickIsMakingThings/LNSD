@@ -24,6 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
     "Caleb Williams","Marvin Harrison Jr.","Malik Nabers","Bo Nix"
   ];
 
+// normalize player names for matching
+function normalizePlayerName(s) {
+  return s.replace(/[^\w\s]/gi, '').toLowerCase().trim();
+}
+
   // Binary mode control variables:
   let binaryModeActive = false;
   let binaryRoundCount = 0;    // Should be forced to 3 when binary mode starts
@@ -227,16 +232,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Typing Indicator ---
   function showTypingIndicator(callback) {
-    const indicator = document.createElement('div');
-    indicator.classList.add('message', 'ai', 'typing-indicator');
-    indicator.textContent = "...";
-    chatContainer.appendChild(indicator);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-    setTimeout(() => {
-      chatContainer.removeChild(indicator);
-      callback();
-    }, 1500);
-  }
+  const indicator = document.createElement('div');
+  indicator.classList.add('message','ai','typing-indicator');
+  indicator.textContent = '...';
+  chatContainer.appendChild(indicator);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+
+  setTimeout(() => {
+    if (indicator.parentNode) {
+      indicator.parentNode.removeChild(indicator);
+    }
+    callback();
+  }, 1500);
+}
 
   function addAIMessage(text) {
     clearTimer();
@@ -291,49 +299,54 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Easy rounds: only QBs with value >= 50.
   function startEasyRound() {
-    phase = "easy";
-    if (Object.keys(nflToCollege).length === 0) {
-      gameOver("No players data loaded.");
-      return;
-    }
-const present = easyNames.filter(n => !!nflToCollege[n]);
-const missing = easyNames.filter(n => !nflToCollege[n]);
-console.log('🟢 easyNames that match the CSV keys:', present);
-console.log('🔴 easyNames NOT found in nflToCollege:', missing);
-    let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
-      const info = nflToCollege[player];
-      return info.position.toUpperCase() === "QB" && info.value >= 50;
-    });
-    // Exclude players whose college is in recentSchools.
-    const filteredPlayers = eligiblePlayers.filter(player => {
-      const collegeNorm = normalizeCollegeString(nflToCollege[player].college);
-      return !recentSchools.includes(collegeNorm);
-    });
-    if (filteredPlayers.length > 0) {
-      eligiblePlayers = filteredPlayers;
-    }
-    if (eligiblePlayers.length === 0) {
-      gameOver("No eligible players for easy round. Game Over!");
-      return;
-    }
-    currentNFLPlayer = eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)];
-    const chosenCollege = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
-    recentSchools.push(chosenCollege);
-    if (recentSchools.length > 7) { recentSchools.shift(); }
-    easyRounds++;
-    const template = getQuestionTemplate();
-    const question = template.replace("XXXXX", currentNFLPlayer);
-    addAIMessage(question);
-    userInput.value = "";
-    inputForm.style.display = "block";
-    // After 3 easy rounds, transition to normal rounds.
-    if (easyRounds >= 3) {
-      setTimeout(() => {
-        phase = "trivia";
-        startTriviaRound();
-      }, 1500);
-    }
+  phase = "easy";
+
+  if (!Object.keys(nflToCollege).length) {
+    return gameOver("No players data loaded.");
   }
+
+  // 1) map your easyNames to the actual keys in nflToCollege
+  const matched = easyNames
+    .map(name => {
+      const norm = normalizePlayerName(name);
+      return Object.keys(nflToCollege)
+        .find(k => normalizePlayerName(k) === norm);
+    })
+    .filter(k => k);
+
+  console.log("✅ matched easyNames:", matched);
+  if (matched.length === 0) {
+    return gameOver("No eligible easy players.");
+  }
+
+  // 2) apply your QB/value filter
+  const eligible = matched.filter(player => {
+    const info = nflToCollege[player];
+    return info.position.toUpperCase() === "QB" && info.value >= 50;
+  });
+
+  if (eligible.length === 0) {
+    return gameOver("No eligible easy players.");
+  }
+
+  // 3) pick one and ask
+  currentNFLPlayer = eligible[Math.floor(Math.random() * eligible.length)];
+  const collegeNorm = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
+  recentSchools.push(collegeNorm);
+  if (recentSchools.length > 7) recentSchools.shift();
+  easyRounds++;
+
+  const template = getQuestionTemplate();
+  addAIMessage(template.replace("XXXXX", currentNFLPlayer));
+
+  // After 3 easy rounds, move to trivia
+  if (easyRounds >= 3) {
+    setTimeout(() => {
+      phase = "trivia";
+      startTriviaRound();
+    }, 1500);
+  }
+}
 
   // Normal rounds: rounds with criteria: round ≤ 3, position in [QB, RB, WR], value ≥ 10.
   function startTriviaRound() {
