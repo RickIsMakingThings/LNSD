@@ -318,4 +318,18 @@ body {
     width: 100%;
     flex: 0 0 auto;
   }
+#mc-choices {
+  display: none;
+  text-align: center;
+  margin: 10px 0;
+}
+#mc-choices button {
+  padding: 8px 12px;
+  margin: 0 5px 5px;
+  border: none;
+  background: var(--blue);
+  color: var(--text-white);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
 }
