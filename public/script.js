@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const chatContainer = document.getElementById('chat-container');
   const inputForm = document.getElementById('input-form');
   const userInput = document.getElementById('user-input');
-  const scoreDisplay = document.getElementById('score');
+  const scoreDisplay = document.getElementById('score-display');
   const gameOverOverlay = document.getElementById('game-over');
   const gameOverMsg = document.getElementById('game-over-msg');
   const restartButton = document.getElementById('restart');
