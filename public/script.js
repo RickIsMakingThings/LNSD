@@ -125,9 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   function showPlusOne() {
   const plus = document.getElementById('plus-one');
+  if (!plus) return;
   plus.classList.add('show');
-  // remove after 600ms
-  setTimeout(() => plus.classList.remove('show'), 600);
+  setTimeout(() => plus.classList.remove('show'), 400);
 }
 
   // --- Timer Functions ---
