@@ -10,6 +10,19 @@ document.addEventListener('DOMContentLoaded', function() {
     "Mark Sanchez","Mac Jones","C.J. Stroud","George Pickens","Travis Etienne",
     "Caleb Williams","Marvin Harrison Jr.","Malik Nabers","Bo Nix"
   ];
+ // ─── New: A bucket of tips ───────────────────────
+  const tips = [
+    "Try abbreviations (e.g. 'Bama' for Alabama).",
+    "Focus on the position—WRs often go to SEC schools.",
+    "Late‑round rookies might be tougher than veterans.",
+    "Watch for back‑to‑back players from the same school.",
+    "If you get stuck, think geographic—West Coast vs East Coast.",
+    "Dual‑threat QBs often come from smaller programs.",
+    "Speedy RBs are sometimes late‑round picks.",
+    "Transfers can throw you off—use aliases if needed.",
+    "Big‑school receivers tend to be drafted earlier.",
+    "Keep an eye on recent Draftees for extra points."
+  ];
 
   // ─── Flags & State ─────────────────────────────────
   let nflToCollege      = {};
@@ -251,6 +264,9 @@ loadData.then(() => {
     usernameForm.style.display    = 'none';
     leaderboardCont.style.display = 'none';
     inputForm.style.display       = 'none';
+
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    document.getElementById('tip-container').textContent = "Tip: " + tip;
   }
   restartBtn.addEventListener('click', restartGame);
   submitScoreBtn.addEventListener('click', ()=>{

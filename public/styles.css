@@ -242,6 +242,15 @@ body {
   border-radius: 5px;
   margin: 6px 0;
 }
+#tip-container {
+  margin-top: auto;      /* push to bottom of flex container */
+  padding: 10px 0;
+  width: 100%;
+  text-align: center;
+  font-style: italic;
+  color: #555;
+  border-top: 1px solid var(--gray-separator);
+}
 
 /* ── 13) Toast ─────────────────────────────────── */
 #toast {
