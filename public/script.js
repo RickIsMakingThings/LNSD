@@ -99,6 +99,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   return Math.min(baseValue * boost, MAX_WEIGHT);
 }
+  function showPlusOne() {
+  const plus = document.getElementById('plus-one');
+  plus.classList.add('show');
+  // remove after 600ms
+  setTimeout(() => plus.classList.remove('show'), 600);
+}
+
 
   // ─── Utility: Pick With Cooldown ──────────────────
   function pickWithCooldown(arr, recentArr) {
@@ -472,6 +479,7 @@ loadData.then(() => {
       // ← Restore this entire block:
       score++;
       updateScore();
+      showPlusOne();
 
       if (phase==='easy') {
         if (easyRounds < 3) {

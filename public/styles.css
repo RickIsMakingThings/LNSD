@@ -98,6 +98,25 @@ body {
   left: 12px;
   font-weight: bold;
 }
+/* +1 indicator next to the score */
+#score-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+#plus-one {
+  margin-left: 6px;
+  font-weight: bold;
+  color: green;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#plus-one.show {
+  opacity: 1;
+}
+
 
 /* ── 6) Chat area ──────────────────────────────── */
 #chat-container {
