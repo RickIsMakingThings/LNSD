@@ -13,6 +13,17 @@ document.addEventListener('DOMContentLoaded', function() {
   let easyRounds = 0;          // Count of easy rounds played (target: 3)
   let recentSchools = [];      // Tracks normalized college names of the last 7 rounds
 
+// ─── Curated Easy‑Round Player Names ───
+  const easyNames = [
+    "Matthew Stafford","Cam Newton","Patrick Mahomes","Lamar Jackson","Kirk Cousins",
+    "Derrick Henry","Christian McCaffrey","Andrew Luck","Baker Mayfield","Jalen Hurts",
+    "Kyler Murray","Ezekiel Elliott","Justin Herbert","Jameis Winston","Odell Beckham Jr.",
+    "Joe Burrow","Saquon Barkley","Justin Jefferson","Joe Mixon","Marcus Mariota",
+    "Amon-Ra St. Brown","Nick Chubb","Jonathan Taylor","Trevor Lawrence","Justin Fields",
+    "Mark Sanchez","Mac Jones","C.J. Stroud","George Pickens","Travis Etienne",
+    "Caleb Williams","Marvin Harrison Jr.","Malik Nabers","Bo Nix"
+  ];
+
   // Binary mode control variables:
   let binaryModeActive = false;
   let binaryRoundCount = 0;    // Should be forced to 3 when binary mode starts
