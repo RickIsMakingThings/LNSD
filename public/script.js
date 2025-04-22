@@ -285,6 +285,10 @@ document.addEventListener('DOMContentLoaded', function() {
       gameOver("No players data loaded.");
       return;
     }
+const present = easyNames.filter(n => !!nflToCollege[n]);
+const missing = easyNames.filter(n => !nflToCollege[n]);
+console.log('🟢 easyNames that match the CSV keys:', present);
+console.log('🔴 easyNames NOT found in nflToCollege:', missing);
     let eligiblePlayers = Object.keys(nflToCollege).filter(player => {
       const info = nflToCollege[player];
       return info.position.toUpperCase() === "QB" && info.value >= 50;
