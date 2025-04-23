@@ -78,6 +78,18 @@ const recentTransferCompliments = [];
   const toastEl           = document.getElementById('toast');
   const tipContainer      = document.getElementById('tip-container');
 
+  // ─── Legend‐Mode Text Submit Handler ─────────────────
+  inputForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!gameActive || mode === 'choice') return;
+    const ans = userInput.value.trim();
+    if (!ans) return;
+    clearTimer();
+    addMessage(ans, 'user');
+    userInput.value = '';
+    handleAnswer(ans);
+  });
+
   // We'll inject our Choice-Mode container here
   let choiceContainer = null;
   function ensureChoiceContainer() {
