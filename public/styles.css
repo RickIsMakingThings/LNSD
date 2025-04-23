@@ -318,6 +318,7 @@ body {
     width: 100%;
     flex: 0 0 auto;
   }
+}
 /* ─── Scrollable leaderboard list ───────────────── */
 #leaderboard-container {
   /* keep the outer container as-is for padding & background */
@@ -333,5 +334,4 @@ body {
 #leaderboard-container li {
   border-bottom: 1px solid #ddd;
   padding: 4px 0;
-}
 }

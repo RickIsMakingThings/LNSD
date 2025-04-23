@@ -320,19 +320,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── Game Over & Tips ─────────────────────────────
   function gameOver(msg) {
-    gameActive = false;
-    clearTimer();
-    addAIMessage(msg);
-    gameOverMsg.textContent = msg;
-    gameOverOverlay.style.display = 'flex';
-    inputForm.style.display       = 'none';
-    binaryChoices.style.display   = 'none';
-    if (choiceContainer) choiceContainer.style.display = 'none';  
-    tipContainer.textContent = 'Tip: ' + tips[Math.floor(Math.random()*tips.length)];
-    modeBtn.textContent = mode==='legend'
-      ? 'Switch to Choice Mode'
-      : 'Switch to Legend Mode';
-  }
+  gameActive = false;
+  clearTimer();
+  addAIMessage(msg);
+
+  // **SHOW** the big button bar again:
+  gameOverButtons.style.display = 'flex';
+
+  gameOverMsg.textContent = msg;
+  gameOverOverlay.style.display = 'flex';
+  inputForm.style.display       = 'none';
+  binaryChoices.style.display   = 'none';
+  if (choiceContainer) choiceContainer.style.display = 'none';
+  tipContainer.textContent = 'Tip: ' + tips[Math.floor(Math.random()*tips.length)];
+
+  modeBtn.textContent = mode==='legend'
+    ? 'Switch to Choice Mode'
+    : 'Switch to Legend Mode';
+}
 
   // ─── Restart ──────────────────────────────────────
   restartBtn.addEventListener('click', restartGame);
