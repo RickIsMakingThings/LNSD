@@ -1,49 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-/>
-<title>Conversational Football Trivia</title>
-<link rel="stylesheet" href="styles.css?v=6" />
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
-<script>
-// Firebase config (unchanged)
-const firebaseConfig = {
-apiKey: "AIzaSyAwBmdgqQ3XeG2vtNtpHcM67Xk5rviNh6Q",
-authDomain: "lnsd-13da9.firebaseapp.com",
-projectId: "lnsd-13da9",
-storageBucket: "lnsd-13da9.firebasestorage.app",
-messagingSenderId: "1000350992218",
-appId: "1:1000350992218:web:31e80c8e595afc00cc1563",
-measurementId: "G-JWM9SK7VRM"
-};
-firebase.initializeApp(firebaseConfig);
-</script>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+  />
+  <title>Conversational Football Trivia</title>
+  <link rel="stylesheet" href="styles.css?v=6" />
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase config (unchanged)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwBmdgqQ3XeG2vtNtpHcM67Xk5rviNh6Q",
+      authDomain: "lnsd-13da9.firebaseapp.com",
+      projectId: "lnsd-13da9",
+      storageBucket: "lnsd-13da9.firebasestorage.app",
+      messagingSenderId: "1000350992218",
+      appId: "1:1000350992218:web:31e80c8e595afc00cc1563",
+      measurementId: "G-JWM9SK7VRM"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
-<div id="game-container">
-<!-- START SCREEN OVERLAY -->
-<div id="start-screen">
-<h1>Let's Name Some Dudes</h1>
-<p>
-You think you know ball?<br>
-We text NFL dudes, you name the college.<br>
-Abbreviations are cool. Bama. Ole Miss. LSU.
-Submit your answer before time runs out and see where you stack up on the     	leaderboard!<br>
-</p>
-<button id="start-button">Start Game</button>
-<img src="example.png" alt="Example" id="intro-image" />
-</div>
-
-<!-- iMessage‑style header -->
-<div id="header">
-      <img src="boomlogo.png" alt="B" id="header-logo" />
-      <div id="score-display">0</div>
+  <div id="game-container">
+    <!-- START SCREEN OVERLAY -->
+    <div id="start-screen">
+      <h1>Let's Name Some Dudes</h1>
+      <p>
+        You think you know ball?<br>
+        We text NFL dudes, you name the college.<br>
+        Abbreviations are cool. Bama. Ole Miss. LSU.
+        Submit your answer before time runs out and see where you stack up on the     	leaderboard!<br>
+      </p>
+      <button id="start-button">Start Game</button>
+      <img src="example.png" alt="Example" id="intro-image" />
     </div>
+
+    <!-- iMessage‑style header -->
+    <div id="header">
   <img src="boomlogo.png" alt="B" id="header-logo" />
   <div id="score-wrapper">
     <div id="score-display">0</div>
@@ -51,45 +48,46 @@ Submit your answer before time runs out and see where you stack up on the     	l
   </div>
 </div>
 
-<div id="chat-container"></div>
-<div id="timer-container"><div id="timer-bar"></div></div>
-<div id="binary-choices">
-<button id="choice-tough">Hit me with a tough one</button>
-<button id="choice-defense">Go defense</button>
-</div>
-<form id="input-form">
-<input
-type="text"
-id="user-input"
-placeholder="Type your answer here…"
-autocomplete="off"
-/>
-<button type="submit">Send</button>
-</form>
-<div id="game-over">
-<p id="game-over-msg">Game Over!</p>
-<div id="game-over-buttons">
-<button id="submit-score">Submit Score</button>
-<button id="restart">Restart Game</button>
-<!-- New Share Button -->
-<button id="share-score">Share Score</button>
-</div>
-<div id="username-form" style="display:none;">
-<p>Please enter your Boom Fantasy username:</p>
-<input type="text" id="username-input" placeholder="Username" />
-<button id="username-submit">Submit</button>
-</div>
-<div id="leaderboard-container" style="display:none;">
-<button id="leaderboard-restart">Restart Game</button>
-<h3>Leaderboard (Top 20)</h3>
-<ol id="leaderboard"></ol>
-</div>
-<!-- Toast container -->
-<div id="toast"></div>
-<div id="tip-container"></div>
-</div>
-</div>
-</div>
+    <div id="chat-container"></div>
+    <div id="timer-container"><div id="timer-bar"></div></div>
+    <div id="binary-choices">
+      <button id="choice-tough">Hit me with a tough one</button>
+      <button id="choice-defense">Go defense</button>
+    </div>
+    <form id="input-form">
+      <input
+        type="text"
+        id="user-input"
+        placeholder="Type your answer here…"
+        autocomplete="off"
+      />
+      <button type="submit">Send</button>
+    </form>
+    <div id="game-over">
+      <p id="game-over-msg">Game Over!</p>
+      <div id="game-over-buttons">
+        <button id="submit-score">Submit Score</button>
+        <button id="restart">Restart Game</button>
+        <!-- New Share Button -->
+        <button id="share-score">Share Score</button>
+      </div>
+      <div id="username-form" style="display:none;">
+        <p>Please enter your Boom Fantasy username:</p>
+        <input type="text" id="username-input" placeholder="Username" />
+        <button id="username-submit">Submit</button>
+      </div>
+      <div id="leaderboard-container" style="display:none;">
+        <button id="leaderboard-restart">Restart Game</button>
+        <h3>Leaderboard (Top 20)</h3>
+        <ol id="leaderboard"></ol>
+      </div>
+      <!-- Toast container -->
+      <div id="toast"></div>
+      <div id="tip-container"></div>
+      </div>
+    </div>
+  </div>
 
-<script src="script.js?v=6"></script>
+  <script src="script.js?v=6"></script>
 </body>
+</html>
