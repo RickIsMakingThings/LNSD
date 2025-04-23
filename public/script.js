@@ -3,15 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let nflToCollege = {};       // Loaded from players.csv.
   let collegeAliases = {};     // Loaded from college_aliases.csv.
   let dialogueBuckets = {};    // Loaded from dialogue.json.
-  
-  // Phase can be "easy", "trivia" (normal), or "binary"
-  let phase = "easy";          
-  let currentNFLPlayer = "";
-  let score = 0;
-  let gameActive = true;
-  let correctStreak = 0;
-  let easyRounds = 0;          // Count of easy rounds played (target: 3)
-  let recentSchools = [];      // Tracks normalized college names of the last 7 rounds
 
 // ─── Curated Easy‑Round Player Names ───
   const easyNames = [
@@ -23,6 +14,15 @@ document.addEventListener('DOMContentLoaded', function() {
     "Mark Sanchez","Mac Jones","C.J. Stroud","George Pickens","Travis Etienne",
     "Caleb Williams","Marvin Harrison Jr.","Malik Nabers","Bo Nix"
   ];
+  
+  // Phase can be "easy", "trivia" (normal), or "binary"
+  let phase = "easy";          
+  let currentNFLPlayer = "";
+  let score = 0;
+  let gameActive = true;
+  let correctStreak = 0;
+  let easyRounds = 0;          // Count of easy rounds played (target: 3)
+  let recentSchools = [];      // Tracks normalized college names of the last 7 rounds
 
 // normalize player names for matching
 function normalizePlayerName(s) {
@@ -49,6 +49,10 @@ function normalizePlayerName(s) {
   const choiceTough = document.getElementById('choice-tough');
   const choiceDefense = document.getElementById('choice-defense');
   const timerBar = document.getElementById('timer-bar'); // Ensure this exists in your HTML
+
+  restartButton.addEventListener('click', restartGame);
+  submitScoreBtn .addEventListener('click', () => { /* show username form */ });
+  shareScoreBtn  .addEventListener('click', shareScoreHandler);
 
   // --- Data Loading ---
   // Load external dialogue JSON.
@@ -298,48 +302,54 @@ function normalizePlayerName(s) {
   }
   
   // Easy rounds: only QBs with value >= 50.
-  function startEasyRound() {
+  function normalizeName(s) {
+  return s.replace(/[^\w\s]/g,'').toLowerCase().trim();
+}
+
+function startEasyRound() {
   phase = "easy";
 
   if (!Object.keys(nflToCollege).length) {
     return gameOver("No players data loaded.");
   }
 
-  // 1) map your easyNames to the actual keys in nflToCollege
-  const matched = easyNames
-    .map(name => {
-      const norm = normalizePlayerName(name);
-      return Object.keys(nflToCollege)
-        .find(k => normalizePlayerName(k) === norm);
-    })
-    .filter(k => k);
+  // 1) Map your curated easyNames → actual keys in nflToCollege
+  const keyMap = Object.keys(nflToCollege).reduce((m,k) => {
+    m[ normalizeName(k) ] = k;
+    return m;
+  }, {});
 
-  console.log("✅ matched easyNames:", matched);
-  if (matched.length === 0) {
+  const matched = easyNames
+    .map(n => keyMap[ normalizeName(n) ])
+    .filter(Boolean);
+
+  console.log("✅ easyNames matched:", matched);
+  if (!matched.length) {
     return gameOver("No eligible easy players.");
   }
 
-  // 2) apply your QB/value filter
-  const eligible = matched.filter(player => {
-    const info = nflToCollege[player];
-    return info.position.toUpperCase() === "QB" && info.value >= 50;
+  // 2) Apply your QB & value>=50 filter
+  let eligible = matched.filter(p => {
+    const info = nflToCollege[p];
+    return info.position.toUpperCase()==="QB" && info.value >= 50;
   });
 
-  if (eligible.length === 0) {
+  if (!eligible.length) {
     return gameOver("No eligible easy players.");
   }
 
-  // 3) pick one and ask
-  currentNFLPlayer = eligible[Math.floor(Math.random() * eligible.length)];
+  // 3) Pick one at random
+  currentNFLPlayer = eligible[ Math.floor(Math.random()*eligible.length) ];
   const collegeNorm = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
   recentSchools.push(collegeNorm);
-  if (recentSchools.length > 7) recentSchools.shift();
+  if (recentSchools.length>7) recentSchools.shift();
   easyRounds++;
 
+  // 4) Fire off the question
   const template = getQuestionTemplate();
-  addAIMessage(template.replace("XXXXX", currentNFLPlayer));
+  addAIMessage( template.replace("XXXXX", currentNFLPlayer) );
 
-  // After 3 easy rounds, move to trivia
+  // 5) After 3 easy rounds, advance to trivia
   if (easyRounds >= 3) {
     setTimeout(() => {
       phase = "trivia";
