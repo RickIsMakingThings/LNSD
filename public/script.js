@@ -47,7 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let binaryModeActive  = false;
   let binaryRoundCount  = 0;
   let correctStreak     = 0;
-  let timerInterval;
+  let _timerTimeout = null;
+  let _timerInterval = null;
+  let _timerDeadline = 0;
   let _hasIntroduced = false;
 
  // Cooldown pools for question/dialogue reuse
@@ -296,22 +298,38 @@ function toTitleCase(str) {
 
   // ─── Timer ────────────────────────────────────────
   function startTimer() {
-    clearTimer();
-    let t = 7;
-    timerBar.style.width = '100%';
-    timerInterval = setInterval(()=>{
-      t -= 0.1;
-      timerBar.style.width = `${(t/7)*100}%`;
-      if (t<=0) {
-        clearInterval(timerInterval);
-        gameOver("Time's up! Game Over!");
-      }
-    },100);
-  }
-  function clearTimer() {
-    clearInterval(timerInterval);
-    timerBar.style.width = '0%';
-  }
+  // clear whatever was running
+  clearTimer();
+
+  const DURATION = 7000;              // 7 seconds in ms
+  _timerDeadline = Date.now() + DURATION;
+
+  // 1) Schedule the actual Game Over at the deadline.
+  //    Even if the tab is throttled, when it comes back to life
+  //    the timeout will fire immediately if the time has already passed.
+  _timerTimeout = setTimeout(() => {
+    gameOver("Time's up! Game Over!");
+  }, DURATION);
+
+  // 2) Kick off a quick UI‐update loop to move the blue bar.
+  //    We use setInterval here, but even if it's paused,
+  //    as soon as it runs again it'll “catch up” the bar.
+  _timerInterval = setInterval(() => {
+    const remaining = Math.max(0, _timerDeadline - Date.now());
+    const pct       = (remaining / DURATION) * 100;
+    timerBar.style.width = pct + '%';
+
+    // (optional) once we're at zero we can clear early:
+    if (remaining <= 0) clearTimer();
+  }, 100);
+}
+
+// replace clearTimer() with this:
+function clearTimer() {
+  if (_timerTimeout   !== null) { clearTimeout(_timerTimeout);   _timerTimeout   = null; }
+  if (_timerInterval  !== null) { clearInterval(_timerInterval); _timerInterval  = null; }
+  timerBar.style.width = '0%';
+}
 
   // ─── Data Loading ─────────────────────────────────
   let dataLoaded = 0;
