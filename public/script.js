@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── DOM Refs ──────────────────────────────────────
   const startScreen       = document.getElementById('start-screen');
   const startButton       = document.getElementById('start-button');
+  const gameContainer = document.getElementById('game-container');
   const chatContainer     = document.getElementById('chat-container');
   const inputForm         = document.getElementById('input-form');
   const userInput         = document.getElementById('user-input');
