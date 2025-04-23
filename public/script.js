@@ -85,7 +85,6 @@ const recentTransferCompliments = [];
     const ans = userInput.value.trim();
     if (!ans) return;
     clearTimer();
-    addMessage(ans, 'user');
     userInput.value = '';
     handleAnswer(ans);
   });
