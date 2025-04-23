@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let binaryRoundCount  = 0;
   let correctStreak     = 0;
   let timerInterval;
-  let _introHasRun = false;
+  let _hasIntroduced = false;
 
  // Cooldown pools for question/dialogue reuse
   const recentQuestions           = [];
@@ -442,28 +442,25 @@ function toTitleCase(str) {
 
    // ─── Intro Sequence ──────────────────────────────
   function startIntro() {
-  // pick which bucket to use: initial greetings vs restart
-  const bucket = !_introHasRun
-    ? (dialogueBuckets.greetings || [])
-    : (dialogueBuckets.restart   || []);
+  // decide which bucket to use
+  const bucketName = _hasIntroduced ? 'restart' : 'greetings';
+  const bucket = dialogueBuckets[bucketName] || [];
 
-  _introHasRun = true;  // flip so next time we pick `restart`
+  // fallback default lines
+  const defaults = {
+    greetings: ["you and I have to take an oath 🤝"],
+    restart:   ["Alright, back at it!"]
+  };
 
-  const m1 = bucket[0] || "you and I have to take an oath 🤝";
-  const m2 = bucket[1] || "no googling";
-  const m3 = "We can start with some easy ones.";
+  // pick one line at random (or default if bucket empty)
+  const lines = bucket.length ? bucket : defaults[bucketName];
+  const line  = lines[Math.floor(Math.random() * lines.length)];
 
-  // 1) show one typing indicator for the two intro lines
-  showTypingIndicator(() => {
-    addMessage(m1, 'ai');
-    addMessage(m2, 'ai');
+  // mark that we’ve now introduced once
+  _hasIntroduced = true;
 
-    // 2) then show another indicator for the transition into easy rounds
-    showTypingIndicator(() => {
-      addMessage(m3, 'ai');
-      startEasyRound();
-    });
-  });
+  // show the single line, then go straight into the first round
+  addAIMessage(line, startEasyRound);
 }
 
   // ─── ROUND STARTERS ───────────────────────────────
