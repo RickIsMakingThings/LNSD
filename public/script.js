@@ -107,10 +107,16 @@ const recentTransferCompliments = [];
 
   // ─── Binary‐choices UI Helpers ──────────────────
   function showBinaryChoices() {
+  // hide everything else
   inputForm.style.display      = 'none';
-  if (choiceContainer) choiceContainer.style.display = 'none';
   binaryChoices.style.display  = 'block';
-}
+  // in case we're in Choice Mode boss‐round, make sure the MC container exists
+  if (mode === 'choice') {
+    ensureChoiceContainer();
+    choiceContainer.innerHTML = '';
+  } else {
+    if (choiceContainer) choiceContainer.style.display = 'none';
+  }
 
   // ─── Firebase Setup ───────────────────────────────
   const db = firebase.firestore();
@@ -435,10 +441,12 @@ const recentTransferCompliments = [];
 
   // ─── Shared “ask” logic ───────────────────────────
   function holdPlayerAndAsk() {
-  // first, hide *all* the alternate UIs
+ // first thing, make sure our choice container is on the page
+  ensureChoiceContainer();
+  // then hide *all* the alternate UIs
   inputForm.style.display      = 'none';
   binaryChoices.style.display  = 'none';
-  if (choiceContainer) choiceContainer.style.display = 'none';
+  choiceContainer.style.display = 'none';
 
   // register the school so we don’t repeat it
   const colNorm = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
@@ -449,15 +457,15 @@ const recentTransferCompliments = [];
   const tmpl     = pickWithCooldown(dialogueBuckets.questions||['How about XXXXX'], recentQuestions);
   const question = tmpl.replace('XXXXX', currentNFLPlayer);
 
-  if (mode === 'legend') {
-    // Legend = show the text-field
+    if (mode === 'legend') {
+    // Legend mode: pop the text input back up
     inputForm.style.display = 'flex';
     addAIMessage(question);
   } else {
-    // Choice  = show multiple-choice buttons
+    // Choice mode: show MC buttons
     presentMultipleChoice(question);
   }
-}
+ }
 
 
   // ─── Multiple-Choice UI ───────────────────────────
