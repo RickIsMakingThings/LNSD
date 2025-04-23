@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let binaryRoundCount  = 0;
   let correctStreak     = 0;
   let timerInterval;
+  let _introHasRun = false;
 
  // Cooldown pools for question/dialogue reuse
   const recentQuestions           = [];
@@ -441,17 +442,29 @@ function toTitleCase(str) {
 
    // ─── Intro Sequence ──────────────────────────────
   function startIntro() {
-    addAIMessage(
-      dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
-      () => addAIMessage(
-        dialogueBuckets.greetings?.[1] || "no googling",
-        () => {
-          addAIMessage("We can start with some easy ones.");
-          startEasyRound();
-        }
-      )
-    );
-  }
+  // pick which bucket to use: initial greetings vs restart
+  const bucket = !_introHasRun
+    ? (dialogueBuckets.greetings || [])
+    : (dialogueBuckets.restart   || []);
+
+  _introHasRun = true;  // flip so next time we pick `restart`
+
+  const m1 = bucket[0] || "you and I have to take an oath 🤝";
+  const m2 = bucket[1] || "no googling";
+  const m3 = "We can start with some easy ones.";
+
+  // 1) show one typing indicator for the two intro lines
+  showTypingIndicator(() => {
+    addMessage(m1, 'ai');
+    addMessage(m2, 'ai');
+
+    // 2) then show another indicator for the transition into easy rounds
+    showTypingIndicator(() => {
+      addMessage(m3, 'ai');
+      startEasyRound();
+    });
+  });
+}
 
   // ─── ROUND STARTERS ───────────────────────────────
   function startEasyRound() {
