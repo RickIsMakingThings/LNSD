@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return csv.trim().split(/\r?\n/).slice(1).reduce((o,line)=>{
       const p = line.split(',');
       if (p.length < 7) return o;
-      const [round,name,position,college,value] = [
+      const [draftyear,round,name,position,college,value] = [
         parseInt(p[0],10), p[1], p[2], p[3], parseFloat(p[4])
       ];
       if (name) o[name] = { round, position, college, value };
