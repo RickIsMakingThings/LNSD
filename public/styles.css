@@ -81,7 +81,8 @@ body {
   height: 80px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  position: relative;      /* so that absolute children are measured from here */
+  justify-content: center; /* keep the logo centered */
   padding: 15px 0;
   background: var(--gray-light);
   border-bottom: 1px solid var(--gray-separator);
@@ -94,15 +95,18 @@ body {
   margin-right: 12px;
 }
 #score-display {
-  position: absolute;
-  left: 12px;
-  font-weight: bold;
+  position: static !important;
+  margin-right: 6px;       /* give a little breathing room before the “+1” */
+  font-weight: bold;       /* keep your bolding */
 }
 /* +1 indicator next to the score */
 #score-wrapper {
+  position: absolute;      /* remove it from the flex layout */
+  left: 12px;              /* how far from the left edge you want it */
+  top: 50%;                /* vertical center */
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
-  position: relative;
 }
 
 #plus-one {
