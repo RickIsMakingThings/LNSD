@@ -1,4 +1,5 @@
 // script.js (v7)
+// *** Updated to include flat recency boost (+30/+25/.../+10) and elimination of old low-value players (max age 7, min boosted value 40) ***
 document.addEventListener('DOMContentLoaded', () => {
   // ─── Mode Persistence ──────────────────────────────
   let mode = localStorage.getItem('gameMode') || 'legend'; // 'legend' or 'choice'
@@ -44,16 +45,16 @@ document.addEventListener('DOMContentLoaded', () => {
   let correctStreak     = 0;
   let timerInterval;
 
- // Cooldown pools for question/dialogue reuse
-const recentQuestions           = [];
-const recentConfirmations       = [];
-const recentBigCompliments      = [];
-const recentTransferCompliments = [];
+  // Cooldown pools for question/dialogue reuse
+  const recentQuestions           = [];
+  const recentConfirmations       = [];
+  const recentBigCompliments      = [];
+  const recentTransferCompliments = [];
 
   // ─── DOM Refs ──────────────────────────────────────
   const startScreen       = document.getElementById('start-screen');
   const startButton       = document.getElementById('start-button');
-  const gameContainer = document.getElementById('game-container');
+  const gameContainer     = document.getElementById('game-container');
   const chatContainer     = document.getElementById('chat-container');
   const inputForm         = document.getElementById('input-form');
   const userInput         = document.getElementById('user-input');
@@ -78,7 +79,7 @@ const recentTransferCompliments = [];
   const toastEl           = document.getElementById('toast');
   const tipContainer      = document.getElementById('tip-container');
 
-  // ─── Legend‐Mode Text Submit Handler ─────────────────
+  // ─── Legend‑Mode Text Submit Handler ─────────────────
   inputForm.addEventListener('submit', e => {
     e.preventDefault();
     if (!gameActive || mode === 'choice') return;
@@ -89,7 +90,7 @@ const recentTransferCompliments = [];
     handleAnswer(ans);
   });
 
-  // We'll inject our Choice-Mode container here
+  // We'll inject our Choice‑Mode container here
   let choiceContainer = null;
   function ensureChoiceContainer() {
     if (!choiceContainer) {
@@ -105,20 +106,20 @@ const recentTransferCompliments = [];
     }
   }
 
-  // ─── Binary‐choices UI Helpers ──────────────────
+  // ─── Binary‑choices UI Helpers ──────────────────
   function showBinaryChoices() {
-  // Make sure the MC container exists (we’ll hide it here)
-  ensureChoiceContainer();
+    // Make sure the MC container exists (we’ll hide it here)
+    ensureChoiceContainer();
 
-  // Hide anything else
-  inputForm.style.display     = 'none';
-  choiceContainer.style.display = 'none';
+    // Hide anything else
+    inputForm.style.display       = 'none';
+    choiceContainer.style.display = 'none';
 
-  // Show the two-button binary choice panel every time
-  binaryChoices.style.display = 'block';
-}
+    // Show the two-button binary choice panel every time
+    binaryChoices.style.display = 'block';
+  }
 
- // ─── hide the two-button binary panel ─────────────
+  // ─── hide the two-button binary panel ─────────────
   function hideBinaryChoices() {
     binaryChoices.style.display = 'none';
   }
@@ -137,7 +138,7 @@ const recentTransferCompliments = [];
     return items[items.length-1].name;
   }
 
-  // ─── Utility: Draft-Year Boost ─────────────────────
+  // ─── Utility: Draft‑Year Boost ─────────────────────
   const MAX_WEIGHT = 100;
   function computeWeight(p) {
     const baseValue = p.value + ((p.draftYear||0) >= 2023 ? 10 : 0);
@@ -147,6 +148,18 @@ const recentTransferCompliments = [];
     else if (p.draftYear >= 2018) boost = 2.0;
     else                           boost = 0.4;
     return Math.min(baseValue * boost, MAX_WEIGHT);
+  }
+
+  // ─── Utility: Flat Recency Boost ─────────────────
+  function recencyBoost(draftYear) {
+    const CURRENT_YEAR = new Date().getFullYear();
+    const age = CURRENT_YEAR - draftYear;
+    if (age === 1) return 30;   // 2024
+    if (age === 2) return 25;   // 2023
+    if (age === 3) return 20;   // 2022
+    if (age === 4) return 15;   // 2021
+    if (age === 5) return 10;   // 2020
+    return 0;                   // 2019 and older
   }
 
   // ─── Utility: Cooldown Pick ───────────────────────
@@ -170,27 +183,26 @@ const recentTransferCompliments = [];
     }, {});
   }
   function parsePlayersCSV(csv) {
-  return csv.trim().split(/\r?\n/).slice(1).reduce((o, line) => {
-    const p = line.split(',');
-    // we expect at least: year, round, ??, ??, name, position, college, ... , value
-    if (p.length < 10) return o;
-    const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
-    const draftYear = parseInt(dy, 10);
-    const round     = parseInt(rnd,10);
-    const value     = val.trim()==='' ? 0 : parseFloat(val);
-    if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
-      o[name] = {
-        draftYear,
-        round,
-        position: pos,
-        college: c1,    // first college column
-        value
-      };
-    }
-    return o;
-  }, {});
-}
-
+    return csv.trim().split(/\r?\n/).slice(1).reduce((o, line) => {
+      const p = line.split(',');
+      // we expect at least: year, round, ??, ??, name, position, college, ... , value
+      if (p.length < 10) return o;
+      const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
+      const draftYear = parseInt(dy, 10);
+      const round     = parseInt(rnd,10);
+      const value     = val.trim()==='' ? 0 : parseFloat(val);
+      if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
+        o[name] = {
+          draftYear,
+          round,
+          position: pos,
+          college: c1,    // first college column
+          value
+        };
+      }
+      return o;
+    }, {});
+  }
 
   // ─── Normalize & Alias Check ──────────────────────
   function normalizeCollegeString(s) {
@@ -381,202 +393,34 @@ const recentTransferCompliments = [];
 
   // ─── ROUND STARTERS ───────────────────────────────
   function startEasyRound() {
-  phase = 'easy';
-  const candidates = easyNames
-    .filter(n => nflToCollege[n])
-    .filter(n => {
-      const c = normalizeCollegeString(nflToCollege[n].college);
-      return !recentSchools.includes(c);
-    });
-  if (!candidates.length) return gameOver("No eligible easy players.");
-  currentNFLPlayer = candidates[Math.floor(Math.random() * candidates.length)];
-  holdPlayerAndAsk();
-  easyRounds++;
-  // ← no auto-transition here; handleAnswer() will transition *after* the user's response
-}
-
-  function startTriviaRound() {
-    phase = 'trivia';
-    const base = Object.keys(nflToCollege)
-      .filter(n=>!easyNames.includes(n))
-      .filter(n=>{
-        const info = nflToCollege[n];
-        return info.round <= 4
-            && ['QB','RB','WR','TE'].includes(info.position.toUpperCase())
-            && info.value >= 20;
-      })
-      .filter(n=>{
+    phase = 'easy';
+    const candidates = easyNames
+      .filter(n => nflToCollege[n])
+      .filter(n => {
         const c = normalizeCollegeString(nflToCollege[n].college);
         return !recentSchools.includes(c);
       });
-    if (!base.length) return gameOver("No eligible players.");
-    currentNFLPlayer = base[Math.floor(Math.random()*base.length)];
+    if (!candidates.length) return gameOver("No eligible easy players.");
+    currentNFLPlayer = candidates[Math.floor(Math.random() * candidates.length)];
     holdPlayerAndAsk();
+    easyRounds++;
+    // ← no auto-transition here; handleAnswer() will transition *after* the user's response
   }
 
-  function startTriviaRoundFiltered(choice) {
-    phase = 'binary';
-    let base = Object.keys(nflToCollege).filter(n=>!easyNames.includes(n));
-    if (choice==='tough') {
-      base = base.filter(n=>{
+  function startTriviaRound() {
+    phase = 'trivia';
+    const CURRENT_YEAR      = new Date().getFullYear();
+    const MAX_AGE           = 7;    // exclude anyone 7+ seasons old if they’re too low-value
+    const MIN_VALUE_FOR_OLD = 40;
+
+    // 1) Base filters (round, position, no repeats) ↓
+    let base = Object.keys(nflToCollege)
+      .filter(n => !easyNames.includes(n))
+      .filter(n => {
         const p = nflToCollege[n];
-        return p.round>=2 && p.round<=7
-            && ['QB','RB','WR'].includes(p.position.toUpperCase())
-            && p.value>=10 && p.value<=20;
-      });
-    } else {
-      const defPos = ['DE','DT','DL','LB','OLB','ILB','CB','S'];
-      base = base.filter(n=>{
-        const p = nflToCollege[n];
-        return defPos.includes(p.position.toUpperCase()) && p.value>=60;
-      });
-    }
-    base = base.filter(n=>{
-      const c = normalizeCollegeString(nflToCollege[n].college);
-      return !recentSchools.includes(c);
-    });
-    if (!base.length) {
-      addAIMessage("Can't think of anyone, let's keep going");
-      return setTimeout(startTriviaRound,1500);
-    }
-    currentNFLPlayer = base[Math.floor(Math.random()*base.length)];
-    binaryRoundCount--;
-    holdPlayerAndAsk();
-  }
-
-  // ─── Shared “ask” logic ───────────────────────────
-  function holdPlayerAndAsk() {
- // first thing, make sure our choice container is on the page
-  ensureChoiceContainer();
-  // then hide *all* the alternate UIs
-  inputForm.style.display      = 'none';
-  binaryChoices.style.display  = 'none';
-  choiceContainer.style.display = 'none';
-
-  // register the school so we don’t repeat it
-  const colNorm = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
-  recentSchools.push(colNorm);
-  if (recentSchools.length > 7) recentSchools.shift();
-
-  // pick question text
-  const tmpl     = pickWithCooldown(dialogueBuckets.questions||['How about XXXXX'], recentQuestions);
-  const question = tmpl.replace('XXXXX', currentNFLPlayer);
-
-    if (mode === 'legend') {
-    // Legend mode: pop the text input back up
-    inputForm.style.display = 'flex';
-    addAIMessage(question);
-  } else {
-    // Choice mode: show MC buttons
-    presentMultipleChoice(question);
-  }
- }
-
-
-  // ─── Multiple-Choice UI ───────────────────────────
-  function presentMultipleChoice(question) {
-  // first show the question with typing
-  addAIMessage(question, () => {
-    ensureChoiceContainer();
-    // hide text form
-    inputForm.style.display = 'none';
-    // clear out any old buttons
-    choiceContainer.innerHTML = '';
-
-    // build your three options
-    const allCols = Array.from(new Set(
-      Object.values(nflToCollege).map(p => p.college)
-    ));
-    const correct = nflToCollege[currentNFLPlayer].college;
-    const decoys  = [];
-    while (decoys.length < 2) {
-      const pick = allCols[Math.floor(Math.random() * allCols.length)];
-      if (pick !== correct && !decoys.includes(pick)) decoys.push(pick);
-    }
-    const options = [correct, ...decoys].sort(() => Math.random() - 0.5);
-
-    options.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.textContent = opt;
-      btn.style.margin = '5px';
-      btn.addEventListener('click', () => {
-        choiceContainer.style.display = 'none';
-        handleAnswer(opt);
-      });
-      choiceContainer.appendChild(btn);
-    });
-
-    choiceContainer.style.display = 'block';
-  });
-}
-
-  // ─── Answer Handler ──────────────────────────────
-  function handleAnswer(ans) {
-    clearTimer();
-    addMessage(ans, 'user');
-    const correctCol = nflToCollege[currentNFLPlayer].college;
-    if (isCollegeAnswerCorrect(ans, correctCol)) {
-      const resp = pickWithCooldown(dialogueBuckets.confirmations||['Nice!'], recentConfirmations);
-      addAIMessage(resp, ()=> {
-        // scoring
-        score += (mode==='choice'?5:10);
-        updateScore();
-        showPlusOne();
-        // next round
-        if (phase==='easy') {
-          if (easyRounds<3) startEasyRound();
-          else {
-            phase='trivia';
-            startTriviaRound();
-          }
-        } else if (phase==='trivia') {
-          if (++normalRoundsCount >= 3) askNextQuestion();
-          else startTriviaRound();
-        } else {
-          if (binaryModeActive && binaryRoundCount>0) showBinaryChoices();
-          else {
-            binaryModeActive = false;
-            startTriviaRound();
-          }
-        }
-      });
-    } else {
-      gameOver(`Nah, ${currentNFLPlayer} played at ${correctCol}. Better luck next time!`);
-    }
-  }
-
-  // ─── Next / Binary Trigger ───────────────────────
-  function askNextQuestion() {
-  addAIMessage(
-    dialogueBuckets.transitions?.[0] || "What's next?",
-    () => {
-      // fire binary choices right away
-      binaryModeActive = true;
-      binaryRoundCount = 3;
-      // reset your normal-round counter so you’ll cycle back cleanly later
-      normalRoundsCount = 0;
-      showBinaryChoices();
-    }
-  );
-}
-
-  // ─── Binary Choices Hooks ─────────────────────────
-  choiceTough.onclick   = ()=> { addMessage('Hit me with a tough one','user'); hideBinaryChoices(); startTriviaRoundFiltered('tough'); };
-  choiceDefense.onclick = ()=> { addMessage('Go defense','user'); hideBinaryChoices(); startTriviaRoundFiltered('defense'); };
-
-  // ─── Typing helper for share feedback ─────────────
-  function showToast(msg, d=1500) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    setTimeout(()=> toastEl.classList.remove('show'), d);
-  }
-
-  // ─── Final hooking of Start Button ───────────────
-  startButton.onclick = () => {
-    if (startButton.disabled) return;
-    startScreen.style.display   = 'none';
-    gameContainer.style.display = 'flex';
-    updateScore();
-    startIntro();
-  };
-});
+        return p.round <= 4
+            && ['QB','RB','WR','TE'].includes(p.position.toUpperCase())
+            && p.value >= 20;
+      })
+      .filter(n => {
+        const c = normalizeCollegeString
