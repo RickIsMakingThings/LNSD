@@ -318,22 +318,20 @@ body {
     width: 100%;
     flex: 0 0 auto;
   }
-/* Make the top-20 list scrollable */
+/* ─── Scrollable leaderboard list ───────────────── */
 #leaderboard-container {
-  /* set whatever max-height feels right: 40% of the overlay, 200px, etc */
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 8px; /* to avoid cut-off scrollbars */
-  margin-top: 10px;   /* give it a little breathing room */
+  /* keep the outer container as-is for padding & background */
+  /* no height rules here */
 }
-
-/* Optional: tighten up the list items */
 #leaderboard-container ol#leaderboard {
-  list-style-position: inside;
-  padding-left: 0;
+  max-height: 180px;     /* or whatever feels right */
+  overflow-y: auto;
   margin: 0;
+  padding: 0 8px;
+  list-style-position: inside;
 }
 #leaderboard-container li {
-  padding: 4px 0;
   border-bottom: 1px solid #ddd;
+  padding: 4px 0;
+}
 }
