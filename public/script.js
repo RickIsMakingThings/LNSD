@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         round,
         position: pos,
         // for the easy‐round you were using `.college`, but having an array lets you handle transfers too
-        colleges: [c1,c2,c3].filter(c => c.trim()),
+        college: [c1,c2,c3].filter(c => c.trim()),
         value
       };
     }
