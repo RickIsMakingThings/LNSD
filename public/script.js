@@ -309,27 +309,30 @@ function toTitleCase(str) {
   _timerDeadline = Date.now() + DURATION;
 
   // 1) Schedule the actual Game Over at the deadline.
-  _timerTimeout = setTimeout(() => {
-    gameOver("Time's up! Game Over!");
-  }, DURATION);
-
-  // 2) Kick off a quick UI‐update loop to move the blue bar.
   _timerInterval = setInterval(() => {
-    const remaining = Math.max(0, _timerDeadline - Date.now());
-    const pct       = (remaining / DURATION) * 100;
-    timerBar.style.width = pct + '%';
+  const remaining = Math.max(0, _timerDeadline - Date.now());
+  const pct       = (remaining / DURATION) * 100;
+  timerBar.style.width = pct + '%';
 
-    if (remaining <= 0) clearTimer();
-  }, 100);
-}
+  // ** new: change color **
+  if (pct > 60) {
+    timerBar.style.backgroundColor = 'var(--blue)';
+  } else if (pct > 30) {
+    timerBar.style.backgroundColor = 'orange';
+  } else {
+    timerBar.style.backgroundColor = 'red';
+  }
+
+  if (remaining <= 0) clearTimer();
+}, 100);
 
 // replace clearTimer() with this (no change needed here):
 function clearTimer() {
   if (_timerTimeout   !== null) { clearTimeout(_timerTimeout);   _timerTimeout   = null; }
   if (_timerInterval  !== null) { clearInterval(_timerInterval); _timerInterval  = null; }
   timerBar.style.width = '0%';
+  timerBar.style.backgroundColor = 'var(--blue)';  // back to default
 }
-
   // ─── Data Loading ─────────────────────────────────
   let dataLoaded = 0;
   function tryStart() {
