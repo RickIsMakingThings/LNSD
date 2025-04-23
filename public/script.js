@@ -488,33 +488,40 @@ const recentTransferCompliments = [];
 
   // ─── Multiple-Choice UI ───────────────────────────
   function presentMultipleChoice(question) {
-    addAIMessage(question);
+  // first show the question with typing
+  addAIMessage(question, () => {
     ensureChoiceContainer();
+    // hide text form
+    inputForm.style.display = 'none';
+    // clear out any old buttons
     choiceContainer.innerHTML = '';
-    // gather all unique college names
+
+    // build your three options
     const allCols = Array.from(new Set(
-      Object.values(nflToCollege).map(p=>p.college)
+      Object.values(nflToCollege).map(p => p.college)
     ));
     const correct = nflToCollege[currentNFLPlayer].college;
-    // pick 2 random decoys
-    const decoys = [];
-    while(decoys.length < 2) {
-      const pick = allCols[Math.floor(Math.random()*allCols.length)];
+    const decoys  = [];
+    while (decoys.length < 2) {
+      const pick = allCols[Math.floor(Math.random() * allCols.length)];
       if (pick !== correct && !decoys.includes(pick)) decoys.push(pick);
     }
-    const options = [correct, ...decoys].sort(()=>Math.random()-0.5);
+    const options = [correct, ...decoys].sort(() => Math.random() - 0.5);
+
     options.forEach(opt => {
       const btn = document.createElement('button');
       btn.textContent = opt;
       btn.style.margin = '5px';
-      btn.onclick = () => {
+      btn.addEventListener('click', () => {
         choiceContainer.style.display = 'none';
         handleAnswer(opt);
-      };
+      });
       choiceContainer.appendChild(btn);
     });
+
     choiceContainer.style.display = 'block';
-  }
+  });
+}
 
   // ─── Answer Handler ──────────────────────────────
   function handleAnswer(ans) {
@@ -553,17 +560,18 @@ const recentTransferCompliments = [];
 
   // ─── Next / Binary Trigger ───────────────────────
   function askNextQuestion() {
-    addAIMessage(dialogueBuckets.transitions?.[0] || "What's next?", ()=> {
-      if (++correctStreak >= 4) {
-        binaryModeActive = true;
-        binaryRoundCount = 3;
-        correctStreak = 0;
-        showBinaryChoices();
-      } else {
-        startTriviaRound();
-      }
-    });
-  }
+  addAIMessage(
+    dialogueBuckets.transitions?.[0] || "What's next?",
+    () => {
+      // fire binary choices right away
+      binaryModeActive = true;
+      binaryRoundCount = 3;
+      // reset your normal-round counter so you’ll cycle back cleanly later
+      normalRoundsCount = 0;
+      showBinaryChoices();
+    }
+  );
+}
 
   // ─── Binary Choices Hooks ─────────────────────────
   choiceTough.onclick   = ()=> { addMessage('Hit me with a tough one','user'); hideBinaryChoices(); startTriviaRoundFiltered('tough'); };
