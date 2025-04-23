@@ -106,12 +106,10 @@ const recentTransferCompliments = [];
   }
 
   // ─── Binary‐choices UI Helpers ──────────────────
-  function showBinaryChoices(){
-  binaryChoices.style.display = 'block';
-}
-
-function hideBinaryChoices(){
-  binaryChoices.style.display = 'none';
+  function showBinaryChoices() {
+  inputForm.style.display      = 'none';
+  if (choiceContainer) choiceContainer.style.display = 'none';
+  binaryChoices.style.display  = 'block';
 }
 
   // ─── Firebase Setup ───────────────────────────────
@@ -437,38 +435,27 @@ function hideBinaryChoices(){
 
   // ─── Shared “ask” logic ───────────────────────────
   function holdPlayerAndAsk() {
-  // register school...
+  // first, hide *all* the alternate UIs
+  inputForm.style.display      = 'none';
+  binaryChoices.style.display  = 'none';
+  if (choiceContainer) choiceContainer.style.display = 'none';
+
+  // register the school so we don’t repeat it
   const colNorm = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
   recentSchools.push(colNorm);
   if (recentSchools.length > 7) recentSchools.shift();
 
-  // pick question template...
-  const tmpl     = pickWithCooldown(dialogueBuckets.questions || ['How about XXXXX'], recentQuestions);
+  // pick question text
+  const tmpl     = pickWithCooldown(dialogueBuckets.questions||['How about XXXXX'], recentQuestions);
   const question = tmpl.replace('XXXXX', currentNFLPlayer);
 
-  // legend mode always free-form:
   if (mode === 'legend') {
-    inputForm.style.display   = 'flex';
-    ensureChoiceContainer();
-    choiceContainer.style.display = 'none';
+    // Legend = show the text-field
+    inputForm.style.display = 'flex';
     addAIMessage(question);
-
-  // choice mode:
   } else {
-    // *if* we’ve fallen into a binary phase, show the two-button menu:
-    if (phase === 'binary') {
-      inputForm.style.display     = 'none';
-      ensureChoiceContainer();
-      choiceContainer.style.display = 'none';
-      addAIMessage(question, () => {
-        showBinaryChoices();
-      });
-
-    // otherwise do the 3-option multiple choice:
-    } else {
-      inputForm.style.display = 'none';
-      presentMultipleChoice(question);
-    }
+    // Choice  = show multiple-choice buttons
+    presentMultipleChoice(question);
   }
 }
 
