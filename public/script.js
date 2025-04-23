@@ -378,7 +378,7 @@ function clearTimer() {
   tipContainer.textContent = 'Tip: ' + tips[Math.floor(Math.random()*tips.length)];
 
   modeBtn.textContent = mode==='legend'
-    ? 'Switch to Choice Mode'
+    ? 'Switch to Multiple Choice'
     : 'Switch to Legend Mode';
 }
 
