@@ -191,6 +191,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const round     = parseInt(rnd,10);
       const value     = val.trim()==='' ? 0 : parseFloat(val);
       if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
+// gather *all* possible colleges, normalized
+      const colleges = [c1, c2, c3]
+        .map(s => normalizeCollegeString(s))
+        .filter(s => s);
         o[name] = {
           draftYear,
           round,
@@ -596,36 +600,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── Answer Handler ──────────────────────────────
   function handleAnswer(ans) {
-    clearTimer();
-    addMessage(ans, 'user');
-    const correctCol = nflToCollege[currentNFLPlayer].college;
-    if (isCollegeAnswerCorrect(ans, correctCol)) {
-      const resp = pickWithCooldown(dialogueBuckets.confirmations||['Nice!'], recentConfirmations);
-      addAIMessage(resp, ()=> {
-        score += (mode==='choice'?5:10);
-        updateScore();
-        showPlusOne();
-        if (phase==='easy') {
-          if (easyRounds<3) startEasyRound();
-          else {
-            phase='trivia';
-            startTriviaRound();
-          }
-        } else if (phase==='trivia') {
-          if (++normalRoundsCount >= 3) askNextQuestion();
-          else startTriviaRound();
-        } else {
-          if (binaryModeActive && binaryRoundCount>0) showBinaryChoices();
-          else {
-            binaryModeActive = false;
-            startTriviaRound();
-          }
+  clearTimer();
+  addMessage(ans, 'user');
+
+  // 1) pull the array of possible schools
+  const info = nflToCollege[currentNFLPlayer];
+  const cols = info.colleges || [info.college];
+
+  // 2) see if the guess matches any of them
+  const idx = cols.findIndex(c => isCollegeAnswerCorrect(ans, c));
+  if (idx >= 0) {
+    // choose different compliments for transfers
+    const pool = idx === 0
+      ? dialogueBuckets.confirmations
+      : dialogueBuckets.transferCompliments;
+    const recentPool = idx === 0
+      ? recentConfirmations
+      : recentTransferCompliments;
+    const resp = pickWithCooldown(pool || ['Nice!'], recentPool);
+
+    addAIMessage(resp, () => {
+      // scoring
+      score += (mode === 'choice' ? 5 : 10);
+      updateScore();
+      showPlusOne();
+
+      // next round routing (unchanged)
+      if (phase === 'easy') {
+        if (easyRounds < 3) startEasyRound();
+        else {
+          phase = 'trivia';
+          startTriviaRound();
         }
-      });
-    } else {
-      gameOver(`Nah, ${currentNFLPlayer} played at ${correctCol}. Better luck next time!`);
-    }
+      } else if (phase === 'trivia') {
+        if (++normalRoundsCount >= 3) askNextQuestion();
+        else startTriviaRound();
+      } else {
+        if (binaryModeActive && binaryRoundCount > 0) showBinaryChoices();
+        else {
+          binaryModeActive = false;
+          startTriviaRound();
+        }
+      }
+    });
+  } else {
+    // completely wrong—always reveal the primary college (cols[0])
+    gameOver(`Nah, ${currentNFLPlayer} played at ${cols[0]}. Better luck next time!`);
   }
+}
 
   // ─── Next / Binary Trigger ───────────────────────
   function askNextQuestion() {
