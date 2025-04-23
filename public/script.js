@@ -107,16 +107,21 @@ const recentTransferCompliments = [];
 
   // ─── Binary‐choices UI Helpers ──────────────────
   function showBinaryChoices() {
-  // hide everything else
-  inputForm.style.display      = 'none';
-  binaryChoices.style.display  = 'block';
-  // in case we're in Choice Mode boss‐round, make sure the MC container exists
-  if (mode === 'choice') {
-    ensureChoiceContainer();
-    choiceContainer.innerHTML = '';
-  } else {
-    if (choiceContainer) choiceContainer.style.display = 'none';
-  }
+   // hide all other inputs
+   inputForm.style.display     = 'none';
+   if (choiceContainer) choiceContainer.style.display = 'none';
+
+   if (mode === 'legend') {
+     // legendary mode: show the two-button panel
+     binaryChoices.style.display = 'block';
+   } else {
+     // choice mode boss round: show multiple-choice instead
+     binaryChoices.style.display = 'none';
+     // re-ask the question and render the 3-button MC UI
+     holdPlayerAndAsk();
+     // presentMultipleChoice is already wired to show MC buttons
+   }
+ }
 
   // ─── Firebase Setup ───────────────────────────────
   const db = firebase.firestore();
@@ -545,31 +550,20 @@ const recentTransferCompliments = [];
   addAIMessage(
     dialogueBuckets.transitions?.[0] || "What's next?",
     () => {
-      if (++normalRoundsCount >= 3) {
-        // kick off a 3-question “boss” round
-        binaryModeActive  = true;
-        binaryRoundCount  = 3;
-        normalRoundsCount = 0;
-        showBinaryChoices();
-      } else {
-        startTriviaRound();
-      }
+      // fire binary choices right away
+      binaryModeActive = true;
+      binaryRoundCount = 3;
+      // reset your normal-round counter so you’ll cycle back cleanly later
+      normalRoundsCount = 0;
+      showBinaryChoices();
     }
   );
 }
 
   // ─── Binary Choices Hooks ─────────────────────────
-  choiceTough.onclick   = () => {
-  addMessage('Hit me with a tough one','user');
-  hideBinaryChoices();
-  startTriviaRoundFiltered('tough');
-};
+  choiceTough.onclick   = ()=> { addMessage('Hit me with a tough one','user'); hideBinaryChoices(); startTriviaRoundFiltered('tough'); };
+  choiceDefense.onclick = ()=> { addMessage('Go defense','user'); hideBinaryChoices(); startTriviaRoundFiltered('defense'); };
 
-choiceDefense.onclick = () => {
-  addMessage('Go defense','user');
-  hideBinaryChoices();
-  startTriviaRoundFiltered('defense');
-};
   // ─── Typing helper for share feedback ─────────────
   function showToast(msg, d=1500) {
     toastEl.textContent = msg;
