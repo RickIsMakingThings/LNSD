@@ -361,14 +361,74 @@ document.addEventListener('DOMContentLoaded', () => {
     submitScoreBtn.style.display = 'none';
     usernameForm.style.display   = 'block';
   });
-  shareScoreBtn.addEventListener('click', () => {
-    const txt = `Lost on ${currentNFLPlayer} but I got ${score}`;
-    navigator.clipboard.writeText(txt)
-      .then(()=> showToast('Copied to clipboard!'))
-      .catch(()=> showToast('Copy failed'));
+  shareScoreBtn.addEventListener('click', ()=>{
+    const last = currentNFLPlayer || '…';
+    const txt  = `Lost on ${last} but I got ${score}`;
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(txt)
+        .then(()=> showToast('Copied to clipboard!'))
+        .catch(()=> showToast('Copy failed'));
+    } else {
+      showToast(`Share: ${txt}`);
+    }
   });
+  usernameSubmit.addEventListener('click', ()=>{
+    const u = usernameInput.value.trim();
+    if (!u) return alert('Enter username.');
+    db.collection('highScores').add({
+      username: u,
+      score,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(showLeaderboard)
+      .catch(e=>{ console.error(e); alert('Submit failed.'); });
+  });
+  leaderboardRestart.addEventListener('click', ()=>{
+    leaderboardCont.style.display = 'none';
+    usernameInput.value = '';
+    restartGame();
+  });
+  function showLeaderboard(){
+    usernameForm.style.display    = 'none';
+    leaderboardCont.style.display = 'block';
+    leaderboardList.innerHTML     = '';
+    db.collection('highScores')
+      .orderBy('score','desc').limit(20)
+      .get().then(snap=>{
+        if (snap.empty) leaderboardList.innerHTML = '<li>No scores yet.</li>';
+        else snap.forEach(doc=>{
+          const {username,score} = doc.data();
+          const li = document.createElement('li');
+          li.textContent = `${username}: ${score}`;
+          leaderboardList.appendChild(li);
+        });
+      }).catch(e=>{
+        console.error(e);
+        leaderboardList.innerHTML = '<li>Unable to load leaderboard.</li>';
+      });
+  }
 
-  // ... (usernameSubmit, leaderboardRestart, showLeaderboard same as before) ...
+  // ─── Restart Game ─────────────────────────────────
+  function restartGame(){
+    clearTimer();
+    phase             = 'easy';
+    easyRounds        = 0;
+    normalRoundsCount = 0;
+    currentNFLPlayer  = '';
+    score             = 0;
+    gameActive        = true;
+    binaryModeActive  = false;
+    binaryRoundCount  = 0;
+    recentSchools     = [];
+    updateScore();
+    chatContainer.innerHTML      = '';
+    userInput.value              = '';
+    inputForm.style.display = 'flex';
+    gameOverOverlay.style.display= 'none';
+    gameOverButtons.style.display= 'none';
+    usernameForm.style.display   = 'none';
+    leaderboardCont.style.display= 'none';
+    startIntro();
+  }
 
   // ─── Intro Sequence ──────────────────────────────
   function startIntro() {
