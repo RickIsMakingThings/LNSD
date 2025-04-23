@@ -326,13 +326,14 @@ function toTitleCase(str) {
   if (remaining <= 0) clearTimer();
 }, 100);
 
-// replace clearTimer() with this (no change needed here):
-function clearTimer() {
-  if (_timerTimeout   !== null) { clearTimeout(_timerTimeout);   _timerTimeout   = null; }
-  if (_timerInterval  !== null) { clearInterval(_timerInterval); _timerInterval  = null; }
-  timerBar.style.width = '0%';
-  timerBar.style.backgroundColor = 'var(--blue)';  // back to default
 }
+ // replace clearTimer() with this (no change needed here):
+   function clearTimer() {
+     if (_timerTimeout   !== null) { clearTimeout(_timerTimeout);   _timerTimeout   = null; }
+     if (_timerInterval  !== null) { clearInterval(_timerInterval); _timerInterval  = null; }
+     timerBar.style.width = '0%';
+     timerBar.style.backgroundColor = 'var(--blue)';  // back to default
+   }
   // ─── Data Loading ─────────────────────────────────
   let dataLoaded = 0;
   function tryStart() {
