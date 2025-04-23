@@ -110,6 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+// helper to render every option in Title Case
+function toTitleCase(str) {
+  return str
+    .split(' ')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+}
+
   // ─── Binary‐choices UI Helpers ──────────────────
   function showBinaryChoices() {
     // Make sure the MC container exists (we’ll hide it here)
@@ -575,38 +583,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── Multiple-Choice UI ───────────────────────────
   function presentMultipleChoice(question) {
-    addAIMessage(question, () => {
-      ensureChoiceContainer();
-      inputForm.style.display = 'none';
-      choiceContainer.innerHTML = '';
+  addAIMessage(question, () => {
+    ensureChoiceContainer();
+    inputForm.style.display = 'none';
+    choiceContainer.innerHTML = '';
 
-      // correct answer
-      const correct = nflToCollege[currentNFLPlayer].college;
+    // raw correct answer from your data
+    const correctRaw  = nflToCollege[currentNFLPlayer].college;
+    const correctNorm = normalizeCollegeString(correctRaw);
 
-      // build decoys from your static list (excluding the correct one)
-      const pool   = decoyList.filter(s => s !== correct);
-      const decoys = [];
-      while (decoys.length < 2 && pool.length) {
-        const i = Math.floor(Math.random() * pool.length);
-        decoys.push(pool.splice(i,1)[0]);
-      }
+    // 1) try static decoys first (by normalized mismatch)
+    let pool = decoyList.filter(s =>
+      normalizeCollegeString(s) !== correctNorm
+    );
 
-      // mix and render
-      const options = [correct, ...decoys].sort(() => Math.random() - 0.5);
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.textContent = opt;
-        btn.style.margin = '5px';
-        btn.addEventListener('click', () => {
-          choiceContainer.style.display = 'none';
-          handleAnswer(opt);
-        });
-        choiceContainer.appendChild(btn);
+    // 2) fallback if not enough static decoys
+    if (pool.length < 2) {
+      pool = Array.from(
+        new Set(Object.values(nflToCollege).map(p => p.college))
+      )
+      .filter(c => normalizeCollegeString(c) !== correctNorm);
+    }
+
+    // 3) pick exactly two *distinct* decoys
+    const decoys = [];
+    while (decoys.length < 2 && pool.length > 0) {
+      const i = Math.floor(Math.random() * pool.length);
+      decoys.push(pool.splice(i,1)[0]);
+    }
+
+    // 4) mix + render, using Title Case for everything
+    const options = [correctRaw, ...decoys]
+      .sort(() => Math.random() - 0.5);
+
+    options.forEach(optRaw => {
+      const btn = document.createElement('button');
+      btn.textContent = toTitleCase(optRaw);
+      btn.style.margin = '5px';
+      btn.addEventListener('click', () => {
+        choiceContainer.style.display = 'none';
+        handleAnswer(optRaw);
       });
-
-      choiceContainer.style.display = 'block';
+      choiceContainer.appendChild(btn);
     });
-  }
+
+    choiceContainer.style.display = 'block';
+  });
+}
+
 
   // ─── Answer Handler ──────────────────────────────
   function handleAnswer(ans) {
