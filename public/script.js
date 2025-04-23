@@ -105,6 +105,28 @@ const recentTransferCompliments = [];
     }
   }
 
+  // ─── Binary‐choices UI Helpers ──────────────────
+  function showBinaryChoices() {
+    // show the two-button “tough/defense” panel
+    binaryChoices.style.display = 'block';
+    // hide whatever input UI was there
+    inputForm.style.display     = 'none';
+    // also hide the multiple-choice container if present
+    if (choiceContainer) choiceContainer.style.display = 'none';
+  }
+
+  function hideBinaryChoices() {
+    // hide that two-button panel
+    binaryChoices.style.display = 'none';
+    // restore whatever input UI is appropriate for the current mode
+    if (mode === 'legend') {
+      inputForm.style.display = 'flex';
+    } else {
+      // in choice-mode, we don’t auto-show the text input
+      inputForm.style.display = 'none';
+    }
+  }
+
   // ─── Firebase Setup ───────────────────────────────
   const db = firebase.firestore();
 
