@@ -428,25 +428,41 @@ const recentTransferCompliments = [];
 
   // ─── Shared “ask” logic ───────────────────────────
   function holdPlayerAndAsk() {
-    // register school
-    const colNorm = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
-    recentSchools.push(colNorm);
-    if (recentSchools.length > 7) recentSchools.shift();
+  // register school...
+  const colNorm = normalizeCollegeString(nflToCollege[currentNFLPlayer].college);
+  recentSchools.push(colNorm);
+  if (recentSchools.length > 7) recentSchools.shift();
 
-    // pick question
-    const tmpl = pickWithCooldown(dialogueBuckets.questions||['How about XXXXX'], recentQuestions);
-    const question = tmpl.replace('XXXXX', currentNFLPlayer);
-    if (mode === 'legend') {
-      inputForm.style.display = 'flex';
+  // pick question template...
+  const tmpl     = pickWithCooldown(dialogueBuckets.questions || ['How about XXXXX'], recentQuestions);
+  const question = tmpl.replace('XXXXX', currentNFLPlayer);
+
+  // legend mode always free-form:
+  if (mode === 'legend') {
+    inputForm.style.display   = 'flex';
+    ensureChoiceContainer();
+    choiceContainer.style.display = 'none';
+    addAIMessage(question);
+
+  // choice mode:
+  } else {
+    // *if* we’ve fallen into a binary phase, show the two-button menu:
+    if (phase === 'binary') {
+      inputForm.style.display     = 'none';
       ensureChoiceContainer();
       choiceContainer.style.display = 'none';
-      addAIMessage(question);
+      addAIMessage(question, () => {
+        showBinaryChoices();
+      });
+
+    // otherwise do the 3-option multiple choice:
     } else {
-      // choice mode
       inputForm.style.display = 'none';
       presentMultipleChoice(question);
     }
   }
+}
+
 
   // ─── Multiple-Choice UI ───────────────────────────
   function presentMultipleChoice(question) {
