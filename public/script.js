@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // etc.  
   return s;
 }
-  }
+  })
   function isCollegeAnswerCorrect(ans, correct) {
     const a = normalizeCollegeString(ans);
     const c = normalizeCollegeString(correct);
