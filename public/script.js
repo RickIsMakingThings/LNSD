@@ -191,18 +191,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const round     = parseInt(rnd,10);
       const value     = val.trim()==='' ? 0 : parseFloat(val);
       if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
-// gather *all* possible colleges, normalized
+      // gather *all* possible colleges, normalized
       const colleges = [c1, c2, c3]
         .map(s => normalizeCollegeString(s))
         .filter(s => s);
-        o[name] = {
-          draftYear,
-          round,
-          position: pos,
-          college: c1,    // first college column
-          value
-        };
-      }
+      o[name] = {
+        draftYear,
+        round,
+        position: pos,
+        college: c1,    // first college column
+        value
+      };
+    }
       return o;
     }, {});
   }
