@@ -123,6 +123,11 @@ const recentTransferCompliments = [];
    }
  }
 
+ // ─── hide the two-button binary panel ─────────────
+  function hideBinaryChoices() {
+    binaryChoices.style.display = 'none';
+  }
+
   // ─── Firebase Setup ───────────────────────────────
   const db = firebase.firestore();
 
