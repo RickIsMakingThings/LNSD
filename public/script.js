@@ -428,6 +428,7 @@ function clearTimer() {
     db.collection('highScores').add({
       username: u,
       score,
+      mode,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(showLeaderboard)
       .catch(e=>{ console.error(e); alert('Submit failed.'); });
@@ -437,25 +438,39 @@ function clearTimer() {
     usernameInput.value = '';
     restartGame();
   });
-  function showLeaderboard(){
-    usernameForm.style.display    = 'none';
-    leaderboardCont.style.display = 'block';
-    leaderboardList.innerHTML     = '';
-    db.collection('highScores')
-      .orderBy('score','desc').limit(20)
-      .get().then(snap=>{
-        if (snap.empty) leaderboardList.innerHTML = '<li>No scores yet.</li>';
-        else snap.forEach(doc=>{
-          const {username,score} = doc.data();
+  function showLeaderboard() {
+  usernameForm.style.display    = 'none';
+  leaderboardCont.style.display = 'block';
+  leaderboardList.innerHTML     = '';
+
+  // dynamically update the heading
+  const heading = mode === 'choice'
+    ? 'Choice Mode Leaderboard (Top 20)'
+    : 'Legend Mode Leaderboard (Top 20)';
+  document.querySelector('#leaderboard-container h3').textContent = heading;
+
+  db.collection('highScores')
+    .where('mode', '==', mode)          // ← only pull this mode
+    .orderBy('score', 'desc')
+    .limit(20)
+    .get()
+    .then(snap => {
+      if (snap.empty) {
+        leaderboardList.innerHTML = '<li>No scores yet.</li>';
+      } else {
+        snap.forEach(doc => {
+          const { username, score } = doc.data();
           const li = document.createElement('li');
           li.textContent = `${username}: ${score}`;
           leaderboardList.appendChild(li);
         });
-      }).catch(e=>{
-        console.error(e);
-        leaderboardList.innerHTML = '<li>Unable to load leaderboard.</li>';
-      });
-  }
+      }
+    })
+    .catch(e => {
+      console.error(e);
+      leaderboardList.innerHTML = '<li>Unable to load leaderboard.</li>';
+    });
+}
 
    // ─── Intro Sequence ──────────────────────────────
   function startIntro() {
