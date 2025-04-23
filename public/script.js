@@ -106,26 +106,13 @@ const recentTransferCompliments = [];
   }
 
   // ─── Binary‐choices UI Helpers ──────────────────
-  function showBinaryChoices() {
-    // show the two-button “tough/defense” panel
-    binaryChoices.style.display = 'block';
-    // hide whatever input UI was there
-    inputForm.style.display     = 'none';
-    // also hide the multiple-choice container if present
-    if (choiceContainer) choiceContainer.style.display = 'none';
-  }
+  function showBinaryChoices(){
+  binaryChoices.style.display = 'block';
+}
 
-  function hideBinaryChoices() {
-    // hide that two-button panel
-    binaryChoices.style.display = 'none';
-    // restore whatever input UI is appropriate for the current mode
-    if (mode === 'legend') {
-      inputForm.style.display = 'flex';
-    } else {
-      // in choice-mode, we don’t auto-show the text input
-      inputForm.style.display = 'none';
-    }
-  }
+function hideBinaryChoices(){
+  binaryChoices.style.display = 'none';
+}
 
   // ─── Firebase Setup ───────────────────────────────
   const db = firebase.firestore();
@@ -563,20 +550,31 @@ const recentTransferCompliments = [];
   addAIMessage(
     dialogueBuckets.transitions?.[0] || "What's next?",
     () => {
-      // fire binary choices right away
-      binaryModeActive = true;
-      binaryRoundCount = 3;
-      // reset your normal-round counter so you’ll cycle back cleanly later
-      normalRoundsCount = 0;
-      showBinaryChoices();
+      if (++normalRoundsCount >= 3) {
+        // kick off a 3-question “boss” round
+        binaryModeActive  = true;
+        binaryRoundCount  = 3;
+        normalRoundsCount = 0;
+        showBinaryChoices();
+      } else {
+        startTriviaRound();
+      }
     }
   );
 }
 
   // ─── Binary Choices Hooks ─────────────────────────
-  choiceTough.onclick   = ()=> { addMessage('Hit me with a tough one','user'); hideBinaryChoices(); startTriviaRoundFiltered('tough'); };
-  choiceDefense.onclick = ()=> { addMessage('Go defense','user'); hideBinaryChoices(); startTriviaRoundFiltered('defense'); };
+  choiceTough.onclick   = () => {
+  addMessage('Hit me with a tough one','user');
+  hideBinaryChoices();
+  startTriviaRoundFiltered('tough');
+};
 
+choiceDefense.onclick = () => {
+  addMessage('Go defense','user');
+  hideBinaryChoices();
+  startTriviaRoundFiltered('defense');
+};
   // ─── Typing helper for share feedback ─────────────
   function showToast(msg, d=1500) {
     toastEl.textContent = msg;
