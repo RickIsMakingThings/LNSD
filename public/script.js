@@ -363,21 +363,19 @@ const recentTransferCompliments = [];
 
   // ─── ROUND STARTERS ───────────────────────────────
   function startEasyRound() {
-    phase = 'easy';
-    const candidates = easyNames
-      .filter(n=>nflToCollege[n])
-      .filter(n=>{
-        const c = normalizeCollegeString(nflToCollege[n].college);
-        return !recentSchools.includes(c);
-      });
-    if (!candidates.length) return gameOver("No eligible easy players.");
-    currentNFLPlayer = candidates[Math.floor(Math.random()*candidates.length)];
-    holdPlayerAndAsk();
-    easyRounds++;
-    if (easyRounds >= 3) {
-      setTimeout(()=>{ phase='trivia'; startTriviaRound(); }, 1500);
-    }
-  }
+  phase = 'easy';
+  const candidates = easyNames
+    .filter(n => nflToCollege[n])
+    .filter(n => {
+      const c = normalizeCollegeString(nflToCollege[n].college);
+      return !recentSchools.includes(c);
+    });
+  if (!candidates.length) return gameOver("No eligible easy players.");
+  currentNFLPlayer = candidates[Math.floor(Math.random() * candidates.length)];
+  holdPlayerAndAsk();
+  easyRounds++;
+  // ← no auto-transition here; handleAnswer() will transition *after* the user's response
+}
 
   function startTriviaRound() {
     phase = 'trivia';
