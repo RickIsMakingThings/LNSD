@@ -107,21 +107,16 @@ const recentTransferCompliments = [];
 
   // ─── Binary‐choices UI Helpers ──────────────────
   function showBinaryChoices() {
-   // hide all other inputs
-   inputForm.style.display     = 'none';
-   if (choiceContainer) choiceContainer.style.display = 'none';
+  // Make sure the MC container exists (we’ll hide it here)
+  ensureChoiceContainer();
 
-   if (mode === 'legend') {
-     // legendary mode: show the two-button panel
-     binaryChoices.style.display = 'block';
-   } else {
-     // choice mode boss round: show multiple-choice instead
-     binaryChoices.style.display = 'none';
-     // re-ask the question and render the 3-button MC UI
-     holdPlayerAndAsk();
-     // presentMultipleChoice is already wired to show MC buttons
-   }
- }
+  // Hide anything else
+  inputForm.style.display     = 'none';
+  choiceContainer.style.display = 'none';
+
+  // Show the two-button binary choice panel every time
+  binaryChoices.style.display = 'block';
+}
 
  // ─── hide the two-button binary panel ─────────────
   function hideBinaryChoices() {
