@@ -356,6 +356,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updateScore();
     chatContainer.innerHTML = '';
     userInput.value         = '';
+// — Restore the main buttons —
+    submitScoreBtn.style.display  = '';
+    shareScoreBtn.style.display   = '';
+    restartBtn.style.display      = '';
+    modeBtn.style.display         = '';
+
+
     inputForm.style.display = 'flex';
     gameOverOverlay.style.display = 'none';
     startIntro();
