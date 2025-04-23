@@ -135,16 +135,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }, {});
   }
   function parsePlayersCSV(csv) {
-    return csv.trim().split(/\r?\n/).slice(1).reduce((o,line)=>{
-      const p = line.split(',');
-      if (p.length < 7) return o;
-      const [round,name,position,college,value] = [
-        parseInt(p[0],10), p[1], p[2], p[3], parseFloat(p[4])
-      ];
-      if (name) o[name] = { round, position, college, value };
-      return o;
-    }, {});
-  }
+  return csv.trim().split(/\r?\n/).slice(1).reduce((o,line) => {
+    const p = line.split(',');
+    if (p.length < 10) return o;
+    const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
+    const draftYear = parseInt(dy,10),
+          round     = parseInt(rnd,10),
+          value     = val.trim()==='' ? 0 : parseFloat(val);
+    if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
+      o[name] = {
+        draftYear,
+        round,
+        position: pos,
+        // for the easy‐round you were using `.college`, but having an array lets you handle transfers too
+        colleges: [c1,c2,c3].filter(c => c.trim()),
+        value
+      };
+    }
+    return o;
+  }, {});
+}
 
   // ─── Normalize & Alias Check ──────────────────────
   function normalizeCollegeString(s) {
