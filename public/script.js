@@ -679,7 +679,7 @@ function toTitleCase(str) {
     });
   } else {
     // completely wrong—always reveal the primary college (cols[0])
-    gameOver(`Nah, ${currentNFLPlayer} played at ${toTitleCase(cols[0]}. Better luck next time!`);
+    gameOver(`Nah, ${currentNFLPlayer} played at ${toTitleCase(cols[0])}. Better luck next time!`);
   }
 }
 
