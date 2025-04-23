@@ -419,30 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  // ─── Restart Game ─────────────────────────────────
-  function restartGame(){
-    clearTimer();
-    phase             = 'easy';
-    easyRounds        = 0;
-    normalRoundsCount = 0;
-    currentNFLPlayer  = '';
-    score             = 0;
-    gameActive        = true;
-    binaryModeActive  = false;
-    binaryRoundCount  = 0;
-    recentSchools     = [];
-    updateScore();
-    chatContainer.innerHTML      = '';
-    userInput.value              = '';
-    inputForm.style.display = 'flex';
-    gameOverOverlay.style.display= 'none';
-    gameOverButtons.style.display= 'none';
-    usernameForm.style.display   = 'none';
-    leaderboardCont.style.display= 'none';
-    startIntro();
-  }
-
-  // ─── Intro Sequence ──────────────────────────────
+   // ─── Intro Sequence ──────────────────────────────
   function startIntro() {
     addAIMessage(
       dialogueBuckets.greetings?.[0] || "you and I have to take an oath 🤝",
