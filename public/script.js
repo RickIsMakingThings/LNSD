@@ -28,6 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
     "Keep an eye on recent draftees for extra points."
   ];
 
+ // ─── Static decoy list for multiple-choice ─────────────────
+  // Populate this with all the “big” schools you want as wrong options
+  const decoyList = [
+    // e.g. 'Alabama', 'Ohio State', 'Georgia', 'Clemson'  ];
+
   // ─── State ─────────────────────────────────────────
   let nflToCollege      = {};
   let collegeAliases    = {};
@@ -575,17 +580,19 @@ document.addEventListener('DOMContentLoaded', () => {
       inputForm.style.display = 'none';
       choiceContainer.innerHTML = '';
 
-      const allCols = Array.from(new Set(
-        Object.values(nflToCollege).map(p => p.college)
-      ));
+      // correct answer
       const correct = nflToCollege[currentNFLPlayer].college;
-      const decoys  = [];
-      while (decoys.length < 2) {
-        const pick = allCols[Math.floor(Math.random() * allCols.length)];
-        if (pick !== correct && !decoys.includes(pick)) decoys.push(pick);
-      }
-      const options = [correct, ...decoys].sort(() => Math.random() - 0.5);
 
+      // build decoys from your static list (excluding the correct one)
+      const pool   = decoyList.filter(s => s !== correct);
+      const decoys = [];
+      while (decoys.length < 2 && pool.length) {
+        const i = Math.floor(Math.random() * pool.length);
+        decoys.push(pool.splice(i,1)[0]);
+      }
+
+      // mix and render
+      const options = [correct, ...decoys].sort(() => Math.random() - 0.5);
       options.forEach(opt => {
         const btn = document.createElement('button');
         btn.textContent = opt;
