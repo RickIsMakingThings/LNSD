@@ -301,30 +301,29 @@ function toTitleCase(str) {
   // clear whatever was running
   clearTimer();
 
-  const DURATION = 7000;              // 7 seconds in ms
+  // choose duration based on mode
+  const DURATION = mode === 'choice'
+    ? 5000   // 5s for Choice Mode
+    : 7000;  // 7s for Legend Mode
+
   _timerDeadline = Date.now() + DURATION;
 
   // 1) Schedule the actual Game Over at the deadline.
-  //    Even if the tab is throttled, when it comes back to life
-  //    the timeout will fire immediately if the time has already passed.
   _timerTimeout = setTimeout(() => {
     gameOver("Time's up! Game Over!");
   }, DURATION);
 
   // 2) Kick off a quick UI‐update loop to move the blue bar.
-  //    We use setInterval here, but even if it's paused,
-  //    as soon as it runs again it'll “catch up” the bar.
   _timerInterval = setInterval(() => {
     const remaining = Math.max(0, _timerDeadline - Date.now());
     const pct       = (remaining / DURATION) * 100;
     timerBar.style.width = pct + '%';
 
-    // (optional) once we're at zero we can clear early:
     if (remaining <= 0) clearTimer();
   }, 100);
 }
 
-// replace clearTimer() with this:
+// replace clearTimer() with this (no change needed here):
 function clearTimer() {
   if (_timerTimeout   !== null) { clearTimeout(_timerTimeout);   _timerTimeout   = null; }
   if (_timerInterval  !== null) { clearInterval(_timerInterval); _timerInterval  = null; }
