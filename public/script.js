@@ -360,16 +360,21 @@ function clearTimer() {
   function gameOver(msg) {
   gameActive = false;
   clearTimer();
+
+  // 1) update the overlay text
+  gameOverMsg.textContent = msg;
+  document.getElementById('final-score').textContent = `Your score: ${score}`;
+
+  // 2) show AI announcing the loss if you still want that
   addAIMessage(msg);
 
-  // **SHOW** the big button bar again:
+  // 3) reveal the Game-Over UI
   gameOverButtons.style.display = 'flex';
-
-  gameOverMsg.textContent = msg;
   gameOverOverlay.style.display = 'flex';
   inputForm.style.display       = 'none';
   binaryChoices.style.display   = 'none';
   if (choiceContainer) choiceContainer.style.display = 'none';
+
   tipContainer.textContent = 'Tip: ' + tips[Math.floor(Math.random()*tips.length)];
 
   modeBtn.textContent = mode==='legend'
