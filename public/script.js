@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         round,
         position: pos,
         // for the easy‐round you were using `.college`, but having an array lets you handle transfers too
-        college: [c1,c2,c3].filter(c => c.trim()),
+        colleges: [c1,c2,c3].filter(c => c.trim()),
         value
       };
     }
@@ -157,19 +157,19 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 
   // ─── Normalize & Alias Check ──────────────────────
-  function normalizeCollegeString(s) {
-    let str = s.replace(/[^\w\s]/g,'').toLowerCase().trim();
-    if (str.startsWith('university of ')) str = str.slice(14);
-    if (str.startsWith('college of '))    str = str.slice(11);
-    const toks = str.split(/\s+/);
-    const last = toks[toks.length - 1];
-    if (last==='st'||last==='st.') toks[toks.length - 1] = 'state';
-    str = toks.join(' ');
-    if (str.endsWith(' university')) {
-      const tmp = str.slice(0,-11).trim();
-      if (tmp.split(/\s+/).length>1) str = tmp;
-    }
-    return str;
+  function normalizeCollegeString(str) {
+  // guard: if it's not a string, convert to one (undefined→'', objects→'[object Object]')
+  if (typeof str !== 'string') str = String(str || '');
+
+  // now it's safe:
+  let s = str.replace(/[^\w\s&]/gi,'')
+             .toLowerCase()
+             .trim();
+  // …rest of your cleanup…
+  if (s.startsWith('university of ')) s = s.slice(14);
+  // etc.  
+  return s;
+}
   }
   function isCollegeAnswerCorrect(ans, correct) {
     const a = normalizeCollegeString(ans);
@@ -344,22 +344,57 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ─── ROUND STARTERS ───────────────────────────────
-  function startEasyRound() {
-    phase = 'easy';
-    const candidates = easyNames
-      .filter(n=>nflToCollege[n])
-      .filter(n=>{
-        const c = normalizeCollegeString(nflToCollege[n].college);
-        return !recentSchools.includes(c);
-      });
-    if (!candidates.length) return gameOver("No eligible easy players.");
-    currentNFLPlayer = candidates[Math.floor(Math.random()*candidates.length)];
-    holdPlayerAndAsk();
-    easyRounds++;
-    if (easyRounds >= 3) {
-      setTimeout(()=>{ phase='trivia'; startTriviaRound(); }, 1500);
-    }
+  function getRawCollegeFor(playerName) {
+  const info = nflToCollege[playerName] || {};
+  // if you record a “college” field
+  if (typeof info.college === 'string') return info.college;
+  // otherwise if you have a “colleges” array
+  if (Array.isArray(info.colleges) && info.colleges.length) return info.colleges[0];
+  // otherwise fallback to empty string
+  return '';
+}
+
+function startEasyRound() {
+  phase = 'easy';
+
+  const candidates = easyNames
+    .filter(n => nflToCollege[n])            // make sure we actually loaded that player
+    .filter(n => {                            // then filter out recents
+      const raw = getRawCollegeFor(n);
+      const norm = normalizeCollegeString(raw);
+      return raw !== '' && !recentSchools.includes(norm);
+    });
+
+  if (!candidates.length) {
+    return gameOver("No eligible easy players.");
   }
+
+  // pick one
+  currentNFLPlayer = candidates[
+    Math.floor(Math.random() * candidates.length)
+  ];
+
+  // record its college so we don’t repeat
+  const chosen = getRawCollegeFor(currentNFLPlayer);
+  const norm   = normalizeCollegeString(chosen);
+  recentSchools.push(norm);
+  if (recentSchools.length > 7) recentSchools.shift();
+
+  easyRounds++;
+
+  // ask the question
+  const template = pickWithCooldown(dialogueBuckets.questions || ['How about XXXXX'], recentQuestions);
+  const question = template.replace('XXXXX', currentNFLPlayer);
+  addAIMessage(question);
+
+  // after 3 easy rounds, move to trivia
+  if (easyRounds >= 3) {
+    setTimeout(() => {
+      phase = 'trivia';
+      startTriviaRound();
+    }, 1500);
+  }
+}
 
   function startTriviaRound() {
     phase = 'trivia';
