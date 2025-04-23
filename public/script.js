@@ -656,6 +656,8 @@ function clearTimer() {
     });
 
     choiceContainer.style.display = 'block';
+
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   });
 }
 
