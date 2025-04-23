@@ -303,37 +303,38 @@ function toTitleCase(str) {
 
   // choose duration based on mode
   const DURATION = mode === 'choice'
-    ? 5000   // 5s for Choice Mode
-    : 7000;  // 7s for Legend Mode
+    ? 5500   // 5.5s for Choice Mode
+    : 8000;  // 8s for Legend Mode
 
   _timerDeadline = Date.now() + DURATION;
 
   // 1) Schedule the actual Game Over at the deadline.
+  _timerTimeout = setTimeout(() => {
+    gameOver("Time's up! Game Over!");
+  }, DURATION);
+
+  // 2) Kick off a quick UI‐update loop to move & recolor the blue bar.
   _timerInterval = setInterval(() => {
-  const remaining = Math.max(0, _timerDeadline - Date.now());
-  const pct       = (remaining / DURATION) * 100;
-  timerBar.style.width = pct + '%';
+    const remaining = Math.max(0, _timerDeadline - Date.now());
+    const pct       = (remaining / DURATION) * 100;
+    timerBar.style.width            = pct + '%';
+    timerBar.style.backgroundColor  =
+      pct > 60 ? 'var(--blue)'
+    : pct > 30 ? 'orange'
+    :             'red';
 
-  // ** new: change color **
-  if (pct > 60) {
-    timerBar.style.backgroundColor = 'var(--blue)';
-  } else if (pct > 30) {
-    timerBar.style.backgroundColor = 'orange';
-  } else {
-    timerBar.style.backgroundColor = 'red';
-  }
-
-  if (remaining <= 0) clearTimer();
-}, 100);
-
+    // once we're at zero we can clear early
+    if (remaining <= 0) clearTimer();
+  }, 100);
 }
- // replace clearTimer() with this (no change needed here):
-   function clearTimer() {
-     if (_timerTimeout   !== null) { clearTimeout(_timerTimeout);   _timerTimeout   = null; }
-     if (_timerInterval  !== null) { clearInterval(_timerInterval); _timerInterval  = null; }
-     timerBar.style.width = '0%';
-     timerBar.style.backgroundColor = 'var(--blue)';  // back to default
-   }
+
+// sibling, not nested in startTimer:
+function clearTimer() {
+  if (_timerTimeout   !== null) { clearTimeout(_timerTimeout);   _timerTimeout   = null; }
+  if (_timerInterval  !== null) { clearInterval(_timerInterval); _timerInterval  = null; }
+  timerBar.style.width           = '0%';
+  timerBar.style.backgroundColor = 'var(--blue)';
+}
   // ─── Data Loading ─────────────────────────────────
   let dataLoaded = 0;
   function tryStart() {
