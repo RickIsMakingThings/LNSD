@@ -182,30 +182,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }, {});
   }
   function parsePlayersCSV(csv) {
-    return csv.trim().split(/\r?\n/).slice(1).reduce((o, line) => {
-      const p = line.split(',');
-      // we expect at least: year, round, ??, ??, name, position, college, ... , value
-      if (p.length < 10) return o;
-      const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
-      const draftYear = parseInt(dy, 10);
-      const round     = parseInt(rnd,10);
-      const value     = val.trim()==='' ? 0 : parseFloat(val);
-      if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
-      // gather *all* possible colleges, normalized
+  return csv.trim().split(/\r?\n/).slice(1).reduce((o, line) => {
+    const p = line.split(',');
+    if (p.length < 10) return o;
+    const [dy, rnd, , , name, pos, c1, c2, c3, val] = p;
+    const draftYear = parseInt(dy, 10);
+    const round     = parseInt(rnd, 10);
+    const value     = val.trim() === '' ? 0 : parseFloat(val);
+    if (!isNaN(draftYear) && !isNaN(round) && name && pos && c1) {
+      // 1) Gather and normalize *all* non-empty college strings:
       const colleges = [c1, c2, c3]
-        .map(s => normalizeCollegeString(s))
-        .filter(s => s);
+        .filter(s => s && s.trim())                // drop blanks
+        .map(s => normalizeCollegeString(s))        // normalize formatting
+        .filter(s => s);                            // drop any still-empty
+
+      // 2) Attach both the array *and* the primary college:
       o[name] = {
         draftYear,
         round,
         position: pos,
-        college: c1,    // first college column
+        colleges,                                   // <-- full list
+        college: colleges[0],                       // <-- primary for fallbacks
         value
       };
     }
-      return o;
-    }, {});
-  }
+    return o;
+  }, {});
+}
 
 
   // ─── Normalize & Alias Check ──────────────────────
