@@ -44,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
   let correctStreak     = 0;
   let timerInterval;
 
++ // Cooldown pools for question/dialogue reuse
++ const recentQuestions           = [];
++ const recentConfirmations       = [];
++ const recentBigCompliments      = [];
++ const recentTransferCompliments = [];
+
   // ─── DOM Refs ──────────────────────────────────────
   const startScreen       = document.getElementById('start-screen');
   const startButton       = document.getElementById('start-button');
