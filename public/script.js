@@ -350,7 +350,7 @@ function clearTimer() {
     mode = mode==='legend' ? 'choice' : 'legend';
     localStorage.setItem('gameMode', mode);
     modeBtn.textContent = mode==='legend'
-      ? 'Switch to Choice Mode'
+      ? 'Switch to Multiple Choice'
       : 'Switch to Legend Mode';
     restartGame();
   });
@@ -450,7 +450,7 @@ function clearTimer() {
 
   // dynamically update the heading
   const heading = mode === 'choice'
-    ? 'Choice Mode Leaderboard (Top 20)'
+    ? 'Multi-Choice Leaderboard (Top 20)'
     : 'Legend Mode Leaderboard (Top 20)';
   document.querySelector('#leaderboard-container h3').textContent = heading;
 
