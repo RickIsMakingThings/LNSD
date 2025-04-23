@@ -335,3 +335,38 @@ body {
   border-bottom: 1px solid #ddd;
   padding: 4px 0;
 }
+/* 1) Always hide that tiny “Restart” in the leaderboard */
+#leaderboard-restart {
+  display: none !important;
+}
+
+/* 2) Push your Game-Over content down a bit & center it nicely */
+#game-over {
+  /* override the “margin-top: auto” trick that’s pushing everything up */
+  justify-content: flex-start;  
+  /* give some breathing room from the very top */
+  padding-top: 80px;                 
+}
+
+/* 3) Pin the tip at the bottom, out of the flex flow */
+#tip-container {
+  /* remove auto-margin */
+  margin-top: 0;    
+  /* pull it out of the flow and stick to the bottom */
+  position: absolute;
+  bottom: 20px;
+}
+
+/* 4) Turn your big buttons into a flex row with spacing */
+#game-over-buttons {
+  display: flex;
+  flex-wrap: wrap;        /* allow wrapping on narrow screens */
+  justify-content: center;/* center them horizontally */
+  gap: 10px;              /* space them out */
+  margin-top: 20px;       /* lift them away from the message */
+}
+
+/* 5) Remove the old vertical margins on each button */
+#game-over-buttons button {
+  margin: 0;
+}
