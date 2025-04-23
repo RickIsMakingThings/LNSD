@@ -50,10 +50,6 @@ function normalizePlayerName(s) {
   const choiceDefense = document.getElementById('choice-defense');
   const timerBar = document.getElementById('timer-bar'); // Ensure this exists in your HTML
 
-  restartButton.addEventListener('click', restartGame);
-  submitScoreBtn .addEventListener('click', () => { /* show username form */ });
-  shareScoreBtn  .addEventListener('click', shareScoreHandler);
-
   // --- Data Loading ---
   // Load external dialogue JSON.
   fetch('dialogue.json')
