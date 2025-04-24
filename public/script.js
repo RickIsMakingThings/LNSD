@@ -16,16 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ─── Tip Bucket ────────────────────────────────────
   const tips = [
-    "Try abbreviations (e.g. 'Bama' for Alabama).",
-    "Focus on the position—WRs often go to SEC schools.",
-    "Late-round rookies might be tougher than veterans.",
-    "Watch for back-to-back players from the same school.",
-    "Think geographic—West vs East Coast.",
-    "Dual-threat QBs often come from smaller programs.",
-    "Speedy RBs are sometimes late-round picks.",
-    "Transfers can throw you off—use aliases if needed.",
-    "Big-school receivers tend to be drafted earlier.",
-    "Keep an eye on recent draftees for extra points."
+    "Switch to Multiple Choice Mode for an easier experience.",
+    "Multiple Choice Mode is easier and has it’s own Leaderboard.",
+    "There are two game modes, see which one you like best!",
+    "Abbreviations work for all schools like Bama, Ole Miss and LSU.",
+    "Shortened names will work with most schools (ND, OSU, UM).",
+    "Boom Fantasy is the only place where two picks can win 500x your entry.",
+    "If you cheat, we will find you.",
+    "Close your eyes, take a deep breath, and guess Bama."
   ];
 
  // ─── Static decoy list for multiple-choice ─────────────────
