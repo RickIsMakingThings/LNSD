@@ -121,6 +121,20 @@ function toTitleCase(str) {
     .join(' ');
 }
 
+const collegeDisplayOverrides = {
+  'usc':      'USC',
+  'lsu':      'LSU',
+  'texas am': 'Texas A&M',
+  // add any others you need: 'nd': 'Notre Dame', 'osu': 'Ohio State', etc.
+};
+
+function formatCollegeName(rawName) {
+  // normalize exactly the same way you already do
+  const key = normalizeCollegeString(rawName);
+  // if it's in overrides, use that, otherwise fall back to Title Case
+  return collegeDisplayOverrides[key] || toTitleCase(rawName);
+}
+
   // ─── Binary‐choices UI Helpers ──────────────────
   function showBinaryChoices() {
     // Make sure the MC container exists (we’ll hide it here)
@@ -686,7 +700,7 @@ function clearTimer() {
 
     options.forEach(optRaw => {
       const btn = document.createElement('button');
-      btn.textContent = toTitleCase(optRaw);
+      btn.textContent = formatCollegeName(optRaw);
       btn.style.margin = '5px';
       btn.addEventListener('click', () => {
         choiceContainer.style.display = 'none';
