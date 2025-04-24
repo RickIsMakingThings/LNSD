@@ -154,14 +154,25 @@ function toTitleCase(str) {
   // ─── Utility: Draft-Year Boost ─────────────────────
   const MAX_WEIGHT = 100;
   function computeWeight(p) {
-    const baseValue = p.value + ((p.draftYear||0) >= 2023 ? 10 : 0);
-    let boost;
-    if      (p.draftYear >= 2024) boost = 3.0;
-    else if (p.draftYear >= 2022) boost = 2.5;
-    else if (p.draftYear >= 2018) boost = 2.0;
-    else                           boost = 0.4;
-    return Math.min(baseValue * boost, MAX_WEIGHT);
-  }
+  const CURRENT_YEAR = new Date().getFullYear();
+  const age = CURRENT_YEAR - p.draftYear;
+
+  // base bump for very recent players
+  const baseValue = p.value + (p.draftYear >= 2023 ? 15 : 0);
+
+  // age‐tiered multiplier (more aggressive for rookies/young vets)
+  let tierBoost;
+  if      (p.draftYear >= 2024) tierBoost = 4.0;  // huge rookie boost
+  else if (p.draftYear >= 2022) tierBoost = 3.0;
+  else if (p.draftYear >= 2018) tierBoost = 2.5;
+  else if (p.draftYear >= 2015) tierBoost = 1.5;
+  else                           tierBoost = 1.0;  // minimal for older vets
+
+  // penalize true veterans (older than 7 years)
+  const vetPenalty = age >= 7 ? 0.4 : 1.0;
+
+  return Math.min(baseValue * tierBoost * vetPenalty, MAX_WEIGHT);
+}
 
   // ─── Utility: Flat Recency Boost ─────────────────
   function recencyBoost(draftYear) {
@@ -551,9 +562,9 @@ function clearTimer() {
 
     // Weighted pick
     const items = base.map(name => {
-      const p = nflToCollege[name];
-      return { name, weight: p.value + recencyBoost(p.draftYear) };
-    });
+    const p = nflToCollege[name];
+    return { name, weight: computeWeight(p) };
+  });
     currentNFLPlayer = weightedRandomPick(items);
     holdPlayerAndAsk();
   }
@@ -601,9 +612,9 @@ function clearTimer() {
 
     // Weighted pick
     const items = base.map(name => {
-      const p = nflToCollege[name];
-      return { name, weight: p.value + recencyBoost(p.draftYear) };
-    });
+    const p = nflToCollege[name];
+    return { name, weight: computeWeight(p) };
+  });
     currentNFLPlayer = weightedRandomPick(items);
     binaryRoundCount--;
     holdPlayerAndAsk();
