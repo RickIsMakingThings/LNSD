@@ -1,13 +1,21 @@
 {
   "greetings": [
-    "Ready to name some dudes?",
-    "Oh boy, it's time to name Dudes again",
+    "Ready to play WhosU?",
+    "Let's start a new game, names incoming",
+    "I name dudes, you name schools. Got it?",
+    "Down for another round, let's do it",
     "Let's play😤remember, No google."
   ],
   "restart": [
     "Ok let's do another round",
     "Let's play again",
     "A new streak begins",
+    "Ok this is the run",
+    "Got time, let's play WhosU",
+    "One more round won't hurt",
+    "Sure I'll play again",
+    "New round, anything is possible",
+    "High score incoming lfg",
     "Let's run it back!",
     "You know what time it is"
   ],
@@ -15,6 +23,9 @@
     "Let's see how good you are",
     "Ok let's really play now",
     "Warmup over",
+    "Let's get serious now",
+    "Nice you know a little ball",
+    "Ok some better names incoming",
     "Ok time for some real Dudes",
     "You know these, let's amp it up"
   ],
@@ -22,6 +33,11 @@
     "How about XXXXX",
     "Let's go with XXXXX",
     "XXXXX",
+    "Here's a dude- XXXXX",
+    "Ooh what about XXXXX",
+    "Next up: XXXXX",
+    "Where did XXXXX go?",
+    "Tell me where XXXXX went",
     "What about XXXXX",
     "ummm XXXXX",
     "XXXXX?"
@@ -36,6 +52,10 @@
     "nice",
     "boom",
     "got em",
+    "aye",
+    "crushed",
+    "🤝",
+    "Anotha one lol",
     "yup",
     "bang",
     "lfg",
@@ -47,11 +67,18 @@
     "dude is a dawg",
     "guy was so good in college",
     "might have his jersey lol",
+    "BOOM (fantasy) lol,"
+    "weirdly watched a ton of his games,"
+    "animal tbh",
     "and what a legend he was",
     "iconic youtube highlights"
   ],
   "transitions": [
     "What's next?"
+    "How about a Boss Round",
+    "Tough offense or go defense?",
+    "You're crushing (for now)",
+    "Let's switch it up"
   ],
   "errors": [
     "Nah, that's not it. Better luck next time!"
