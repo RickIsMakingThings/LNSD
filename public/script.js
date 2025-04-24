@@ -561,9 +561,10 @@ function clearTimer() {
     .filter(n => !easyNames.includes(n))
     .filter(n => {
       const info = nflToCollege[n];
+      const boosted = info.value + recencyBoost(info.draftYear);
       return info.round <= 4
-          && ['QB','RB','WR','TE'].includes(info.position.toUpperCase())
-          && info.value >= 20;
+            && ['QB','RB','WR','TE'].includes(info.position.toUpperCase())
+            && boosted >= 20;              // ← use boosted value
     })
     .filter(n => !recentPlayers.includes(n))  // ← no repeats
     .filter(n => {                            // your “no-repeat-school” filter
