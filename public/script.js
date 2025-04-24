@@ -525,8 +525,8 @@ function clearTimer() {
       .filter(n => {
         const c = normalizeCollegeString(nflToCollege[n].college);
         return !recentSchools.includes(c);
+    .filter(n => !recentPlayers.includes(n))    // ← no repeats
       });
-      .filter(n => !recentPlayers.includes(n))    // ← no repeats
     if (!candidates.length) return gameOver("No eligible easy players.");
     currentNFLPlayer = candidates[Math.floor(Math.random() * candidates.length)];
     recentPlayers.push(currentNFLPlayer);
