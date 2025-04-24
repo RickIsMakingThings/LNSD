@@ -125,6 +125,7 @@ const collegeDisplayOverrides = {
   'usc':      'USC',
   'lsu':      'LSU',
   'texas am': 'Texas A&M',
+  'byu':      'BYU',
   // add any others you need: 'nd': 'Notre Dame', 'osu': 'Ohio State', etc.
 };
 
