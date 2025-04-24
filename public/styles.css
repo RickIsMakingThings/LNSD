@@ -109,12 +109,12 @@ body {
 
 /* now fine-tune the label vs the number */
 #score-label {
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: normal;
 }
 
 #score-display {
-  font-size: 1rem;
+  font-size: 1.25rem;
   font-weight: bold;
 }
 /* absolutely‐position the +1 relative to #score-wrapper */
