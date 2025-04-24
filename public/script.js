@@ -554,23 +554,34 @@ function clearTimer() {
   function startTriviaRound() {
   phase = 'trivia';
   const CURRENT_YEAR      = new Date().getFullYear();
-  const MAX_AGE           = 7;   
-  const MIN_VALUE_FOR_OLD = 40;
-
-  let base = Object.keys(nflToCollege)
-    .filter(n => !easyNames.includes(n))
-    .filter(n => {
-      const info = nflToCollege[n];
-      const boosted = info.value + recencyBoost(info.draftYear);
-      return info.round <= 4
-            && ['QB','RB','WR','TE'].includes(info.position.toUpperCase())
-            && boosted >= 20;              // ← use boosted value
-    })
-    .filter(n => !recentPlayers.includes(n))  // ← no repeats
-    .filter(n => {                            // your “no-repeat-school” filter
-      const c = normalizeCollegeString(nflToCollege[n].college);
-      return !recentSchools.includes(c);
-    });
+ // Base filters with dynamic, draft-year thresholds
+     let base = Object.keys(nflToCollege)
+       .filter(n => !easyNames.includes(n))
+       .filter(n => {
+         const p       = nflToCollege[n];
+         const boosted = p.value + recencyBoost(p.draftYear);
+ 
+         // pick your threshold by draft year
+         let threshold;
+         if (p.draftYear >= CURRENT_YEAR - 1) {
+           // 2024 rookies get the lowest bar
+           threshold = 15;
+         } else if (p.draftYear >= 2016) {
+           // 2016–2023 vets get a medium bar
+           threshold = 25;
+         } else {
+           // pre-2016 vets need a higher bar
+           threshold = 35;
+         }
+ 
+         return p.round <= 4
+             && ['QB','RB','WR','TE'].includes(p.position.toUpperCase())
+             && boosted >= threshold;
+       })
+       .filter(n => {
+         const c = normalizeCollegeString(nflToCollege[n].college);
+         return !recentSchools.includes(c);
+       });
 
   // …then your prune-by-age/value, pick & push:
   base = base.filter(name => {
