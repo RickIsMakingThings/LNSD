@@ -423,7 +423,7 @@ function clearTimer() {
   });
   shareScoreBtn.addEventListener('click', ()=>{
     const last = currentNFLPlayer || '…';
-    const txt  = `Lost on ${last} but I got ${score}`;
+    const txt  = `Lost on ${last} , see if you can beat ${score} at WhosU.co`;
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(txt)
         .then(()=> showToast('Copied to clipboard!'))
