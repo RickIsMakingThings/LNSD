@@ -519,62 +519,60 @@ function clearTimer() {
 
   // ─── ROUND STARTERS ───────────────────────────────
   function startEasyRound() {
-    phase = 'easy';
-    const candidates = easyNames
-      .filter(n => nflToCollege[n])
-      .filter(n => {
-        const c = normalizeCollegeString(nflToCollege[n].college);
-        return !recentSchools.includes(c);
-    .filter(n => !recentPlayers.includes(n))    // ← no repeats
-      });
-    if (!candidates.length) return gameOver("No eligible easy players.");
-    currentNFLPlayer = candidates[Math.floor(Math.random() * candidates.length)];
-    recentPlayers.push(currentNFLPlayer);
-    holdPlayerAndAsk();
-    easyRounds++;
-  }
+  phase = 'easy';
+  const candidates = easyNames
+    .filter(n => nflToCollege[n])
+    .filter(n => {
+      const c = normalizeCollegeString(nflToCollege[n].college);
+      return !recentSchools.includes(c);
+    })                                   // ← close this filter…
+    .filter(n => !recentPlayers.includes(n)); // ← …then filter out seen players
+
+  if (!candidates.length) return gameOver("No eligible easy players.");
+  currentNFLPlayer = candidates[Math.floor(Math.random() * candidates.length)];
+  recentPlayers.push(currentNFLPlayer);
+  holdPlayerAndAsk();
+  easyRounds++;
+}
 
   function startTriviaRound() {
-    phase = 'trivia';
-    const CURRENT_YEAR      = new Date().getFullYear();
-    const MAX_AGE           = 7;   
-    const MIN_VALUE_FOR_OLD = 40;
+  phase = 'trivia';
+  const CURRENT_YEAR      = new Date().getFullYear();
+  const MAX_AGE           = 7;   
+  const MIN_VALUE_FOR_OLD = 40;
 
-    // Base filters
-    let base = Object.keys(nflToCollege)
-      .filter(n=>!easyNames.includes(n))
-      .filter(n=>{
-        const info = nflToCollege[n];
-        return info.round <= 4
-            && ['QB','RB','WR','TE'].includes(info.position.toUpperCase())
-            && info.value >= 20;
-      .filter(n => !recentPlayers.includes(n))   // ← no repeats
-      })
-      .filter(n=>{
-        const c = normalizeCollegeString(nflToCollege[n].college);
-        return !recentSchools.includes(c);
-      });
-
-    // Prune old & under-value after boost
-    base = base.filter(name => {
-      const p = nflToCollege[name];
-      const age = CURRENT_YEAR - p.draftYear;
-      const boostedValue = p.value + recencyBoost(p.draftYear);
-      if (age >= MAX_AGE && boostedValue < MIN_VALUE_FOR_OLD) return false;
-      return true;
+  let base = Object.keys(nflToCollege)
+    .filter(n => !easyNames.includes(n))
+    .filter(n => {
+      const info = nflToCollege[n];
+      return info.round <= 4
+          && ['QB','RB','WR','TE'].includes(info.position.toUpperCase())
+          && info.value >= 20;
+    })
+    .filter(n => !recentPlayers.includes(n))  // ← no repeats
+    .filter(n => {                            // your “no-repeat-school” filter
+      const c = normalizeCollegeString(nflToCollege[n].college);
+      return !recentSchools.includes(c);
     });
 
-    if (!base.length) return gameOver("No eligible players.");
+  // …then your prune-by-age/value, pick & push:
+  base = base.filter(name => {
+    const p = nflToCollege[name];
+    const age = CURRENT_YEAR - p.draftYear;
+    const boostedValue = p.value + recencyBoost(p.draftYear);
+    return !(age >= MAX_AGE && boostedValue < MIN_VALUE_FOR_OLD);
+  });
 
-    // Weighted pick
-    const items = base.map(name => {
+  if (!base.length) return gameOver("No eligible players.");
+
+  const items = base.map(name => {
     const p = nflToCollege[name];
     return { name, weight: computeWeight(p) };
   });
-    currentNFLPlayer = weightedRandomPick(items);
-    recentPlayers.push(currentNFLPlayer);
-    holdPlayerAndAsk();
-  }
+  currentNFLPlayer = weightedRandomPick(items);
+  recentPlayers.push(currentNFLPlayer);
+  holdPlayerAndAsk();
+}
 
   function startTriviaRoundFiltered(choice) {
     phase = 'binary';
