@@ -583,14 +583,6 @@ function clearTimer() {
          return !recentSchools.includes(c);
        });
 
-  // …then your prune-by-age/value, pick & push:
-  base = base.filter(name => {
-    const p = nflToCollege[name];
-    const age = CURRENT_YEAR - p.draftYear;
-    const boostedValue = p.value + recencyBoost(p.draftYear);
-    return !(age >= MAX_AGE && boostedValue < MIN_VALUE_FOR_OLD);
-  });
-
   if (!base.length) return gameOver("No eligible players.");
 
   const items = base.map(name => {
