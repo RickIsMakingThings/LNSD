@@ -103,16 +103,20 @@ body {
   /* shrink wrap its contents instead of full-width flex */
   display: inline-flex;
   align-items: center;
-  font-size: .8rem;
+  font-size: 1rem;
   font-weight: bold;
 }
 
-/* keep the “Score:” and number inline */
-#score-label,
-#score-display {
-  margin: 0 0.25em 0 0;  /* small gap to next item */
+/* now fine-tune the label vs the number */
+#score-label {
+  font-size: 0.75rem;
+  font-weight: normal;
 }
 
+#score-display {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
 /* absolutely‐position the +1 relative to #score-wrapper */
 #plus-one {
   position: absolute;
