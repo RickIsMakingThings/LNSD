@@ -417,4 +417,6 @@ body {
     font-size: 2rem;      /* doubled from 1rem */
   }
 }
-
+#logo-container #header-logo {
+  margin: 0 !important;
+}
