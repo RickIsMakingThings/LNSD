@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let _timerInterval = null;
   let _timerDeadline = 0;
   let _hasIntroduced = false;
+  let recentPlayers = [];
+
 
  // Cooldown pools for question/dialogue reuse
   const recentQuestions           = [];
@@ -403,6 +405,7 @@ function clearTimer() {
     phase             = 'easy';
     currentNFLPlayer  = '';
     score             = 0;
+    recentPlayers     = [];
     gameActive        = true;
     easyRounds        = 0;
     normalRoundsCount = 0;
@@ -523,8 +526,10 @@ function clearTimer() {
         const c = normalizeCollegeString(nflToCollege[n].college);
         return !recentSchools.includes(c);
       });
+      .filter(n => !recentPlayers.includes(n))    // ← no repeats
     if (!candidates.length) return gameOver("No eligible easy players.");
     currentNFLPlayer = candidates[Math.floor(Math.random() * candidates.length)];
+    recentPlayers.push(currentNFLPlayer);
     holdPlayerAndAsk();
     easyRounds++;
   }
@@ -543,6 +548,7 @@ function clearTimer() {
         return info.round <= 4
             && ['QB','RB','WR','TE'].includes(info.position.toUpperCase())
             && info.value >= 20;
+      .filter(n => !recentPlayers.includes(n))   // ← no repeats
       })
       .filter(n=>{
         const c = normalizeCollegeString(nflToCollege[n].college);
@@ -566,6 +572,7 @@ function clearTimer() {
     return { name, weight: computeWeight(p) };
   });
     currentNFLPlayer = weightedRandomPick(items);
+    recentPlayers.push(currentNFLPlayer);
     holdPlayerAndAsk();
   }
 
@@ -604,6 +611,7 @@ function clearTimer() {
       if (age >= MAX_AGE && boostedValue < MIN_VALUE_FOR_OLD) return false;
       return true;
     });
+    base = base.filter(n => !recentPlayers.includes(n));
 
     if (!base.length) {
       addAIMessage("Can't think of anyone, let's keep going");
@@ -616,6 +624,7 @@ function clearTimer() {
     return { name, weight: computeWeight(p) };
   });
     currentNFLPlayer = weightedRandomPick(items);
+    recentPlayers.push(currentNFLPlayer);        // ← mark seen
     binaryRoundCount--;
     holdPlayerAndAsk();
   }
