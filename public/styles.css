@@ -94,23 +94,29 @@ body {
   overflow: hidden;
   margin-right: 12px;
 }
+/* +1 indicator next to the score */
+#score-wrapper {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  font-size: 2rem;            /* 100% bigger */
+  font-weight: bold;
+}
+#score-label {
+  margin-right: 6px;
+}
 #score-display {
   position: static !important;
   margin-right: 6px;       /* give a little breathing room before the “+1” */
   font-weight: bold;       /* keep your bolding */
 }
-/* +1 indicator next to the score */
-#score-wrapper {
-  position: absolute;      /* remove it from the flex layout */
-  left: 12px;              /* how far from the left edge you want it */
-  top: 50%;                /* vertical center */
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-}
 
 #plus-one {
   margin-left: 6px;
+  font-size: 2rem;   
   font-weight: bold;
   color: green;
   opacity: 0;
@@ -119,6 +125,18 @@ body {
 
 #plus-one.show {
   opacity: 1;
+}
+#logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#header-subtitle {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--text-black);
+  line-height: 1;
 }
 
 
