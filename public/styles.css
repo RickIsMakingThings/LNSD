@@ -97,26 +97,29 @@ body {
 /* +1 indicator next to the score */
 #score-wrapper {
   position: absolute;
-  left: 12px;
-  top: 50%;
+  left: 12px;            /* your existing */
+  top: 50%;              /* your existing */
   transform: translateY(-50%);
-  display: flex;
+  /* shrink wrap its contents instead of full-width flex */
+  display: inline-flex;
   align-items: center;
-  font-size: 1.25rem;            /* 100% bigger */
+  font-size: 2rem;
   font-weight: bold;
 }
-#score-label {
-  margin-right: 6px;
-}
+
+/* keep the “Score:” and number inline */
+#score-label,
 #score-display {
-  position: static !important;
-  margin-right: 6px;       /* give a little breathing room before the “+1” */
-  font-weight: bold;       /* keep your bolding */
+  margin: 0 0.25em 0 0;  /* small gap to next item */
 }
 
+/* absolutely‐position the +1 relative to #score-wrapper */
 #plus-one {
-  margin-left: 6px;
-  font-size: 2.5rem;   
+  position: absolute;
+  /* lift it above the text, and over to the right */
+  top: -0.6em;
+  left: 2.2em;
+  font-size: 2rem;
   font-weight: bold;
   color: green;
   opacity: 0;
@@ -126,6 +129,7 @@ body {
 #plus-one.show {
   opacity: 1;
 }
+
 #logo-container {
   display: flex;
   flex-direction: column;
