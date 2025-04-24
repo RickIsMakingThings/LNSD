@@ -102,7 +102,7 @@ body {
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  font-size: 1.5rem;            /* 100% bigger */
+  font-size: 1.25rem;            /* 100% bigger */
   font-weight: bold;
 }
 #score-label {
@@ -116,7 +116,7 @@ body {
 
 #plus-one {
   margin-left: 6px;
-  font-size: 2rem;   
+  font-size: 2.5rem;   
   font-weight: bold;
   color: green;
   opacity: 0;
