@@ -752,7 +752,7 @@ function clearTimer() {
       dialogueBuckets.transitions?.[0] || "What's next?",
       () => {
         binaryModeActive = true;
-        binaryRoundCount = 3;
+        binaryRoundCount = 1;
         normalRoundsCount = 0;
         showBinaryChoices();
       }
