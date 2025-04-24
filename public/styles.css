@@ -103,7 +103,7 @@ body {
   /* shrink wrap its contents instead of full-width flex */
   display: inline-flex;
   align-items: center;
-  font-size: 2rem;
+  font-size: 1.25rem;
   font-weight: bold;
 }
 
