@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
  // ─── Static decoy list for multiple-choice ─────────────────
   // Populate this with all the “big” schools you want as wrong options
-  const decoyList = ['Alabama', 'Ohio State', 'Georgia', 'Clemson'   
+  const decoyList = ['Alabama', 'Ohio State', 'Georgia', 'Clemson', 'LSU', 'Michigan', 'Florida', 'Penn State', 'Notre Dame', 'Oklahoma', 'Texas', 'Iowa', 'USC', 'Washington', 'Auburn', 'Oregon', 'Mississippi', 'UCLA', 'South Carolina', 'Tennessee', 'Wisconsin', 'Miami Fl', 'TCU', 'Cincinnati', 'North Carolina State', 'Florida State', 'Illinois', 'Kentucky', 'Nebraska', 'BYU', 'Baylor', 'Purdue', 'Utah', 'Arkansas', 'Maryland', 'Kansas State', 'Syracuse', 'Vanderbilt', 'Memphis'    
   ];
 
   // ─── State ─────────────────────────────────────────
