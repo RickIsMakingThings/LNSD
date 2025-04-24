@@ -575,7 +575,7 @@ function clearTimer() {
          }
  
          return p.round <= 4
-             && ['QB','RB','WR','TE'].includes(p.position.toUpperCase())
+             && ['QB','RB','WR'].includes(p.position.toUpperCase())
              && boosted >= threshold;
        })
        .filter(n => {
